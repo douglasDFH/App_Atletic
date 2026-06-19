@@ -7,4 +7,9 @@
         android:title="@string/lbl_ver_ranking"
         android:icon="@android:drawable/ic_menu_sort_by_size"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_evolucion"
+        android:title="@string/lbl_evolucion_marcas"
+        app:showAsAction="never" />
 </menu>

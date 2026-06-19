@@ -43,8 +43,9 @@
 
         <activity android:name=".ranking.RankingActivity"         android:exported="false" />
 
-        <activity android:name=".marcas.MarcasActivity"          android:exported="false" />
-        <activity android:name=".marcas.RegistrarMarcaActivity" android:exported="false" />
+        <activity android:name=".marcas.MarcasActivity"            android:exported="false" />
+        <activity android:name=".marcas.RegistrarMarcaActivity"  android:exported="false" />
+        <activity android:name=".marcas.EvolucionMarcasActivity" android:exported="false" />
         <activity android:name=".eventos.EventosActivity"              android:exported="false" />
         <activity android:name=".eventos.CrearCompetenciaActivity"   android:exported="false" />
         <activity android:name=".eventos.CompetenciaDetalleActivity" android:exported="false" />

@@ -104,9 +104,16 @@ public class MarcasActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_ranking) {
             Intent intent = new Intent(this, RankingActivity.class);
-            if (disciplinaSeleccionada != null) {
-                intent.putExtra("disciplina", disciplinaSeleccionada);
-            }
+            if (disciplinaSeleccionada != null) intent.putExtra("disciplina", disciplinaSeleccionada);
+            startActivity(intent);
+            return true;
+        }
+        if (item.getItemId() == R.id.action_evolucion) {
+            Intent intent = new Intent(this, EvolucionMarcasActivity.class);
+            if (disciplinaSeleccionada != null)
+                intent.putExtra(EvolucionMarcasActivity.EXTRA_DISCIPLINA, disciplinaSeleccionada);
+            if (atletaSeleccionadoId != null)
+                intent.putExtra(EvolucionMarcasActivity.EXTRA_ATLETA_ID, atletaSeleccionadoId);
             startActivity(intent);
             return true;
         }
