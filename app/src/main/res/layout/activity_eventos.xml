@@ -14,30 +14,99 @@
         app:titleTextColor="@color/colorTextPrimary"
         app:title="@string/lbl_eventos_titulo" />
 
-    <!-- Filtro estado -->
+    <!-- Cabecera: búsqueda + chips de filtro -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:orientation="vertical"
         android:background="@color/colorSurface"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp">
+        android:paddingHorizontal="12dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="4dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Barra de búsqueda -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilBuscar"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Estado:"
-            android:textSize="13sp"
-            android:textColor="@color/colorTextSecondary"
-            android:layout_marginEnd="10dp" />
+            android:hint="@string/hint_buscar_evento"
+            app:startIconDrawable="@android:drawable/ic_menu_search"
+            app:startIconTint="@color/colorTextSecondary"
+            app:boxStrokeColor="@color/colorBorder"
+            app:hintTextColor="@color/colorTextSecondary"
+            app:boxBackgroundColor="@color/colorSurfaceVariant">
 
-        <Spinner
-            android:id="@+id/spinnerEstado"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_card_stat" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etBuscar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1"
+                android:imeOptions="actionSearch"
+                android:textColor="@color/colorTextPrimary"
+                android:textColorHint="@color/colorTextHint" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Chips de filtro por estado -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingTop="6dp">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupEstado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                android:paddingHorizontal="2dp">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTodos"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chip_todos"
+                    android:checked="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipProximos"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chip_proximos" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipEnCurso"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chip_en_curso" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipFinalizados"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chip_finalizados" />
+
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+
+        <!-- Contador de resultados -->
+        <TextView
+            android:id="@+id/tvContadorEventos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textColor="@color/colorTextSecondary"
+            android:paddingTop="4dp"
+            android:paddingBottom="6dp"
+            android:paddingStart="2dp"
+            android:visibility="gone" />
+
     </LinearLayout>
 
     <!-- Contenido -->

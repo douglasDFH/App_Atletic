@@ -199,6 +199,13 @@
     <string name="lbl_marcar_todas_leidas">Marcar todo como leído</string>
     <string name="lbl_notif_no_leidas">%1$d sin leer</string>
 
+    <!-- Filtros Eventos -->
+    <string name="hint_buscar_evento">Buscar competencia…</string>
+    <string name="chip_todos">Todos</string>
+    <string name="chip_proximos">Próximos</string>
+    <string name="chip_en_curso">En curso</string>
+    <string name="chip_finalizados">Finalizados</string>
+
     <!-- Errores -->
     <string name="err_campo_requerido">Este campo es requerido</string>
     <string name="err_credenciales">Correo o contraseña incorrectos</string>

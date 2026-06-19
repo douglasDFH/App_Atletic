@@ -21,6 +21,7 @@ import java.util.Locale;
 
 public class EventosAdapter extends RecyclerView.Adapter<EventosAdapter.ViewHolder> {
 
+    private List<Competencia> todas = new ArrayList<>();
     private List<Competencia> competencias = new ArrayList<>();
     private OnItemClickListener listener;
 
@@ -34,9 +35,28 @@ public class EventosAdapter extends RecyclerView.Adapter<EventosAdapter.ViewHold
     }
 
     public void setCompetencias(List<Competencia> lista) {
-        this.competencias = lista;
+        this.todas = new ArrayList<>(lista);
+        this.competencias = new ArrayList<>(lista);
         notifyDataSetChanged();
     }
+
+    public int filtrar(String query) {
+        if (query == null || query.isEmpty()) {
+            competencias = new ArrayList<>(todas);
+        } else {
+            String q = query.toLowerCase();
+            competencias = new ArrayList<>();
+            for (Competencia c : todas) {
+                if (c.getNombre() != null && c.getNombre().toLowerCase().contains(q)) {
+                    competencias.add(c);
+                }
+            }
+        }
+        notifyDataSetChanged();
+        return competencias.size();
+    }
+
+    public int getTotalCount() { return todas.size(); }
 
     public void setOnItemClickListener(OnItemClickListener l) { this.listener = l; }
 

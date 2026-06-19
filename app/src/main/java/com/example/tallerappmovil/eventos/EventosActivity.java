@@ -2,11 +2,10 @@ package com.example.tallerappmovil.eventos;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +22,9 @@ import com.example.tallerappmovil.model.Competencia;
 import com.example.tallerappmovil.perfil.PerfilActivity;
 import com.example.tallerappmovil.session.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
 
@@ -36,15 +37,11 @@ public class EventosActivity extends AppCompatActivity {
     private EventosAdapter adapter;
     private ProgressBar progressBar;
     private TextView tvVacio;
+    private TextView tvContadorEventos;
+    private TextInputEditText etBuscar;
+    private ChipGroup chipGroupEstado;
 
     private String estadoFiltro = null;
-
-    private static final String[] ESTADOS_LABELS = {
-            "Todos", "Próximos", "En curso", "Finalizados", "Cancelados"
-    };
-    private static final String[] ESTADOS_API = {
-            null, "PROXIMO", "EN_CURSO", "FINALIZADO", "CANCELADO"
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +56,11 @@ public class EventosActivity extends AppCompatActivity {
         String rol = session.getUserRole();
         boolean esEntrenador = "ENTRENADOR".equals(rol) || "ADMIN".equals(rol);
 
-        progressBar = findViewById(R.id.progressBar);
-        tvVacio     = findViewById(R.id.tvVacio);
+        progressBar        = findViewById(R.id.progressBar);
+        tvVacio            = findViewById(R.id.tvVacio);
+        tvContadorEventos  = findViewById(R.id.tvContadorEventos);
+        etBuscar           = findViewById(R.id.etBuscar);
+        chipGroupEstado    = findViewById(R.id.chipGroupEstado);
 
         RecyclerView recycler = findViewById(R.id.recyclerEventos);
         recycler.setLayoutManager(new LinearLayoutManager(this));
@@ -74,7 +74,8 @@ public class EventosActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        setupSpinnerEstado();
+        setupChips();
+        setupBusqueda();
 
         FloatingActionButton fab = findViewById(R.id.fabNuevoEvento);
         if (esEntrenador) {
@@ -95,26 +96,37 @@ public class EventosActivity extends AppCompatActivity {
         cargarEventos();
     }
 
-    private void setupSpinnerEstado() {
-        Spinner spinner = findViewById(R.id.spinnerEstado);
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, ESTADOS_LABELS);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(spinnerAdapter);
+    private void setupChips() {
+        chipGroupEstado.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.isEmpty()) return;
+            int id = checkedIds.get(0);
+            if (id == R.id.chipTodos)        estadoFiltro = null;
+            else if (id == R.id.chipProximos)   estadoFiltro = "PROXIMO";
+            else if (id == R.id.chipEnCurso)    estadoFiltro = "EN_CURSO";
+            else if (id == R.id.chipFinalizados) estadoFiltro = "FINALIZADO";
+            etBuscar.setText("");
+            cargarEventos();
+        });
+    }
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    private void setupBusqueda() {
+        etBuscar.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                estadoFiltro = ESTADOS_API[pos];
-                cargarEventos();
+            public void afterTextChanged(Editable s) {
+                int visible = adapter.filtrar(s.toString().trim());
+                actualizarContador(visible);
+                tvVacio.setVisibility(visible == 0 && adapter.getTotalCount() > 0
+                        ? View.VISIBLE : View.GONE);
             }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
 
     private void cargarEventos() {
         progressBar.setVisibility(View.VISIBLE);
         tvVacio.setVisibility(View.GONE);
+        tvContadorEventos.setVisibility(View.GONE);
 
         ApiClient.getCompetenciasService().getCompetencias(estadoFiltro)
                 .enqueue(new Callback<List<Competencia>>() {
@@ -125,7 +137,11 @@ public class EventosActivity extends AppCompatActivity {
                         if (response.isSuccessful() && response.body() != null) {
                             List<Competencia> lista = response.body();
                             adapter.setCompetencias(lista);
-                            tvVacio.setVisibility(lista.isEmpty() ? View.VISIBLE : View.GONE);
+                            String q = etBuscar.getText() != null
+                                    ? etBuscar.getText().toString().trim() : "";
+                            int visible = adapter.filtrar(q);
+                            actualizarContador(visible);
+                            tvVacio.setVisibility(visible == 0 ? View.VISIBLE : View.GONE);
                         } else {
                             tvVacio.setVisibility(View.VISIBLE);
                             Toast.makeText(EventosActivity.this,
@@ -140,6 +156,19 @@ public class EventosActivity extends AppCompatActivity {
                                 getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void actualizarContador(int visible) {
+        int total = adapter.getTotalCount();
+        if (total == 0) {
+            tvContadorEventos.setVisibility(View.GONE);
+            return;
+        }
+        String texto = visible == total
+                ? visible + " evento" + (visible != 1 ? "s" : "")
+                : visible + " de " + total + " eventos";
+        tvContadorEventos.setText(texto);
+        tvContadorEventos.setVisibility(View.VISIBLE);
     }
 
     private void setupBottomNav() {
