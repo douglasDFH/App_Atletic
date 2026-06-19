@@ -206,6 +206,13 @@
     <string name="chip_en_curso">En curso</string>
     <string name="chip_finalizados">Finalizados</string>
 
+    <!-- Filtros Agenda -->
+    <string name="hint_buscar_sesion">Buscar por grupo o lugar…</string>
+    <string name="chip_programadas">Programadas</string>
+    <string name="chip_activas">Activas</string>
+    <string name="chip_finalizadas">Finalizadas</string>
+    <string name="chip_canceladas">Canceladas</string>
+
     <!-- Errores -->
     <string name="err_campo_requerido">Este campo es requerido</string>
     <string name="err_credenciales">Correo o contraseña incorrectos</string>

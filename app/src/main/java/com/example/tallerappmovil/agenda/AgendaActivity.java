@@ -2,6 +2,8 @@ package com.example.tallerappmovil.agenda;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -14,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
-import com.example.tallerappmovil.asistencia.AsistenciaActivity;
 import com.example.tallerappmovil.dashboard.DashboardActivity;
 import com.example.tallerappmovil.eventos.EventosActivity;
 import com.example.tallerappmovil.marcas.MarcasActivity;
@@ -22,7 +23,9 @@ import com.example.tallerappmovil.model.SesionEntrenamiento;
 import com.example.tallerappmovil.perfil.PerfilActivity;
 import com.example.tallerappmovil.session.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -37,11 +40,13 @@ public class AgendaActivity extends AppCompatActivity {
 
     private RecyclerView recyclerSesiones;
     private SesionAdapter adapter;
-    private TextView tvSemana, tvVacio;
+    private TextView tvSemana, tvVacio, tvContadorSesiones;
     private ProgressBar progressBar;
+    private TextInputEditText etBuscar;
+    private ChipGroup chipGroupEstado;
 
     private final Calendar semanaActual = Calendar.getInstance();
-    private String userRol;
+    private String estadoFiltro = null;
 
     private static final SimpleDateFormat API_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -57,15 +62,18 @@ public class AgendaActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        userRol = new SessionManager(this).getUserRole();
+        String userRol = new SessionManager(this).getUserRole();
         boolean puedeEditar = "ENTRENADOR".equals(userRol) || "ADMIN".equals(userRol);
 
-        recyclerSesiones = findViewById(R.id.recyclerSesiones);
-        tvSemana         = findViewById(R.id.tvSemana);
-        tvVacio          = findViewById(R.id.tvVacio);
-        progressBar      = findViewById(R.id.progressBar);
-        FloatingActionButton fab = findViewById(R.id.fabCrear);
+        recyclerSesiones  = findViewById(R.id.recyclerSesiones);
+        tvSemana          = findViewById(R.id.tvSemana);
+        tvVacio           = findViewById(R.id.tvVacio);
+        progressBar       = findViewById(R.id.progressBar);
+        tvContadorSesiones = findViewById(R.id.tvContadorSesiones);
+        etBuscar          = findViewById(R.id.etBuscar);
+        chipGroupEstado   = findViewById(R.id.chipGroupEstado);
 
+        FloatingActionButton fab = findViewById(R.id.fabCrear);
         fab.setVisibility(puedeEditar ? View.VISIBLE : View.GONE);
         fab.setOnClickListener(v ->
                 startActivity(new Intent(this, CrearSesionActivity.class)));
@@ -98,6 +106,8 @@ public class AgendaActivity extends AppCompatActivity {
             cargarSesiones();
         });
 
+        setupChips();
+        setupBusqueda();
         setupBottomNav();
         cargarSesiones();
     }
@@ -106,6 +116,52 @@ public class AgendaActivity extends AppCompatActivity {
         while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
             cal.add(Calendar.DATE, -1);
         }
+    }
+
+    private void setupChips() {
+        chipGroupEstado.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.isEmpty()) return;
+            int id = checkedIds.get(0);
+            if (id == R.id.chipTodos)         estadoFiltro = null;
+            else if (id == R.id.chipProgramadas) estadoFiltro = "PROGRAMADA";
+            else if (id == R.id.chipActivas)     estadoFiltro = "ACTIVA";
+            else if (id == R.id.chipFinalizadas) estadoFiltro = "FINALIZADA";
+            else if (id == R.id.chipCanceladas)  estadoFiltro = "CANCELADA";
+            aplicarFiltros();
+        });
+    }
+
+    private void setupBusqueda() {
+        etBuscar.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
+            @Override public void onTextChanged(CharSequence s, int i, int b, int c) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                aplicarFiltros();
+            }
+        });
+    }
+
+    private void aplicarFiltros() {
+        String query = etBuscar.getText() != null ? etBuscar.getText().toString().trim() : "";
+        int visible = adapter.filtrar(query, estadoFiltro);
+        actualizarContador(visible);
+        tvVacio.setVisibility(visible == 0 && adapter.getTotalCount() > 0
+                ? View.VISIBLE : View.GONE);
+        recyclerSesiones.setVisibility(visible > 0 ? View.VISIBLE : View.GONE);
+    }
+
+    private void actualizarContador(int visible) {
+        int total = adapter.getTotalCount();
+        if (total == 0) {
+            tvContadorSesiones.setVisibility(View.GONE);
+            return;
+        }
+        String texto = visible == total
+                ? visible + " sesión" + (visible != 1 ? "es" : "") + " esta semana"
+                : visible + " de " + total + " sesiones";
+        tvContadorSesiones.setText(texto);
+        tvContadorSesiones.setVisibility(View.VISIBLE);
     }
 
     private void cargarSesiones() {
@@ -121,6 +177,7 @@ public class AgendaActivity extends AppCompatActivity {
 
         progressBar.setVisibility(View.VISIBLE);
         tvVacio.setVisibility(View.GONE);
+        tvContadorSesiones.setVisibility(View.GONE);
         recyclerSesiones.setVisibility(View.GONE);
 
         ApiClient.getAgendaService()
@@ -131,17 +188,14 @@ public class AgendaActivity extends AppCompatActivity {
                                            Response<List<SesionEntrenamiento>> response) {
                         progressBar.setVisibility(View.GONE);
                         if (response.isSuccessful() && response.body() != null) {
-                            List<SesionEntrenamiento> lista = response.body();
-                            adapter.setSesiones(lista);
-                            recyclerSesiones.setVisibility(lista.isEmpty() ? View.GONE : View.VISIBLE);
-                            tvVacio.setVisibility(lista.isEmpty() ? View.VISIBLE : View.GONE);
+                            adapter.setSesiones(response.body());
+                            aplicarFiltros();
                         } else {
                             tvVacio.setVisibility(View.VISIBLE);
                             Toast.makeText(AgendaActivity.this,
                                     getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
                         }
                     }
-
                     @Override
                     public void onFailure(Call<List<SesionEntrenamiento>> call, Throwable t) {
                         progressBar.setVisibility(View.GONE);

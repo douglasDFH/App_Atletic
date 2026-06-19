@@ -25,6 +25,7 @@ public class SesionAdapter extends RecyclerView.Adapter<SesionAdapter.ViewHolder
         void onClick(SesionEntrenamiento sesion);
     }
 
+    private List<SesionEntrenamiento> todas    = new ArrayList<>();
     private List<SesionEntrenamiento> sesiones = new ArrayList<>();
     private final boolean puedeEditar;
     private final OnSesionClickListener listener;
@@ -46,9 +47,30 @@ public class SesionAdapter extends RecyclerView.Adapter<SesionAdapter.ViewHolder
     }
 
     public void setSesiones(List<SesionEntrenamiento> lista) {
-        this.sesiones = lista;
+        this.todas    = new ArrayList<>(lista);
+        this.sesiones = new ArrayList<>(lista);
         notifyDataSetChanged();
     }
+
+    public int filtrar(String query, String estadoFiltro) {
+        sesiones = new ArrayList<>();
+        for (SesionEntrenamiento s : todas) {
+            if (estadoFiltro != null && !estadoFiltro.equals(s.getEstado())) continue;
+            if (query != null && !query.isEmpty()) {
+                String q = query.toLowerCase();
+                boolean matchGrupo = s.getGrupoNombre() != null
+                        && s.getGrupoNombre().toLowerCase().contains(q);
+                boolean matchLugar = s.getLugar() != null
+                        && s.getLugar().toLowerCase().contains(q);
+                if (!matchGrupo && !matchLugar) continue;
+            }
+            sesiones.add(s);
+        }
+        notifyDataSetChanged();
+        return sesiones.size();
+    }
+
+    public int getTotalCount() { return todas.size(); }
 
     @NonNull
     @Override
@@ -106,11 +128,7 @@ public class SesionAdapter extends RecyclerView.Adapter<SesionAdapter.ViewHolder
                 break;
         }
 
-        if (puedeEditar && !"CANCELADA".equals(estado) && !"FINALIZADA".equals(estado)) {
-            h.itemView.setOnClickListener(v -> listener.onClick(s));
-        } else {
-            h.itemView.setOnClickListener(null);
-        }
+        h.itemView.setOnClickListener(v -> listener.onClick(s));
     }
 
     @Override
