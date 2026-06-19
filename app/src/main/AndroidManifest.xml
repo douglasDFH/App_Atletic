@@ -28,8 +28,9 @@
         <activity android:name=".dashboard.AtletaDashboardActivity"     android:exported="false" />
         <activity android:name=".dashboard.EntrenadorDashboardActivity" android:exported="false" />
 
-        <activity android:name=".agenda.AgendaActivity"      android:exported="false" />
-        <activity android:name=".agenda.CrearSesionActivity" android:exported="false" />
+        <activity android:name=".agenda.AgendaActivity"         android:exported="false" />
+        <activity android:name=".agenda.CrearSesionActivity"  android:exported="false" />
+        <activity android:name=".agenda.SesionDetalleActivity" android:exported="false" />
         <activity android:name=".asistencia.AsistenciaActivity"         android:exported="false" />
         <activity android:name=".asistencia.HistorialAsistenciaActivity" android:exported="false" />
 

@@ -58,6 +58,9 @@
     <string name="btn_cerrar_sesion">Cerrar sesión</string>
     <string name="lbl_proximo_sprint">Disponible en próximo sprint</string>
 
+    <!-- Detalle sesión -->
+    <string name="lbl_detalle_sesion">Detalle de sesión</string>
+
     <!-- Agenda -->
     <string name="lbl_crear_sesion">Nueva sesión</string>
     <string name="lbl_editar_sesion">Editar sesión</string>

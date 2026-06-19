@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackground">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorSurface"
+        app:titleTextColor="@color/colorTextPrimary"
+        app:navigationIconTint="@color/colorTextPrimary"
+        app:title="@string/lbl_detalle_sesion" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Header card: grupo + estado -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card_stat"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvGrupo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorTextPrimary" />
+
+                    <TextView
+                        android:id="@+id/tvEstadoBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:textSize="11sp"
+                        android:textColor="@color/colorOnPrimary"
+                        android:textStyle="bold"
+                        android:background="@drawable/bg_avatar" />
+                </LinearLayout>
+
+                <!-- Fecha y horario -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📅"
+                        android:textSize="14sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvFechaHora"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@color/colorTextSecondary" />
+                </LinearLayout>
+
+                <!-- Lugar -->
+                <LinearLayout
+                    android:id="@+id/rowLugar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📍"
+                        android:textSize="14sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvLugar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@color/colorTextSecondary" />
+                </LinearLayout>
+
+                <!-- Descripción -->
+                <TextView
+                    android:id="@+id/tvDescripcion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textColor="@color/colorTextSecondary"
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone" />
+
+                <!-- Motivo cancelación -->
+                <LinearLayout
+                    android:id="@+id/rowMotivo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@color/colorSurfaceVariant"
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚠️ "
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvMotivo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:textColor="@color/colorCancelled" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Mi asistencia (solo atleta) -->
+            <LinearLayout
+                android:id="@+id/layoutMiAsistencia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card_stat"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Mi asistencia"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorTextSecondary" />
+
+                <TextView
+                    android:id="@+id/tvMiAsistencia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorOnPrimary"
+                    android:background="@drawable/bg_avatar" />
+            </LinearLayout>
+
+            <!-- Resumen asistencia (solo entrenador) -->
+            <LinearLayout
+                android:id="@+id/layoutResumenAsistencia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card_stat"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ASISTENCIA"
+                    android:textSize="10sp"
+                    android:textColor="@color/colorTextSecondary"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.1"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+                        <TextView
+                            android:id="@+id/tvCountPresentes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="--"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorActive" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Presentes"
+                            android:textSize="10sp"
+                            android:textColor="@color/colorTextSecondary" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+                        <TextView
+                            android:id="@+id/tvCountAusentes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="--"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorCancelled" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ausentes"
+                            android:textSize="10sp"
+                            android:textColor="@color/colorTextSecondary" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+                        <TextView
+                            android:id="@+id/tvCountJustificados"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="--"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPending" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Justificados"
+                            android:textSize="10sp"
+                            android:textColor="@color/colorTextSecondary" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/progressAsistencia"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Botones acción (solo entrenador) -->
+            <LinearLayout
+                android:id="@+id/layoutBotonesEntrenador"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnTomarAsistencia"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:text="@string/opc_tomar_asistencia"
+                    android:textSize="14sp"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:textColor="@color/colorOnPrimary"
+                    android:layout_marginBottom="10dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEditarSesion"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:text="@string/opc_editar_sesion"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorPrimary"
+                    app:strokeColor="@color/colorPrimary" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

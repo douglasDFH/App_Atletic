@@ -72,34 +72,18 @@ public class AgendaActivity extends AppCompatActivity {
 
         recyclerSesiones.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SesionAdapter(puedeEditar, sesion -> {
-            if (!puedeEditar) return;
-            String titulo = sesion.getGrupoNombre() != null ? sesion.getGrupoNombre() : "Sesión";
-            String[] opciones = {
-                    getString(R.string.opc_editar_sesion),
-                    getString(R.string.opc_tomar_asistencia)
-            };
-            new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle(titulo)
-                    .setItems(opciones, (d, which) -> {
-                        if (which == 0) {
-                            Intent intent = new Intent(this, CrearSesionActivity.class);
-                            intent.putExtra(CrearSesionActivity.EXTRA_SESION_ID, sesion.getId());
-                            intent.putExtra(CrearSesionActivity.EXTRA_HORA_INICIO, sesion.getHoraInicio());
-                            intent.putExtra(CrearSesionActivity.EXTRA_HORA_FIN, sesion.getHoraFin());
-                            intent.putExtra(CrearSesionActivity.EXTRA_LUGAR, sesion.getLugar());
-                            intent.putExtra(CrearSesionActivity.EXTRA_GRUPO_ID, sesion.getGrupoId());
-                            intent.putExtra(CrearSesionActivity.EXTRA_DESCRIPCION, sesion.getDescripcion());
-                            startActivity(intent);
-                        } else {
-                            Intent intent = new Intent(this, AsistenciaActivity.class);
-                            intent.putExtra(AsistenciaActivity.EXTRA_SESION_ID, sesion.getId());
-                            intent.putExtra(AsistenciaActivity.EXTRA_GRUPO, sesion.getGrupoNombre());
-                            intent.putExtra(AsistenciaActivity.EXTRA_HORA, sesion.getHoraInicio());
-                            intent.putExtra(AsistenciaActivity.EXTRA_LUGAR, sesion.getLugar());
-                            startActivity(intent);
-                        }
-                    })
-                    .show();
+            Intent intent = new Intent(this, SesionDetalleActivity.class);
+            intent.putExtra(SesionDetalleActivity.EXTRA_SESION_ID,   sesion.getId());
+            intent.putExtra(SesionDetalleActivity.EXTRA_GRUPO,        sesion.getGrupoNombre());
+            intent.putExtra(SesionDetalleActivity.EXTRA_HORA_INICIO,  sesion.getHoraInicio());
+            intent.putExtra(SesionDetalleActivity.EXTRA_HORA_FIN,     sesion.getHoraFin());
+            intent.putExtra(SesionDetalleActivity.EXTRA_LUGAR,        sesion.getLugar());
+            intent.putExtra(SesionDetalleActivity.EXTRA_DESCRIPCION,  sesion.getDescripcion());
+            intent.putExtra(SesionDetalleActivity.EXTRA_ESTADO,       sesion.getEstado());
+            intent.putExtra(SesionDetalleActivity.EXTRA_MOTIVO,       sesion.getMotivoCancelacion());
+            intent.putExtra(SesionDetalleActivity.EXTRA_GRUPO_ID,
+                    sesion.getGrupoId() != null ? sesion.getGrupoId() : -1L);
+            startActivity(intent);
         });
         recyclerSesiones.setAdapter(adapter);
 
