@@ -217,6 +217,9 @@
     <string name="chip_finalizadas">Finalizadas</string>
     <string name="chip_canceladas">Canceladas</string>
 
+    <!-- Dashboard actividad reciente -->
+    <string name="lbl_ver_todas_notif">Ver todas las notificaciones →</string>
+
     <!-- Errores -->
     <string name="err_campo_requerido">Este campo es requerido</string>
     <string name="err_credenciales">Correo o contraseña incorrectos</string>

@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tallerappmovil.R;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.example.tallerappmovil.agenda.AgendaActivity;
 import com.example.tallerappmovil.asistencia.AsistenciaActivity;
 import com.example.tallerappmovil.atletas.AtletasActivity;
@@ -44,6 +46,11 @@ public class DashboardActivity extends AppCompatActivity {
     private View layoutBotonesSesion;
     private SesionEntrenamiento sesionHoy;
     private boolean esEntrenador;
+
+    private ActividadRecenteAdapter actividadAdapter;
+    private TextView tvSinActividad;
+    private View dividerActividad;
+    private TextView tvVerTodasActividad;
 
     private static final SimpleDateFormat DATE_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -132,6 +139,19 @@ public class DashboardActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // Actividad reciente
+        tvSinActividad     = findViewById(R.id.tvSinActividad);
+        dividerActividad   = findViewById(R.id.dividerActividad);
+        tvVerTodasActividad = findViewById(R.id.tvVerTodasActividad);
+        RecyclerView recyclerActividad = findViewById(R.id.recyclerActividad);
+        recyclerActividad.setLayoutManager(new LinearLayoutManager(this));
+        actividadAdapter = new ActividadRecenteAdapter();
+        actividadAdapter.setOnItemClick(() ->
+                startActivity(new Intent(this, NotificacionesActivity.class)));
+        recyclerActividad.setAdapter(actividadAdapter);
+        tvVerTodasActividad.setOnClickListener(v ->
+                startActivity(new Intent(this, NotificacionesActivity.class)));
+
         setupBottomNav();
         loadTodaySesion();
         loadStats();
@@ -208,18 +228,35 @@ public class DashboardActivity extends AppCompatActivity {
                     public void onResponse(Call<List<Notificacion>> call,
                                            Response<List<Notificacion>> response) {
                         if (response.isSuccessful() && response.body() != null) {
+                            List<Notificacion> todas = response.body();
                             long noLeidas = 0;
-                            for (Notificacion n : response.body()) if (!n.isLeida()) noLeidas++;
+                            for (Notificacion n : todas) if (!n.isLeida()) noLeidas++;
                             if (noLeidas > 0) {
                                 tvBadgeNotif.setVisibility(View.VISIBLE);
                                 tvBadgeNotif.setText(noLeidas > 9 ? "9+" : String.valueOf(noLeidas));
                             } else {
                                 tvBadgeNotif.setVisibility(View.GONE);
                             }
+                            poblarActividad(todas);
                         }
                     }
-                    @Override public void onFailure(Call<List<Notificacion>> call, Throwable t) {}
+                    @Override public void onFailure(Call<List<Notificacion>> call, Throwable t) {
+                        tvSinActividad.setVisibility(View.VISIBLE);
+                    }
                 });
+    }
+
+    private void poblarActividad(List<Notificacion> todas) {
+        if (todas.isEmpty()) {
+            tvSinActividad.setVisibility(View.VISIBLE);
+            return;
+        }
+        // Muestra las últimas 5 (la API ya las devuelve en orden desc)
+        int limit = Math.min(todas.size(), 5);
+        actividadAdapter.setLista(todas.subList(0, limit));
+        tvSinActividad.setVisibility(View.GONE);
+        dividerActividad.setVisibility(todas.size() > 5 ? View.VISIBLE : View.GONE);
+        tvVerTodasActividad.setVisibility(todas.size() > 5 ? View.VISIBLE : View.GONE);
     }
 
     private void loadTodaySesion() {
