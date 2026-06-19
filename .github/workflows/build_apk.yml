@@ -1,0 +1,62 @@
+name: Build APK
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Get version from commit count
+        id: version
+        run: |
+          COUNT=$(git rev-list --count HEAD)
+          echo "name=1.${COUNT}" >> $GITHUB_OUTPUT
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: |
+          mv app/build/outputs/apk/debug/app-debug.apk \
+             app/build/outputs/apk/debug/AthleteSCZ-v${{ steps.version.outputs.name }}.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.name }}
+          name: AthleteSCZ v${{ steps.version.outputs.name }}
+          body: |
+            ## AthleteSCZ — Club Atlético Santa Cruz
+
+            ### Instalación
+            1. Descarga el archivo **AthleteSCZ-v${{ steps.version.outputs.name }}.apk**
+            2. En tu Android ve a **Ajustes → Seguridad** y activa **Instalar de fuentes desconocidas**
+            3. Abre el APK descargado e instala
+
+            > **Nota:** Esta es una versión de *debug* para pruebas del taller.
+            > Asegúrate de que el servidor backend esté en ejecución y accesible.
+          files: app/build/outputs/apk/debug/AthleteSCZ-v${{ steps.version.outputs.name }}.apk
+          make_latest: true
