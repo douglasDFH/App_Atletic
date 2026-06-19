@@ -391,6 +391,37 @@
                         android:textSize="22sp"
                         android:textColor="@color/colorPrimary" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cardEstadisticas"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_card_stat"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginTop="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/lbl_estadisticas_titulo"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorTextPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="22sp"
+                        android:textColor="@color/colorPrimary" />
+                </LinearLayout>
+
             </LinearLayout>
 
             <!-- Actividad reciente -->

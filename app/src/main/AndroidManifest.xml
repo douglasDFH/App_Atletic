@@ -55,6 +55,8 @@
         <activity android:name=".asistencia.ReporteAsistenciaActivity"     android:exported="false" />
         <activity android:name=".grupos.SeleccionarAtletasActivity"       android:exported="false" />
 
+        <activity android:name=".estadisticas.EstadisticasActivity" android:exported="false" />
+
         <activity android:name=".perfil.PerfilActivity"   android:exported="false" />
 
         <activity android:name=".MainActivity" android:exported="false" />

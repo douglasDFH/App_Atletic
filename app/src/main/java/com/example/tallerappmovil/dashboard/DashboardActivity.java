@@ -21,6 +21,7 @@ import com.example.tallerappmovil.model.MarcaPersonal;
 import com.example.tallerappmovil.model.Notificacion;
 import com.example.tallerappmovil.model.SesionEntrenamiento;
 import com.example.tallerappmovil.asistencia.ReporteAsistenciaActivity;
+import com.example.tallerappmovil.estadisticas.EstadisticasActivity;
 import com.example.tallerappmovil.notificaciones.NotificacionesActivity;
 import com.example.tallerappmovil.perfil.PerfilActivity;
 import com.example.tallerappmovil.session.SessionManager;
@@ -96,6 +97,8 @@ public class DashboardActivity extends AppCompatActivity {
                     startActivity(new Intent(this, GruposActivity.class)));
             findViewById(R.id.cardReporte).setOnClickListener(v ->
                     startActivity(new Intent(this, ReporteAsistenciaActivity.class)));
+            findViewById(R.id.cardEstadisticas).setOnClickListener(v ->
+                    startActivity(new Intent(this, EstadisticasActivity.class)));
         }
 
         // Card: marcas → MarcasActivity

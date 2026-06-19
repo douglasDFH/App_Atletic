@@ -206,6 +206,10 @@
     <string name="chip_en_curso">En curso</string>
     <string name="chip_finalizados">Finalizados</string>
 
+    <!-- Estadísticas del Club -->
+    <string name="lbl_estadisticas_titulo">Estadísticas del Club</string>
+    <string name="lbl_ranking_asistencia">Ranking de Asistencia</string>
+
     <!-- Filtros Agenda -->
     <string name="hint_buscar_sesion">Buscar por grupo o lugar…</string>
     <string name="chip_programadas">Programadas</string>
