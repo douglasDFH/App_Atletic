@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackground">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorSurface"
+        app:titleTextColor="@color/colorTextPrimary"
+        app:subtitleTextColor="@color/colorPrimary"
+        app:navigationIconTint="@color/colorTextPrimary"
+        app:title="@string/lbl_agregar_atletas" />
+
+    <!-- Buscador -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorSurface"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp"
+        app:boxBackgroundColor="@color/colorSurfaceVariant"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeColor="@color/colorBorder"
+        app:hintTextColor="@color/colorTextSecondary"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etBuscar"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:hint="@string/hint_buscar_atleta"
+            android:inputType="textPersonName"
+            android:textColor="@color/colorTextPrimary"
+            android:imeOptions="actionSearch"
+            android:singleLine="true" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvVacio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/lbl_sin_atletas"
+            android:textSize="14sp"
+            android:textColor="@color/colorTextSecondary"
+            android:gravity="center"
+            android:padding="24dp"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerAtletas"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false" />
+    </FrameLayout>
+</LinearLayout>

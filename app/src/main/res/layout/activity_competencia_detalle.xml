@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackground">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorSurface"
+        app:titleTextColor="@color/colorTextPrimary"
+        app:navigationIconTint="@color/colorTextPrimary"
+        app:title="@string/lbl_detalle_competencia" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="32dp"
+        android:visibility="gone" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollContent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/colorSurface"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvNombreDetalle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorTextPrimary" />
+
+                    <TextView
+                        android:id="@+id/tvEstadoDetalle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="11sp"
+                        android:textColor="@color/colorBackground"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:background="@drawable/bg_estado_badge" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvDisciplinaDetalle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textColor="@color/colorPrimary"
+                    android:textAllCaps="true"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+
+            <!-- Info grid -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card_stat"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="FECHA"
+                            android:textSize="9sp"
+                            android:textColor="@color/colorTextSecondary"
+                            android:textAllCaps="true" />
+                        <TextView
+                            android:id="@+id/tvFechaDetalle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorTextPrimary"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="CATEGORÍA"
+                            android:textSize="9sp"
+                            android:textColor="@color/colorTextSecondary"
+                            android:textAllCaps="true" />
+                        <TextView
+                            android:id="@+id/tvCategoriaDetalle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorTextPrimary"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="LUGAR"
+                        android:textSize="9sp"
+                        android:textColor="@color/colorTextSecondary"
+                        android:textAllCaps="true" />
+                    <TextView
+                        android:id="@+id/tvLugarDetalle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="15sp"
+                        android:textColor="@color/colorTextPrimary"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Descripción -->
+            <LinearLayout
+                android:id="@+id/layoutDescripcion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DESCRIPCIÓN"
+                    android:textSize="9sp"
+                    android:textColor="@color/colorTextSecondary"
+                    android:textAllCaps="true"
+                    android:layout_marginBottom="4dp" />
+                <TextView
+                    android:id="@+id/tvDescripcionDetalle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorTextPrimary"
+                    android:background="@drawable/bg_card_stat"
+                    android:padding="14dp" />
+            </LinearLayout>
+
+            <!-- Botón inscripción (atleta) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnInscripcion"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="@string/btn_inscribirse"
+                android:textSize="16sp"
+                android:textColor="@color/colorOnPrimary"
+                android:backgroundTint="@color/colorPrimary"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="20dp"
+                android:visibility="gone" />
+
+            <!-- Sección inscritos (entrenador o todos) -->
+            <TextView
+                android:id="@+id/tvHeaderInscritos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ATLETAS INSCRITOS"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorTextSecondary"
+                android:textAllCaps="true"
+                android:letterSpacing="0.1"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvSinInscritos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_sin_inscritos"
+                android:textSize="14sp"
+                android:textColor="@color/colorTextSecondary"
+                android:gravity="center"
+                android:padding="16dp"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerInscritos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false" />
+
+            <View android:layout_width="match_parent"
+                android:layout_height="24dp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

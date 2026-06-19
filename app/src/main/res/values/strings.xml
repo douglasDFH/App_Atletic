@@ -1,0 +1,205 @@
+<resources>
+    <string name="app_name">AthleteSCZ</string>
+    <string name="lbl_app_name">AthleteSCZ</string>
+    <string name="lbl_club_completo">Club Atlético Santa Cruz</string>
+    <string name="lbl_acceso_miembros">Acceso solo para miembros del club</string>
+    <!-- Bottom nav -->
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_agenda">Agenda</string>
+    <string name="nav_marcas">Marcas</string>
+    <string name="nav_eventos">Eventos</string>
+    <string name="nav_perfil">Perfil</string>
+    <!-- Dashboard -->
+    <string name="lbl_sesion_hoy">SESIÓN DE HOY</string>
+    <string name="lbl_actividad_reciente">ACTIVIDAD RECIENTE</string>
+    <string name="lbl_sin_sesion_hoy">Sin sesión programada para hoy</string>
+    <string name="lbl_tomar_asistencia">Tomar asistencia</string>
+    <string name="lbl_ver_agenda">Ver agenda</string>
+    <!-- Perfil -->
+    <string name="lbl_perfil">Mi Perfil</string>
+    <string name="lbl_version">AthleteSCZ v1.0</string>
+    <string name="hello_world">¡Hola Mundo!</string>
+
+    <!-- Login -->
+    <string name="lbl_bienvenido">¡Bienvenido!</string>
+    <string name="lbl_club">Club de Atletismo</string>
+    <string name="hint_correo">Correo electrónico</string>
+    <string name="hint_contrasena">Contraseña</string>
+    <string name="btn_ingresar">Ingresar</string>
+    <string name="lnk_olvide_contrasena">¿Olvidaste tu contraseña?</string>
+    <string name="lnk_registrarse">¿No tienes cuenta? Regístrate</string>
+
+    <!-- Registro -->
+    <string name="lbl_crear_cuenta">Crear cuenta</string>
+    <string name="hint_nombre">Nombre completo</string>
+    <string name="hint_confirmar_contrasena">Confirmar contraseña</string>
+    <string name="hint_rol">Selecciona tu rol</string>
+    <string name="btn_crear_cuenta">Crear cuenta</string>
+    <string name="lnk_ya_tengo_cuenta">¿Ya tienes cuenta? Inicia sesión</string>
+    <string name="rol_atleta">Atleta</string>
+    <string name="rol_padre">Padre / Tutor</string>
+
+    <!-- Recuperar contraseña -->
+    <string name="lbl_recuperar">Recuperar contraseña</string>
+    <string name="lbl_recuperar_desc">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</string>
+    <string name="btn_enviar">Enviar enlace</string>
+    <string name="btn_volver">Volver al inicio de sesión</string>
+
+    <!-- Dashboard -->
+    <string name="lbl_panel_entrenador">Panel del Entrenador</string>
+    <string name="lbl_panel_atleta">Mi Panel</string>
+    <string name="lbl_bienvenido_usuario">Bienvenido, %1$s</string>
+    <string name="lbl_agenda">Agenda</string>
+    <string name="lbl_asistencia">Asistencia</string>
+    <string name="lbl_rendimiento">Rendimiento</string>
+    <string name="lbl_competencias">Competencias</string>
+    <string name="lbl_atletas">Atletas</string>
+    <string name="lbl_mi_historial">Mi Historial</string>
+    <string name="btn_cerrar_sesion">Cerrar sesión</string>
+    <string name="lbl_proximo_sprint">Disponible en próximo sprint</string>
+
+    <!-- Agenda -->
+    <string name="lbl_crear_sesion">Nueva sesión</string>
+    <string name="lbl_editar_sesion">Editar sesión</string>
+    <string name="lbl_sin_entrenamientos">Sin entrenamientos esta semana</string>
+    <string name="hint_fecha">Fecha</string>
+    <string name="hint_hora_inicio">Hora inicio</string>
+    <string name="hint_hora_fin">Hora fin</string>
+    <string name="hint_lugar">Lugar / Cancha</string>
+    <string name="hint_grupo">Grupo</string>
+    <string name="hint_descripcion">Descripción (opcional)</string>
+    <string name="hint_motivo">Motivo de cancelación</string>
+    <string name="btn_guardar_sesion">Guardar sesión</string>
+    <string name="btn_cancelar_sesion">Cancelar esta sesión</string>
+    <string name="msg_sesion_creada">Sesión creada correctamente</string>
+    <string name="msg_sesion_actualizada">Sesión actualizada</string>
+    <string name="msg_sesion_cancelada">Sesión cancelada</string>
+    <string name="err_hora_invalida">La hora de fin debe ser posterior a la de inicio</string>
+    <string name="err_fecha_pasada">No se pueden crear sesiones en fechas pasadas</string>
+
+    <!-- Asistencia -->
+    <string name="lbl_asistencia_titulo">Tomar Asistencia</string>
+    <string name="btn_guardar_asistencia">Guardar asistencia</string>
+    <string name="msg_asistencia_guardada">Asistencia guardada correctamente</string>
+    <string name="err_asistencia_incompleta">Marca el estado de todos los atletas</string>
+    <string name="lbl_editar_o_asistencia">¿Qué deseas hacer?</string>
+    <string name="opc_editar_sesion">Editar sesión</string>
+    <string name="opc_tomar_asistencia">Tomar asistencia</string>
+
+    <!-- Inscripción a Competencias -->
+    <string name="lbl_detalle_competencia">Detalle del evento</string>
+    <string name="btn_inscribirse">Inscribirse</string>
+    <string name="btn_desinscribirse">Desinscribirme</string>
+    <string name="msg_inscripcion_ok">¡Inscripción realizada con éxito!</string>
+    <string name="msg_desinscripcion_ok">Te has desinscrito del evento</string>
+    <string name="lbl_atletas_inscritos">Atletas inscritos</string>
+    <string name="lbl_sin_inscritos">Aún no hay atletas inscritos</string>
+
+    <!-- Historial Asistencia -->
+    <string name="lbl_historial_asistencia">Historial de Asistencia</string>
+    <string name="lbl_sin_historial">Sin registros de asistencia</string>
+    <string name="lbl_mi_asistencia">Mi historial de asistencia</string>
+    <string name="lbl_mis_marcas">Mis marcas personales</string>
+
+    <!-- Ranking -->
+    <string name="lbl_ranking_titulo">Tabla de Posiciones</string>
+    <string name="lbl_ver_ranking">Ranking</string>
+    <string name="lbl_sin_ranking">Sin registros para esta disciplina</string>
+
+    <!-- Grupos -->
+    <string name="lbl_grupos_titulo">Grupos de Entrenamiento</string>
+    <string name="lbl_sin_grupos">Sin grupos registrados</string>
+    <string name="lbl_crear_grupo">Nuevo grupo</string>
+    <string name="lbl_detalle_grupo">Detalle del grupo</string>
+    <string name="hint_nombre_grupo">Nombre del grupo</string>
+    <string name="btn_guardar_grupo">Guardar grupo</string>
+    <string name="msg_grupo_creado">Grupo creado correctamente</string>
+    <string name="lbl_ver_grupos">Ver grupos</string>
+
+    <!-- Atletas -->
+    <string name="lbl_atletas_titulo">Atletas</string>
+    <string name="lbl_sin_atletas">Sin atletas registrados</string>
+    <string name="lbl_perfil_atleta">Perfil del Atleta</string>
+    <string name="hint_buscar_atleta">Buscar atleta…</string>
+    <string name="lbl_atletas_count">atletas</string>
+
+    <!-- Eventos / Competencias -->
+    <string name="lbl_eventos_titulo">Eventos y Competencias</string>
+    <string name="lbl_sin_eventos">Sin eventos registrados</string>
+    <string name="lbl_crear_competencia">Nueva competencia</string>
+    <string name="hint_nombre_evento">Nombre del evento</string>
+    <string name="hint_categoria">Categoría</string>
+    <string name="btn_guardar_competencia">Guardar evento</string>
+    <string name="msg_competencia_creada">Evento creado correctamente</string>
+    <string-array name="categorias">
+        <item>Juvenil A</item>
+        <item>Juvenil B</item>
+        <item>Sub-18</item>
+        <item>Sub-20</item>
+        <item>Senior</item>
+        <item>Máster</item>
+        <item>Abierta</item>
+    </string-array>
+
+    <!-- Marcas -->
+    <string name="lbl_marcas_titulo">Marcas / Rendimiento</string>
+    <string name="lbl_sin_marcas">Sin marcas registradas</string>
+    <string name="lbl_registrar_marca">Registrar marca</string>
+    <string name="hint_atleta">Atleta</string>
+    <string name="hint_disciplina">Disciplina</string>
+    <string name="hint_resultado">Resultado</string>
+    <string name="hint_unidad">Unidad</string>
+    <string name="hint_observaciones">Observaciones (opcional)</string>
+    <string name="btn_guardar_marca">Guardar marca</string>
+    <string name="msg_marca_guardada">Marca registrada correctamente</string>
+    <string name="msg_marca_es_pr">¡Nuevo récord personal!</string>
+    <string-array name="disciplinas">
+        <item>100m</item>
+        <item>200m</item>
+        <item>400m</item>
+        <item>Salto Largo</item>
+        <item>Lanzamiento de Bala</item>
+        <item>Gimnasia</item>
+    </string-array>
+
+    <!-- Editar Perfil -->
+    <string name="lbl_editar_perfil">Editar Perfil</string>
+    <string name="btn_guardar_perfil">Guardar cambios</string>
+    <string name="msg_perfil_actualizado">Perfil actualizado correctamente</string>
+    <string name="lbl_mi_perfil">Mi perfil</string>
+
+    <!-- Gestión atletas en grupo -->
+    <string name="lbl_agregar_atletas">Gestionar atletas del grupo</string>
+
+    <!-- Reporte de Asistencia -->
+    <string name="lbl_reporte_asistencia">Reporte de Asistencia</string>
+    <string name="lbl_sin_reporte">Sin datos para el período seleccionado</string>
+    <string name="lbl_ver_reporte">Ver reporte</string>
+
+    <!-- Cambiar Contraseña -->
+    <string name="lbl_cambiar_contrasena">Cambiar Contraseña</string>
+    <string name="hint_contrasena_actual">Contraseña actual</string>
+    <string name="hint_nueva_contrasena">Nueva contraseña</string>
+    <string name="hint_min_8_chars">Mínimo 8 caracteres</string>
+    <string name="btn_guardar_contrasena">Guardar cambios</string>
+    <string name="lbl_guardando">Guardando…</string>
+    <string name="msg_contrasena_cambiada">Contraseña actualizada correctamente</string>
+    <string name="err_contrasena_actual_incorrecta">Contraseña actual incorrecta</string>
+    <string name="lbl_seguridad">Seguridad</string>
+
+    <!-- Notificaciones -->
+    <string name="lbl_notificaciones">Notificaciones</string>
+    <string name="lbl_sin_notificaciones">Sin notificaciones por el momento</string>
+    <string name="lbl_marcar_todas_leidas">Marcar todo como leído</string>
+    <string name="lbl_notif_no_leidas">%1$d sin leer</string>
+
+    <!-- Errores -->
+    <string name="err_campo_requerido">Este campo es requerido</string>
+    <string name="err_credenciales">Correo o contraseña incorrectos</string>
+    <string name="err_correo_invalido">Ingrese un correo válido</string>
+    <string name="err_contrasena_corta">Mínimo 8 caracteres</string>
+    <string name="err_contrasenas_no_coinciden">Las contraseñas no coinciden</string>
+    <string name="err_conexion">Error de conexión. Verifique su internet.</string>
+    <string name="msg_registro_exitoso">Cuenta creada. Revisa tu correo para verificarla.</string>
+    <string name="msg_correo_enviado">Enlace de recuperación enviado.</string>
+</resources>

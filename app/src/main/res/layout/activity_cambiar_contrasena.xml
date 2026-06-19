@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackground">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorSurface"
+        app:titleTextColor="@color/colorTextPrimary"
+        app:navigationIconTint="@color/colorTextPrimary"
+        app:title="@string/lbl_cambiar_contrasena" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Ícono de candado -->
+            <FrameLayout
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/bg_avatar"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="28dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="🔒"
+                    android:textSize="30sp" />
+            </FrameLayout>
+
+            <!-- Contraseña actual -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilActual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/hint_contrasena_actual"
+                app:boxBackgroundColor="@color/colorSurface"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/colorBorder"
+                app:hintTextColor="@color/colorTextSecondary"
+                app:endIconMode="password_toggle"
+                app:endIconTint="@color/colorTextSecondary"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etActual"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:textColor="@color/colorTextPrimary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Nueva contraseña -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilNueva"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/hint_nueva_contrasena"
+                app:boxBackgroundColor="@color/colorSurface"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/colorBorder"
+                app:hintTextColor="@color/colorTextSecondary"
+                app:endIconMode="password_toggle"
+                app:endIconTint="@color/colorTextSecondary"
+                app:helperText="@string/hint_min_8_chars"
+                app:helperTextTextColor="@color/colorTextSecondary"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etNueva"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:textColor="@color/colorTextPrimary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Confirmar nueva contraseña -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilConfirmar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:hint="@string/hint_confirmar_contrasena"
+                app:boxBackgroundColor="@color/colorSurface"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/colorBorder"
+                app:hintTextColor="@color/colorTextSecondary"
+                app:endIconMode="password_toggle"
+                app:endIconTint="@color/colorTextSecondary"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etConfirmar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:textColor="@color/colorTextPrimary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuardar"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="@string/btn_guardar_contrasena"
+                android:textSize="15sp"
+                android:backgroundTint="@color/colorPrimary"
+                android:textColor="@color/colorOnPrimary" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fondo oscuro navy -->
+    <color name="colorBackground">#0D1B2A</color>
+    <color name="colorSurface">#162232</color>
+    <color name="colorSurfaceVariant">#1E2E42</color>
+    <color name="colorBorder">#2A3D55</color>
+
+    <!-- Primario: Teal -->
+    <color name="colorPrimary">#00BFA5</color>
+    <color name="colorPrimaryDark">#008B76</color>
+    <color name="colorOnPrimary">#000000</color>
+
+    <!-- Texto -->
+    <color name="colorTextPrimary">#FFFFFF</color>
+    <color name="colorTextSecondary">#8899BB</color>
+    <color name="colorTextHint">#4A5F75</color>
+
+    <!-- Estados -->
+    <color name="colorActive">#4CAF50</color>
+    <color name="colorPending">#FF9800</color>
+    <color name="colorCancelled">#EF5350</color>
+
+    <!-- Aliases compatibles con layouts existentes -->
+    <color name="purple_200">#80CBC4</color>
+    <color name="purple_500">#00BFA5</color>
+    <color name="purple_700">#008B76</color>
+    <color name="teal_200">#80CBC4</color>
+    <color name="teal_700">#008B76</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
