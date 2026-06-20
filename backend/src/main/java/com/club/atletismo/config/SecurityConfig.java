@@ -58,7 +58,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/h2-console/**",
+                                         "/actuator/health", "/actuator/info").permitAll()
                         .anyRequest().authenticated())
                 .headers(h -> h.frameOptions(f -> f.disable())) // H2 console
                 .authenticationProvider(authProvider())
