@@ -13,6 +13,11 @@ spring:
     console:
       enabled: true
       path: /h2-console
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
 
 jwt:
   secret: atletismo-super-secret-key-very-long-2026-UPDS-Santa-Cruz-Bolivia

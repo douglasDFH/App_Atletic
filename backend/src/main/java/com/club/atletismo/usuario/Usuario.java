@@ -1,5 +1,6 @@
 package com.club.atletismo.usuario;
 
+import com.club.atletismo.grupo.Grupo;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,6 +33,15 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private Rol rol;
 
+    private String disciplina;
+    private String categoria;
+    private String fcmToken;
+    private String fotoUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "grupo_id")
+    private Grupo grupo;
+
     @Builder.Default
     @Column(nullable = false)
     private boolean activo = true;
@@ -40,11 +50,10 @@ public class Usuario implements UserDetails {
     @Column(nullable = false, updatable = false)
     private LocalDateTime creadoEn = LocalDateTime.now();
 
-    // --- UserDetails ---
     @Override public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
     }
-    @Override public String getPassword()   { return contrasenaHash; }
-    @Override public String getUsername()   { return correo; }
-    @Override public boolean isEnabled()    { return activo; }
+    @Override public String getPassword()  { return contrasenaHash; }
+    @Override public String getUsername()  { return correo; }
+    @Override public boolean isEnabled()   { return activo; }
 }

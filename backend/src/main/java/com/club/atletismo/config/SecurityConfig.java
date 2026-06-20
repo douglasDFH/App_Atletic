@@ -59,7 +59,8 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**", "/h2-console/**",
-                                         "/actuator/health", "/actuator/info").permitAll()
+                                         "/actuator/health", "/actuator/info",
+                                         "/uploads/**").permitAll()
                         .anyRequest().authenticated())
                 .headers(h -> h.frameOptions(f -> f.disable())) // H2 console
                 .authenticationProvider(authProvider())
