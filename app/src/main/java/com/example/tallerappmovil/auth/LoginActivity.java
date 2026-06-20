@@ -19,6 +19,10 @@ import com.example.tallerappmovil.model.TokenResponse;
 import com.example.tallerappmovil.session.SessionManager;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -113,10 +117,23 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void redirectToDashboard(String rol, String nombre) {
+        enviarFcmTokenAlServidor();
         Intent intent = new Intent(this, DashboardActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    private void enviarFcmTokenAlServidor() {
+        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token -> {
+            Map<String, String> body = new HashMap<>();
+            body.put("token", token);
+            ApiClient.getUsuariosService().registrarFcmToken(body)
+                    .enqueue(new Callback<Void>() {
+                        @Override public void onResponse(Call<Void> c, Response<Void> r) {}
+                        @Override public void onFailure(Call<Void> c, Throwable t) {}
+                    });
+        });
     }
 
     private void setLoading(boolean loading) {

@@ -11,4 +11,9 @@
         android:id="@+id/action_reporte"
         android:title="@string/lbl_reporte_asistencia"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_eliminar_grupo"
+        android:title="Eliminar grupo"
+        app:showAsAction="never" />
 </menu>

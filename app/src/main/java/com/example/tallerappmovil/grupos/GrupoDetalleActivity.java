@@ -7,6 +7,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -179,8 +182,8 @@ public class GrupoDetalleActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_grupo_detalle, menu);
-        // Solo entrenador puede editar
         menu.findItem(R.id.action_editar_grupo).setVisible(esEntrenador);
+        menu.findItem(R.id.action_eliminar_grupo).setVisible(esEntrenador);
         return true;
     }
 
@@ -207,7 +210,44 @@ public class GrupoDetalleActivity extends AppCompatActivity {
             startActivity(intent);
             return true;
         }
+        if (id == R.id.action_eliminar_grupo) {
+            confirmarEliminarGrupo();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void confirmarEliminarGrupo() {
+        new AlertDialog.Builder(this)
+                .setTitle("Eliminar grupo")
+                .setMessage("¿Eliminar el grupo \"" + grupoNombreActual + "\"? Esta acción no se puede deshacer.")
+                .setPositiveButton("Eliminar", (d, w) -> eliminarGrupo())
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void eliminarGrupo() {
+        if (grupoId == null) return;
+        ApiClient.getGruposService().eliminarGrupo(grupoId)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<Void> call, retrofit2.Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(GrupoDetalleActivity.this,
+                                    "Grupo eliminado", Toast.LENGTH_SHORT).show();
+                            setResult(RESULT_OK);
+                            finish();
+                        } else {
+                            Toast.makeText(GrupoDetalleActivity.this,
+                                    getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onFailure(retrofit2.Call<Void> call, Throwable t) {
+                        Toast.makeText(GrupoDetalleActivity.this,
+                                getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override

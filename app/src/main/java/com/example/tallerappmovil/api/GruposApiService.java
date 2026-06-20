@@ -28,6 +28,9 @@ public interface GruposApiService {
     @PUT("grupos/{id}")
     Call<GrupoEntrenamiento> editarGrupo(@Path("id") Long id, @Body GrupoRequest request);
 
+    @DELETE("grupos/{id}")
+    Call<Void> eliminarGrupo(@Path("id") Long id);
+
     @POST("grupos/{id}/atletas/{atletaId}")
     Call<Void> agregarAtleta(@Path("id") Long grupoId, @Path("atletaId") Long atletaId);
 
