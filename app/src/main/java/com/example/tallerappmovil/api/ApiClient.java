@@ -1,14 +1,20 @@
 package com.example.tallerappmovil.api;
 
+import android.content.Intent;
+
+import com.example.tallerappmovil.AtletismoApp;
+import com.example.tallerappmovil.auth.LoginActivity;
+import com.example.tallerappmovil.session.SessionManager;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
 
-    // 10.0.2.2 = localhost desde el emulador Android
     private static final String BASE_URL = "http://10.0.2.2:8080/api/v1/";
 
     private static Retrofit retrofit;
@@ -20,6 +26,7 @@ public class ApiClient {
 
     public static void clearToken() {
         authToken = null;
+        retrofit = null;
     }
 
     private static Retrofit getRetrofit() {
@@ -34,7 +41,11 @@ public class ApiClient {
                         if (authToken != null) {
                             builder.addHeader("Authorization", "Bearer " + authToken);
                         }
-                        return chain.proceed(builder.build());
+                        Response response = chain.proceed(builder.build());
+                        if (response.code() == 401) {
+                            handleUnauthorized();
+                        }
+                        return response;
                     })
                     .build();
 
@@ -45,6 +56,19 @@ public class ApiClient {
                     .build();
         }
         return retrofit;
+    }
+
+    private static void handleUnauthorized() {
+        android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
+        main.post(() -> {
+            android.content.Context ctx = AtletismoApp.getContext();
+            new SessionManager(ctx).clearSession();
+            authToken = null;
+            retrofit   = null;
+            Intent intent = new Intent(ctx, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            ctx.startActivity(intent);
+        });
     }
 
     public static AuthApiService getAuthService() {

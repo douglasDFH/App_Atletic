@@ -5,10 +5,11 @@ import android.content.SharedPreferences;
 
 public class SessionManager {
 
-    private static final String PREFS_NAME = "atletismo_session";
+    private static final String PREFS_NAME  = "atletismo_session";
     private static final String KEY_TOKEN   = "access_token";
     private static final String KEY_ROL     = "user_rol";
     private static final String KEY_NOMBRE  = "user_nombre";
+    private static final String KEY_EMAIL   = "user_email";
 
     private final SharedPreferences prefs;
 
@@ -28,12 +29,17 @@ public class SessionManager {
         return prefs.contains(KEY_TOKEN);
     }
 
-    public String getToken()   { return prefs.getString(KEY_TOKEN, null); }
+    public String getToken()    { return prefs.getString(KEY_TOKEN, null); }
     public String getUserRole() { return prefs.getString(KEY_ROL, ""); }
     public String getUserName() { return prefs.getString(KEY_NOMBRE, ""); }
+    public String getUserEmail(){ return prefs.getString(KEY_EMAIL, ""); }
 
     public void saveUserName(String nombre) {
         prefs.edit().putString(KEY_NOMBRE, nombre).apply();
+    }
+
+    public void saveUserEmail(String email) {
+        prefs.edit().putString(KEY_EMAIL, email).apply();
     }
 
     public void clearSession() {

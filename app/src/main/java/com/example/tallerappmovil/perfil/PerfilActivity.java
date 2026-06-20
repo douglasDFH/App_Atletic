@@ -45,6 +45,8 @@ public class PerfilActivity extends AppCompatActivity {
         tvEmail  = findViewById(R.id.tvEmail);
 
         mostrarDatosLocales(nombre, rol);
+        String emailCached = session.getUserEmail();
+        if (!emailCached.isEmpty()) tvEmail.setText(emailCached);
         cargarPerfilApi();
 
         // Botón editar perfil (outline bajo el avatar)
@@ -92,8 +94,11 @@ public class PerfilActivity extends AppCompatActivity {
                             PerfilUsuario p = response.body();
                             String nombre = p.getNombreCompleto();
                             session.saveUserName(nombre);
+                            if (p.getEmail() != null) {
+                                session.saveUserEmail(p.getEmail());
+                                tvEmail.setText(p.getEmail());
+                            }
                             mostrarDatosLocales(nombre, session.getUserRole());
-                            if (p.getEmail() != null) tvEmail.setText(p.getEmail());
                         }
                     }
                     @Override public void onFailure(Call<PerfilUsuario> call, Throwable t) {}
