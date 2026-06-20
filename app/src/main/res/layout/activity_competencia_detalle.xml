@@ -201,6 +201,38 @@
                 android:layout_marginTop="20dp"
                 android:visibility="gone" />
 
+            <!-- Botones editar/eliminar (solo entrenador) -->
+            <LinearLayout
+                android:id="@+id/layoutBotonesEntrenador"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="20dp"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEditarCompetencia"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="Editar"
+                    android:textColor="@color/colorPrimary"
+                    android:strokeColor="@color/colorPrimary"
+                    android:layout_marginEnd="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEliminarCompetencia"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="Eliminar"
+                    android:textColor="@color/colorCancelled"
+                    android:strokeColor="@color/colorCancelled" />
+            </LinearLayout>
+
             <!-- Sección inscritos (entrenador o todos) -->
             <TextView
                 android:id="@+id/tvHeaderInscritos"

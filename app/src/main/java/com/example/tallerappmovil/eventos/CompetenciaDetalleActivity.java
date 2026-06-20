@@ -1,5 +1,6 @@
 package com.example.tallerappmovil.eventos;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
@@ -7,6 +8,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,6 +35,8 @@ public class CompetenciaDetalleActivity extends AppCompatActivity {
     public static final String EXTRA_ID     = "competenciaId";
     public static final String EXTRA_NOMBRE = "competenciaNombre";
 
+    private static final int REQ_EDITAR = 201;
+
     private static final SimpleDateFormat ISO  =
             new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     private static final SimpleDateFormat FULL =
@@ -40,7 +44,9 @@ public class CompetenciaDetalleActivity extends AppCompatActivity {
 
     private Long competenciaId;
     private boolean esAtleta;
+    private boolean esEntrenador;
     private boolean inscritoActual = false;
+    private Competencia competenciaActual;
 
     private TextView tvNombre, tvEstado, tvDisciplina, tvFecha, tvCategoria, tvLugar;
     private TextView tvDescripcion, tvHeaderInscritos, tvSinInscritos;
@@ -48,6 +54,7 @@ public class CompetenciaDetalleActivity extends AppCompatActivity {
     private MaterialButton btnInscripcion;
     private ProgressBar progressBar;
     private View scrollContent;
+    private View layoutBotonesEntrenador;
     private InscritosAdapter inscritosAdapter;
 
     @Override
@@ -66,21 +73,23 @@ public class CompetenciaDetalleActivity extends AppCompatActivity {
 
         SessionManager session = new SessionManager(this);
         String rol = session.getUserRole();
-        esAtleta = "ATLETA".equals(rol);
+        esAtleta     = "ATLETA".equals(rol);
+        esEntrenador = "ENTRENADOR".equals(rol) || "ADMIN".equals(rol);
 
-        tvNombre          = findViewById(R.id.tvNombreDetalle);
-        tvEstado          = findViewById(R.id.tvEstadoDetalle);
-        tvDisciplina      = findViewById(R.id.tvDisciplinaDetalle);
-        tvFecha           = findViewById(R.id.tvFechaDetalle);
-        tvCategoria       = findViewById(R.id.tvCategoriaDetalle);
-        tvLugar           = findViewById(R.id.tvLugarDetalle);
-        tvDescripcion     = findViewById(R.id.tvDescripcionDetalle);
-        layoutDescripcion = findViewById(R.id.layoutDescripcion);
-        btnInscripcion    = findViewById(R.id.btnInscripcion);
-        tvHeaderInscritos = findViewById(R.id.tvHeaderInscritos);
-        tvSinInscritos    = findViewById(R.id.tvSinInscritos);
-        progressBar       = findViewById(R.id.progressBar);
-        scrollContent     = findViewById(R.id.scrollContent);
+        tvNombre              = findViewById(R.id.tvNombreDetalle);
+        tvEstado              = findViewById(R.id.tvEstadoDetalle);
+        tvDisciplina          = findViewById(R.id.tvDisciplinaDetalle);
+        tvFecha               = findViewById(R.id.tvFechaDetalle);
+        tvCategoria           = findViewById(R.id.tvCategoriaDetalle);
+        tvLugar               = findViewById(R.id.tvLugarDetalle);
+        tvDescripcion         = findViewById(R.id.tvDescripcionDetalle);
+        layoutDescripcion     = findViewById(R.id.layoutDescripcion);
+        btnInscripcion        = findViewById(R.id.btnInscripcion);
+        tvHeaderInscritos     = findViewById(R.id.tvHeaderInscritos);
+        tvSinInscritos        = findViewById(R.id.tvSinInscritos);
+        progressBar           = findViewById(R.id.progressBar);
+        scrollContent         = findViewById(R.id.scrollContent);
+        layoutBotonesEntrenador = findViewById(R.id.layoutBotonesEntrenador);
 
         RecyclerView recycler = findViewById(R.id.recyclerInscritos);
         recycler.setLayoutManager(new LinearLayoutManager(this));
@@ -90,8 +99,17 @@ public class CompetenciaDetalleActivity extends AppCompatActivity {
         if (competenciaId != -1L) cargarDetalle();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_EDITAR && resultCode == RESULT_OK) {
+            cargarDetalle();
+        }
+    }
+
     private void cargarDetalle() {
         progressBar.setVisibility(View.VISIBLE);
+        scrollContent.setVisibility(View.GONE);
 
         ApiClient.getCompetenciasService().getCompetencia(competenciaId)
                 .enqueue(new Callback<Competencia>() {
@@ -99,7 +117,8 @@ public class CompetenciaDetalleActivity extends AppCompatActivity {
                     public void onResponse(Call<Competencia> call, Response<Competencia> response) {
                         progressBar.setVisibility(View.GONE);
                         if (response.isSuccessful() && response.body() != null) {
-                            mostrarDetalle(response.body());
+                            competenciaActual = response.body();
+                            mostrarDetalle(competenciaActual);
                             scrollContent.setVisibility(View.VISIBLE);
                         } else {
                             Toast.makeText(CompetenciaDetalleActivity.this,
@@ -121,7 +140,6 @@ public class CompetenciaDetalleActivity extends AppCompatActivity {
         tvCategoria.setText(c.getCategoria() != null ? c.getCategoria() : "--");
         tvLugar.setText(c.getLugar() != null ? c.getLugar() : "--");
 
-        // Fecha formateada
         try {
             Date d = ISO.parse(c.getFechaEvento());
             tvFecha.setText(d != null ? FULL.format(d) : c.getFechaEvento());
@@ -129,30 +147,85 @@ public class CompetenciaDetalleActivity extends AppCompatActivity {
             tvFecha.setText(c.getFechaEvento() != null ? c.getFechaEvento() : "--");
         }
 
-        // Estado badge
         String estado = c.getEstado() != null ? c.getEstado() : "";
         tvEstado.setText(estadoLabel(estado));
-        tvEstado.setBackgroundTintList(
-                ColorStateList.valueOf(estadoColor(estado)));
+        tvEstado.setBackgroundTintList(ColorStateList.valueOf(estadoColor(estado)));
         tvEstado.setVisibility(View.VISIBLE);
 
-        // Descripción
         if (c.getDescripcion() != null && !c.getDescripcion().isEmpty()) {
             tvDescripcion.setText(c.getDescripcion());
             layoutDescripcion.setVisibility(View.VISIBLE);
+        } else {
+            layoutDescripcion.setVisibility(View.GONE);
         }
 
-        // Botón inscripción (solo atleta, solo eventos próximos o en curso)
+        // Botón inscripción (solo atleta, eventos próximos o en curso)
         boolean puedeInscribirse = "PROXIMO".equals(estado) || "EN_CURSO".equals(estado);
         if (esAtleta && puedeInscribirse) {
             inscritoActual = c.isEstaInscrito();
             actualizarBotonInscripcion();
             btnInscripcion.setVisibility(View.VISIBLE);
+        } else {
+            btnInscripcion.setVisibility(View.GONE);
         }
 
-        // Lista inscritos (visible para todos)
+        // Botones editar/eliminar (solo entrenador)
+        if (esEntrenador) {
+            layoutBotonesEntrenador.setVisibility(View.VISIBLE);
+            findViewById(R.id.btnEditarCompetencia).setOnClickListener(v -> abrirEditar(c));
+            findViewById(R.id.btnEliminarCompetencia).setOnClickListener(v -> confirmarEliminar());
+        }
+
         tvHeaderInscritos.setVisibility(View.VISIBLE);
         cargarInscritos();
+    }
+
+    private void abrirEditar(Competencia c) {
+        Intent intent = new Intent(this, CrearCompetenciaActivity.class);
+        intent.putExtra(CrearCompetenciaActivity.EXTRA_COMPETENCIA_ID, c.getId());
+        intent.putExtra(CrearCompetenciaActivity.EXTRA_COMPETENCIA_NOMBRE, c.getNombre());
+        intent.putExtra(CrearCompetenciaActivity.EXTRA_DISCIPLINA, c.getDisciplina());
+        intent.putExtra(CrearCompetenciaActivity.EXTRA_FECHA, c.getFechaEvento());
+        intent.putExtra(CrearCompetenciaActivity.EXTRA_LUGAR, c.getLugar());
+        intent.putExtra(CrearCompetenciaActivity.EXTRA_CATEGORIA, c.getCategoria());
+        intent.putExtra(CrearCompetenciaActivity.EXTRA_DESCRIPCION, c.getDescripcion());
+        startActivityForResult(intent, REQ_EDITAR);
+    }
+
+    private void confirmarEliminar() {
+        new AlertDialog.Builder(this)
+                .setTitle("Eliminar evento")
+                .setMessage(getString(R.string.confirm_eliminar_competencia))
+                .setPositiveButton("Eliminar", (d, w) -> eliminarCompetencia())
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void eliminarCompetencia() {
+        progressBar.setVisibility(View.VISIBLE);
+        ApiClient.getCompetenciasService().eliminarCompetencia(competenciaId)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        progressBar.setVisibility(View.GONE);
+                        if (response.isSuccessful()) {
+                            Toast.makeText(CompetenciaDetalleActivity.this,
+                                    getString(R.string.msg_competencia_eliminada),
+                                    Toast.LENGTH_SHORT).show();
+                            setResult(RESULT_OK);
+                            finish();
+                        } else {
+                            Toast.makeText(CompetenciaDetalleActivity.this,
+                                    getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(CompetenciaDetalleActivity.this,
+                                getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void actualizarBotonInscripcion() {
@@ -170,7 +243,6 @@ public class CompetenciaDetalleActivity extends AppCompatActivity {
 
     private void toggleInscripcion() {
         btnInscripcion.setEnabled(false);
-
         if (inscritoActual) {
             ApiClient.getCompetenciasService().desinscribirse(competenciaId)
                     .enqueue(new Callback<Void>() {

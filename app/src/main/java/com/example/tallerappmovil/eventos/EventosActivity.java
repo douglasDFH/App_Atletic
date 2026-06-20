@@ -71,7 +71,7 @@ public class EventosActivity extends AppCompatActivity {
             Intent intent = new Intent(this, CompetenciaDetalleActivity.class);
             intent.putExtra(CompetenciaDetalleActivity.EXTRA_ID, c.getId());
             intent.putExtra(CompetenciaDetalleActivity.EXTRA_NOMBRE, c.getNombre());
-            startActivity(intent);
+            startActivityForResult(intent, 1);
         });
 
         setupChips();
@@ -86,6 +86,12 @@ public class EventosActivity extends AppCompatActivity {
 
         setupBottomNav();
         cargarEventos();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) cargarEventos();
     }
 
     @Override

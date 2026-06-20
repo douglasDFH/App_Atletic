@@ -137,6 +137,11 @@
     <string name="hint_categoria">Categoría</string>
     <string name="btn_guardar_competencia">Guardar evento</string>
     <string name="msg_competencia_creada">Evento creado correctamente</string>
+    <string name="msg_competencia_actualizada">Evento actualizado correctamente</string>
+    <string name="msg_competencia_eliminada">Evento eliminado</string>
+    <string name="lbl_editar_competencia">Editar evento</string>
+    <string name="btn_eliminar_competencia">Eliminar evento</string>
+    <string name="confirm_eliminar_competencia">¿Eliminar este evento? Esta acción no se puede deshacer.</string>
     <string-array name="categorias">
         <item>Juvenil A</item>
         <item>Juvenil B</item>
