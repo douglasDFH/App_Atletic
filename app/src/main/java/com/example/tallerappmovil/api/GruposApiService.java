@@ -11,6 +11,7 @@ import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface GruposApiService {
@@ -23,6 +24,9 @@ public interface GruposApiService {
 
     @POST("grupos")
     Call<GrupoEntrenamiento> crearGrupo(@Body GrupoRequest request);
+
+    @PUT("grupos/{id}")
+    Call<GrupoEntrenamiento> editarGrupo(@Path("id") Long id, @Body GrupoRequest request);
 
     @POST("grupos/{id}/atletas/{atletaId}")
     Call<Void> agregarAtleta(@Path("id") Long grupoId, @Path("atletaId") Long atletaId);

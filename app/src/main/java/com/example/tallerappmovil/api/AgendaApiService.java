@@ -9,6 +9,7 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -20,6 +21,10 @@ public interface AgendaApiService {
     @GET("sesiones")
     Call<List<SesionEntrenamiento>> listarPorSemana(@Query("semana") String semana);
 
+    @GET("sesiones")
+    Call<List<SesionEntrenamiento>> listarPorGrupo(@Query("semana") String semana,
+                                                   @Query("grupoId") Long grupoId);
+
     @POST("sesiones")
     Call<SesionEntrenamiento> crear(@Body SesionCreateRequest request);
 
@@ -28,6 +33,9 @@ public interface AgendaApiService {
 
     @PUT("sesiones/{id}/cancelar")
     Call<SesionEntrenamiento> cancelar(@Path("id") Long id, @Body Map<String, String> body);
+
+    @DELETE("sesiones/{id}")
+    Call<Void> eliminar(@Path("id") Long id);
 
     @GET("grupos")
     Call<List<GrupoEntrenamiento>> listarGrupos();
