@@ -8,6 +8,7 @@ public class PerfilUsuario {
     private String fechaRegistro;
     private Long grupoId;
     private String grupoNombre;
+    private String fotoUrl;
 
     public Long getId()               { return id; }
     public String getNombreCompleto() { return nombreCompleto; }
@@ -16,4 +17,5 @@ public class PerfilUsuario {
     public String getFechaRegistro()  { return fechaRegistro; }
     public Long getGrupoId()          { return grupoId; }
     public String getGrupoNombre()    { return grupoNombre; }
+    public String getFotoUrl()        { return fotoUrl; }
 }

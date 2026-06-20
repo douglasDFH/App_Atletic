@@ -237,4 +237,10 @@
     <string name="err_conexion">Error de conexión. Verifique su internet.</string>
     <string name="msg_registro_exitoso">Cuenta creada. Revisa tu correo para verificarla.</string>
     <string name="msg_correo_enviado">Enlace de recuperación enviado.</string>
+
+    <!-- Foto de perfil -->
+    <string name="lbl_foto_perfil">Foto de perfil</string>
+    <string name="lbl_cambiar_foto">Cambiar foto</string>
+    <string name="msg_foto_actualizada">Foto de perfil actualizada</string>
+    <string name="err_foto_subida">Error al subir la foto</string>
 </resources>

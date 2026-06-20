@@ -25,14 +25,17 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- Avatar -->
+            <!-- Avatar con selector de foto -->
             <FrameLayout
+                android:id="@+id/frameAvatar"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@drawable/bg_avatar"
                 android:layout_marginTop="12dp"
-                android:layout_marginBottom="28dp">
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless">
                 <TextView
                     android:id="@+id/tvAvatar"
                     android:layout_width="match_parent"
@@ -41,7 +44,33 @@
                     android:textSize="32sp"
                     android:textStyle="bold"
                     android:textColor="@color/colorOnPrimary" />
+                <ImageView
+                    android:id="@+id/ivAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    android:contentDescription="@string/lbl_foto_perfil" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:layout_gravity="bottom"
+                    android:gravity="center"
+                    android:text="✎"
+                    android:textSize="11sp"
+                    android:textColor="@color/colorOnPrimary"
+                    android:background="#88000000" />
             </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="20dp"
+                android:text="@string/lbl_cambiar_foto"
+                android:textSize="12sp"
+                android:textColor="@color/colorPrimary" />
 
             <!-- Nombre completo -->
             <com.google.android.material.textfield.TextInputLayout

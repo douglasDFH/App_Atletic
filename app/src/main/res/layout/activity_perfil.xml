@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -41,6 +41,13 @@
                     android:textSize="32sp"
                     android:textStyle="bold"
                     android:textColor="@color/colorOnPrimary" />
+                <ImageView
+                    android:id="@+id/ivAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    android:contentDescription="@string/lbl_foto_perfil" />
             </FrameLayout>
 
             <TextView
@@ -239,6 +246,5 @@
         app:menu="@menu/menu_bottom_nav"
         app:itemIconTint="@drawable/nav_item_color"
         app:itemTextColor="@drawable/nav_item_color"
-        app:itemActiveIndicatorColor="@color/colorSurfaceVariant"
         app:labelVisibilityMode="labeled" />
 </LinearLayout>

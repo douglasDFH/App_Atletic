@@ -2,9 +2,14 @@ package com.example.tallerappmovil.perfil;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.agenda.AgendaActivity;
@@ -28,6 +33,7 @@ public class PerfilActivity extends AppCompatActivity {
     private static final int REQ_EDITAR = 100;
 
     private TextView tvAvatar, tvNombre, tvRol, tvEmail;
+    private ImageView ivAvatar;
     private SessionManager session;
 
     @Override
@@ -40,6 +46,7 @@ public class PerfilActivity extends AppCompatActivity {
         String rol    = session.getUserRole();
 
         tvAvatar = findViewById(R.id.tvAvatar);
+        ivAvatar = findViewById(R.id.ivAvatar);
         tvNombre = findViewById(R.id.tvNombre);
         tvRol    = findViewById(R.id.tvRol);
         tvEmail  = findViewById(R.id.tvEmail);
@@ -100,6 +107,7 @@ public class PerfilActivity extends AppCompatActivity {
                             }
                             session.saveGrupo(p.getGrupoId(), p.getGrupoNombre());
                             mostrarDatosLocales(nombre, session.getUserRole());
+                            cargarFoto(p.getFotoUrl());
                         }
                     }
                     @Override public void onFailure(Call<PerfilUsuario> call, Throwable t) {}
@@ -121,6 +129,13 @@ public class PerfilActivity extends AppCompatActivity {
         super.onResume();
         BottomNavigationView nav = findViewById(R.id.bottomNav);
         nav.setSelectedItemId(R.id.nav_perfil);
+    }
+
+    private void cargarFoto(String url) {
+        if (url == null || url.isEmpty()) return;
+        ivAvatar.setVisibility(View.VISIBLE);
+        tvAvatar.setVisibility(View.GONE);
+        Glide.with(this).load(url).transform(new CircleCrop()).into(ivAvatar);
     }
 
     private String rolLabel(String rol) {
