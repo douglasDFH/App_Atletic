@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_editar_grupo"
+        android:title="Editar grupo"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_reporte"
         android:title="@string/lbl_reporte_asistencia"
         app:showAsAction="never" />

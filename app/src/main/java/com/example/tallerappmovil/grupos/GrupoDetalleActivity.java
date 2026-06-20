@@ -24,6 +24,8 @@ import com.example.tallerappmovil.model.GrupoDetalle;
 import com.example.tallerappmovil.session.SessionManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -33,12 +35,18 @@ import retrofit2.Response;
 public class GrupoDetalleActivity extends AppCompatActivity {
 
     private static final int REQ_GESTIONAR_ATLETAS = 200;
+    private static final int REQ_EDITAR_GRUPO      = 201;
+
+    private String grupoNombreActual;
+    private String grupoDisciplinaActual;
+    private String grupoDescripcionActual;
 
     private TextView tvInicialHeader, tvNombreHeader, tvDisciplinaHeader;
     private TextView tvDescripcionHeader, tvTotalAtletas, tvSinAtletas;
     private ProgressBar progressBar;
     private AtletasAdapter atletasAdapter;
-    private List<AtletaInfo> atletasActuales = new java.util.ArrayList<>();
+    private List<AtletaInfo> atletasActuales = new ArrayList<>();
+    private Long grupoId;
     private boolean esEntrenador;
 
     @Override
@@ -105,6 +113,10 @@ public class GrupoDetalleActivity extends AppCompatActivity {
                             GrupoDetalle d = response.body();
 
                             String nombre = d.getNombre() != null ? d.getNombre() : "";
+                            grupoNombreActual      = nombre;
+                            grupoDisciplinaActual  = d.getDisciplina();
+                            grupoDescripcionActual = d.getDescripcion();
+
                             tvNombreHeader.setText(nombre);
                             if (!nombre.isEmpty()) {
                                 tvInicialHeader.setText(
@@ -159,7 +171,7 @@ public class GrupoDetalleActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_GESTIONAR_ATLETAS && grupoId != null) {
+        if (resultCode == RESULT_OK && grupoId != null) {
             cargarDetalle(grupoId);
         }
     }
@@ -167,17 +179,30 @@ public class GrupoDetalleActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_grupo_detalle, menu);
+        // Solo entrenador puede editar
+        menu.findItem(R.id.action_editar_grupo).setVisible(esEntrenador);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_reporte) {
+        int id = item.getItemId();
+        if (id == R.id.action_editar_grupo) {
+            Intent intent = new Intent(this, CrearGrupoActivity.class);
+            if (grupoId != null) {
+                intent.putExtra(CrearGrupoActivity.EXTRA_GRUPO_ID, (long) grupoId);
+                intent.putExtra(CrearGrupoActivity.EXTRA_NOMBRE, grupoNombreActual);
+                intent.putExtra(CrearGrupoActivity.EXTRA_DISCIPLINA, grupoDisciplinaActual);
+                intent.putExtra(CrearGrupoActivity.EXTRA_DESCRIPCION, grupoDescripcionActual);
+            }
+            startActivityForResult(intent, REQ_EDITAR_GRUPO);
+            return true;
+        }
+        if (id == R.id.action_reporte) {
             Intent intent = new Intent(this, ReporteAsistenciaActivity.class);
             if (grupoId != null) {
                 intent.putExtra(ReporteAsistenciaActivity.EXTRA_GRUPO_ID, grupoId);
-                intent.putExtra(ReporteAsistenciaActivity.EXTRA_GRUPO_NOMBRE,
-                        getIntent().getStringExtra(GruposActivity.EXTRA_GRUPO_NOMBRE));
+                intent.putExtra(ReporteAsistenciaActivity.EXTRA_GRUPO_NOMBRE, grupoNombreActual);
             }
             startActivity(intent);
             return true;
