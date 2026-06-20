@@ -98,6 +98,7 @@ public class PerfilActivity extends AppCompatActivity {
                                 session.saveUserEmail(p.getEmail());
                                 tvEmail.setText(p.getEmail());
                             }
+                            session.saveGrupo(p.getGrupoId(), p.getGrupoNombre());
                             mostrarDatosLocales(nombre, session.getUserRole());
                         }
                     }

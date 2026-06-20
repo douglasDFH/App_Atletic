@@ -46,7 +46,10 @@ public class AgendaActivity extends AppCompatActivity {
     private ChipGroup chipGroupEstado;
 
     private final Calendar semanaActual = Calendar.getInstance();
-    private String estadoFiltro = null;
+    private String estadoFiltro  = null;
+    private boolean soloMiGrupo  = false;
+    private Long miGrupoId       = null;
+    private String miGrupoNombre = null;
 
     private static final SimpleDateFormat API_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -62,8 +65,13 @@ public class AgendaActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        String userRol = new SessionManager(this).getUserRole();
+        SessionManager session = new SessionManager(this);
+        String userRol = session.getUserRole();
         boolean puedeEditar = "ENTRENADOR".equals(userRol) || "ADMIN".equals(userRol);
+        boolean esAtleta = "ATLETA".equals(userRol) || "PADRE".equals(userRol);
+
+        miGrupoId     = session.getGrupoId();
+        miGrupoNombre = session.getGrupoNombre();
 
         recyclerSesiones  = findViewById(R.id.recyclerSesiones);
         tvSemana          = findViewById(R.id.tvSemana);
@@ -106,6 +114,15 @@ public class AgendaActivity extends AppCompatActivity {
             cargarSesiones();
         });
 
+        // Mostrar chip "Mi grupo" solo si es atleta con grupo asignado
+        if (esAtleta && miGrupoId != null) {
+            com.google.android.material.chip.Chip chipMiGrupo = findViewById(R.id.chipMiGrupo);
+            String label = miGrupoNombre != null && !miGrupoNombre.isEmpty()
+                    ? miGrupoNombre : "Mi grupo";
+            chipMiGrupo.setText(label);
+            chipMiGrupo.setVisibility(android.view.View.VISIBLE);
+        }
+
         setupChips();
         setupBusqueda();
         setupBottomNav();
@@ -122,11 +139,25 @@ public class AgendaActivity extends AppCompatActivity {
         chipGroupEstado.setOnCheckedStateChangeListener((group, checkedIds) -> {
             if (checkedIds.isEmpty()) return;
             int id = checkedIds.get(0);
-            if (id == R.id.chipTodos)         estadoFiltro = null;
-            else if (id == R.id.chipProgramadas) estadoFiltro = "PROGRAMADA";
-            else if (id == R.id.chipActivas)     estadoFiltro = "ACTIVA";
-            else if (id == R.id.chipFinalizadas) estadoFiltro = "FINALIZADA";
-            else if (id == R.id.chipCanceladas)  estadoFiltro = "CANCELADA";
+            if (id == R.id.chipTodos) {
+                estadoFiltro = null;
+                soloMiGrupo  = false;
+            } else if (id == R.id.chipMiGrupo) {
+                estadoFiltro = null;
+                soloMiGrupo  = true;
+            } else if (id == R.id.chipProgramadas) {
+                estadoFiltro = "PROGRAMADA";
+                soloMiGrupo  = false;
+            } else if (id == R.id.chipActivas) {
+                estadoFiltro = "ACTIVA";
+                soloMiGrupo  = false;
+            } else if (id == R.id.chipFinalizadas) {
+                estadoFiltro = "FINALIZADA";
+                soloMiGrupo  = false;
+            } else if (id == R.id.chipCanceladas) {
+                estadoFiltro = "CANCELADA";
+                soloMiGrupo  = false;
+            }
             aplicarFiltros();
         });
     }
@@ -144,7 +175,8 @@ public class AgendaActivity extends AppCompatActivity {
 
     private void aplicarFiltros() {
         String query = etBuscar.getText() != null ? etBuscar.getText().toString().trim() : "";
-        int visible = adapter.filtrar(query, estadoFiltro);
+        Long grupoFiltro = soloMiGrupo ? miGrupoId : null;
+        int visible = adapter.filtrar(query, estadoFiltro, grupoFiltro);
         actualizarContador(visible);
         tvVacio.setVisibility(visible == 0 && adapter.getTotalCount() > 0
                 ? View.VISIBLE : View.GONE);

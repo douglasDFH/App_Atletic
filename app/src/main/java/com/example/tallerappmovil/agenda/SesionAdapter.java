@@ -53,9 +53,14 @@ public class SesionAdapter extends RecyclerView.Adapter<SesionAdapter.ViewHolder
     }
 
     public int filtrar(String query, String estadoFiltro) {
+        return filtrar(query, estadoFiltro, null);
+    }
+
+    public int filtrar(String query, String estadoFiltro, Long grupoIdFiltro) {
         sesiones = new ArrayList<>();
         for (SesionEntrenamiento s : todas) {
             if (estadoFiltro != null && !estadoFiltro.equals(s.getEstado())) continue;
+            if (grupoIdFiltro != null && !grupoIdFiltro.equals(s.getGrupoId())) continue;
             if (query != null && !query.isEmpty()) {
                 String q = query.toLowerCase();
                 boolean matchGrupo = s.getGrupoNombre() != null

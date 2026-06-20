@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -112,6 +112,14 @@
                     android:checked="true" />
 
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipMiGrupo"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mi grupo"
+                    android:visibility="gone" />
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/chipProgramadas"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
@@ -208,6 +216,5 @@
         app:menu="@menu/menu_bottom_nav"
         app:itemIconTint="@drawable/nav_item_color"
         app:itemTextColor="@drawable/nav_item_color"
-        app:itemActiveIndicatorColor="@color/colorSurfaceVariant"
         app:labelVisibilityMode="labeled" />
 </LinearLayout>
