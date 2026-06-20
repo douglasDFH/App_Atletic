@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -138,6 +140,44 @@ public class SesionDetalleActivity extends AppCompatActivity {
             intent.putExtra(CrearSesionActivity.EXTRA_DESCRIPCION, getIntent().getStringExtra(EXTRA_DESCRIPCION));
             startActivity(intent);
         });
+
+        MaterialButton btnEliminar = findViewById(R.id.btnEliminarSesion);
+        btnEliminar.setOnClickListener(v -> confirmarEliminar());
+    }
+
+    private void confirmarEliminar() {
+        new AlertDialog.Builder(this)
+                .setTitle("Eliminar sesión")
+                .setMessage(getString(R.string.confirm_eliminar_sesion))
+                .setPositiveButton("Eliminar", (d, w) -> eliminarSesion())
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void eliminarSesion() {
+        com.example.tallerappmovil.api.ApiClient.getAgendaService()
+                .eliminar(sesionId)
+                .enqueue(new retrofit2.Callback<Void>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<Void> call,
+                                           retrofit2.Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(SesionDetalleActivity.this,
+                                    getString(R.string.msg_sesion_eliminada),
+                                    Toast.LENGTH_SHORT).show();
+                            setResult(RESULT_OK);
+                            finish();
+                        } else {
+                            Toast.makeText(SesionDetalleActivity.this,
+                                    getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onFailure(retrofit2.Call<Void> call, Throwable t) {
+                        Toast.makeText(SesionDetalleActivity.this,
+                                getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void cargarAsistencia(long id) {

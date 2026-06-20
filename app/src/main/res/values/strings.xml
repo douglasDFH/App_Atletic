@@ -80,6 +80,9 @@
     <string name="msg_sesion_creada">Sesión creada correctamente</string>
     <string name="msg_sesion_actualizada">Sesión actualizada</string>
     <string name="msg_sesion_cancelada">Sesión cancelada</string>
+    <string name="msg_sesion_eliminada">Sesión eliminada</string>
+    <string name="btn_eliminar_sesion">Eliminar sesión</string>
+    <string name="confirm_eliminar_sesion">¿Eliminar esta sesión permanentemente? Esta acción no se puede deshacer.</string>
     <string name="err_hora_invalida">La hora de fin debe ser posterior a la de inicio</string>
     <string name="err_fecha_pasada">No se pueden crear sesiones en fechas pasadas</string>
 

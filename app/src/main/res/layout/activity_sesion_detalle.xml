@@ -305,7 +305,18 @@
                     android:text="@string/opc_editar_sesion"
                     android:textSize="14sp"
                     android:textColor="@color/colorPrimary"
+                    android:layout_marginBottom="10dp"
                     app:strokeColor="@color/colorPrimary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEliminarSesion"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:text="@string/btn_eliminar_sesion"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorCancelled"
+                    app:strokeColor="@color/colorCancelled" />
             </LinearLayout>
 
         </LinearLayout>
