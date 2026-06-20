@@ -94,4 +94,17 @@
             android:layout_marginTop="2dp"
             android:visibility="gone" />
     </LinearLayout>
+
+    <!-- Botón eliminar (solo visible para entrenador) -->
+    <TextView
+        android:id="@+id/tvEliminar"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="✕"
+        android:textSize="16sp"
+        android:textColor="@color/colorCancelled"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone" />
 </LinearLayout>

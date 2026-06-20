@@ -19,12 +19,18 @@ import java.util.Locale;
 
 public class MarcasAdapter extends RecyclerView.Adapter<MarcasAdapter.ViewHolder> {
 
+    public interface OnEliminarListener {
+        void onEliminar(MarcaPersonal marca);
+    }
+
     private List<MarcaPersonal> marcas = new ArrayList<>();
     private boolean mostrarAtleta = false;
+    private boolean mostrarEliminar = false;
+    private OnEliminarListener eliminarListener;
 
-    private static final SimpleDateFormat ISO  = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-    private static final SimpleDateFormat DIA  = new SimpleDateFormat("dd", Locale.getDefault());
-    private static final SimpleDateFormat MES  = new SimpleDateFormat("MMM", new Locale("es"));
+    private static final SimpleDateFormat ISO = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    private static final SimpleDateFormat DIA = new SimpleDateFormat("dd", Locale.getDefault());
+    private static final SimpleDateFormat MES = new SimpleDateFormat("MMM", new Locale("es"));
 
     public void setMarcas(List<MarcaPersonal> lista) {
         this.marcas = lista;
@@ -32,6 +38,11 @@ public class MarcasAdapter extends RecyclerView.Adapter<MarcasAdapter.ViewHolder
     }
 
     public void setMostrarAtleta(boolean mostrar) { this.mostrarAtleta = mostrar; }
+
+    public void setMostrarEliminar(boolean mostrar, OnEliminarListener listener) {
+        this.mostrarEliminar = mostrar;
+        this.eliminarListener = listener;
+    }
 
     @NonNull
     @Override
@@ -77,23 +88,44 @@ public class MarcasAdapter extends RecyclerView.Adapter<MarcasAdapter.ViewHolder
         } else {
             h.tvObservaciones.setVisibility(View.GONE);
         }
+
+        if (mostrarEliminar && eliminarListener != null) {
+            h.tvEliminar.setVisibility(View.VISIBLE);
+            h.tvEliminar.setOnClickListener(v -> {
+                int pos = h.getAdapterPosition();
+                if (pos != RecyclerView.NO_ID) eliminarListener.onEliminar(marcas.get(pos));
+            });
+        } else {
+            h.tvEliminar.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public int getItemCount() { return marcas.size(); }
 
+    public void eliminarItem(Long id) {
+        for (int i = 0; i < marcas.size(); i++) {
+            if (id.equals(marcas.get(i).getId())) {
+                marcas.remove(i);
+                notifyItemRemoved(i);
+                return;
+            }
+        }
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDia, tvMes, tvDisciplina, tvResultado, tvPR, tvAtletaNombre, tvObservaciones;
+        TextView tvDia, tvMes, tvDisciplina, tvResultado, tvPR, tvAtletaNombre, tvObservaciones, tvEliminar;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvDia          = itemView.findViewById(R.id.tvDia);
-            tvMes          = itemView.findViewById(R.id.tvMes);
-            tvDisciplina   = itemView.findViewById(R.id.tvDisciplina);
-            tvResultado    = itemView.findViewById(R.id.tvResultado);
-            tvPR           = itemView.findViewById(R.id.tvPR);
-            tvAtletaNombre = itemView.findViewById(R.id.tvAtletaNombre);
+            tvDia           = itemView.findViewById(R.id.tvDia);
+            tvMes           = itemView.findViewById(R.id.tvMes);
+            tvDisciplina    = itemView.findViewById(R.id.tvDisciplina);
+            tvResultado     = itemView.findViewById(R.id.tvResultado);
+            tvPR            = itemView.findViewById(R.id.tvPR);
+            tvAtletaNombre  = itemView.findViewById(R.id.tvAtletaNombre);
             tvObservaciones = itemView.findViewById(R.id.tvObservaciones);
+            tvEliminar      = itemView.findViewById(R.id.tvEliminar);
         }
     }
 }

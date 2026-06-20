@@ -13,6 +13,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -78,6 +80,9 @@ public class MarcasActivity extends AppCompatActivity {
         recycler.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MarcasAdapter();
         adapter.setMostrarAtleta(esEntrenador);
+        if (esEntrenador) {
+            adapter.setMostrarEliminar(true, marca -> confirmarEliminarMarca(marca));
+        }
         recycler.setAdapter(adapter);
 
         setupSpinnerDisciplina();
@@ -229,6 +234,39 @@ public class MarcasActivity extends AppCompatActivity {
                 break;
             }
         }
+    }
+
+    private void confirmarEliminarMarca(com.example.tallerappmovil.model.MarcaPersonal marca) {
+        String disc = marca.getDisciplina() != null ? marca.getDisciplina() : "marca";
+        String res  = marca.getResultado() != null ? " (" + marca.getResultado() + ")" : "";
+        new AlertDialog.Builder(this)
+                .setTitle("Eliminar marca")
+                .setMessage("¿Eliminar la marca de " + disc + res + "? Esta acción no se puede deshacer.")
+                .setPositiveButton("Eliminar", (d, w) -> eliminarMarca(marca.getId()))
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void eliminarMarca(Long id) {
+        ApiClient.getMarcasService().eliminarMarca(id)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            adapter.eliminarItem(id);
+                            Toast.makeText(MarcasActivity.this,
+                                    "Marca eliminada", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MarcasActivity.this,
+                                    getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(MarcasActivity.this,
+                                getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void setupBottomNav() {
