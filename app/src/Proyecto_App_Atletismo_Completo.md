@@ -1486,6 +1486,68 @@ Entrenador crea sesión
 - Eje X con etiquetas de fecha dd/MM (máx 6 visibles)
 - Eje Y con valores de la marca + líneas de guía grises
 
+### 9.7 Recuperación de Contraseña Real (ForgotPassword + ResetPassword) — 2026-06-21
+
+**Objetivo:** Implementar el flujo completo de recuperación de contraseña con envío real de correo via Gmail SMTP y token de un solo uso.
+
+**Dependencias añadidas:**
+
+| Archivo | Cambio |
+|---|---|
+| `backend/build.gradle` | Añadida `spring-boot-starter-mail` |
+| `backend/application-prod.yml` | Config Gmail SMTP via `MAIL_USERNAME` + `MAIL_PASSWORD` env vars |
+| `backend/application.yml` | Config de mail desactivada para dev (puerto 1025 ficticio) |
+
+**Archivos nuevos — Backend:**
+
+| Archivo | Descripción |
+|---|---|
+| `auth/PasswordResetToken.java` | Entidad JPA: `token` (UUID único), `usuario` (FK), `expiraEn` (1 hora), `usado` (boolean) |
+| `auth/PasswordResetTokenRepository.java` | `findByToken(token)`, `deleteByUsuario(usuario)` |
+| `auth/EmailService.java` | Envía correo con código UUID + deep link `atletismo://reset?token=TOKEN` via `JavaMailSender` |
+| `auth/PasswordResetService.java` | `solicitarReset(correo)`: genera token, guarda en DB, envía email. `resetearPassword(token, nuevaContrasena)`: valida token, actualiza hash, marca usado |
+
+**Archivos modificados — Backend:**
+
+| Archivo | Cambio |
+|---|---|
+| `auth/AuthService.java` | `forgotPassword()` delega a `PasswordResetService.solicitarReset()`. Nuevo `resetPassword()` delega a `resetearPassword()` |
+| `auth/AuthController.java` | Nuevo endpoint `POST /api/v1/auth/reset-password` con body `{ token, nuevaContrasena }` |
+
+**Archivos nuevos — Android:**
+
+| Archivo | Descripción |
+|---|---|
+| `res/layout/activity_reset_password.xml` | Formulario con: campo token (editable, auto-llenado desde deep link), nueva contraseña, confirmar contraseña, botón restablecer |
+| `auth/ResetPasswordActivity.java` | Recibe deep link `atletismo://reset?token=...` o `EXTRA_TOKEN` desde ForgotPassword. Valida campos, llama `POST /auth/reset-password`, navega a `LoginActivity` con stack limpio |
+
+**Archivos modificados — Android:**
+
+| Archivo | Cambio |
+|---|---|
+| `api/AuthApiService.java` | Nuevo método `resetPassword(Map)` → `POST auth/reset-password` |
+| `auth/ForgotPasswordActivity.java` | `onResponse()` navega a `ResetPasswordActivity` en lugar de hacer `finish()` |
+| `AndroidManifest.xml` | `ResetPasswordActivity` registrada con `exported=true` e intent-filter para scheme `atletismo://`, host `reset` |
+| `res/values/strings.xml` | Añadidos: `lbl_nueva_contrasena`, `lbl_reset_desc`, `hint_token_recuperacion`, `btn_restablecer`, `msg_contrasena_restablecida`, `err_token_invalido` |
+
+**Flujo completo:**
+1. Login → "¿Olvidaste tu contraseña?" → `ForgotPasswordActivity`
+2. Usuario ingresa correo → `POST /auth/forgot-password` → backend genera UUID, lo guarda (expira 1h), envía email a Gmail
+3. Email contiene código UUID como texto + enlace `atletismo://reset?token=UUID`
+4. App navega automáticamente a `ResetPasswordActivity` (o usuario toca el enlace del email)
+5. `ResetPasswordActivity`: token pre-llenado (o usuario lo escribe), ingresa nueva contraseña + confirmación
+6. `POST /auth/reset-password` → backend valida token (no usado, no expirado), actualiza hash, marca token como usado
+7. Toast "Contraseña restablecida" → `LoginActivity` con stack limpio
+
+**Variables de entorno a configurar en Coolify:**
+
+| Variable | Valor |
+|---|---|
+| `MAIL_USERNAME` | cuenta Gmail (ej: atletismoscz@gmail.com) |
+| `MAIL_PASSWORD` | Contraseña de aplicación Gmail (16 chars, no la contraseña normal) |
+
+Para obtener contraseña de aplicación Gmail: Cuenta Google → Seguridad → Verificación en 2 pasos → Contraseñas de aplicaciones.
+
 ---
 
 ## Pendiente (Capítulo 6 + Secciones Finales)

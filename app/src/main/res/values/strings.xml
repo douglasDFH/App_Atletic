@@ -238,6 +238,14 @@
     <string name="msg_registro_exitoso">Cuenta creada. Revisa tu correo para verificarla.</string>
     <string name="msg_correo_enviado">Enlace de recuperación enviado.</string>
 
+    <!-- Restablecer contraseña -->
+    <string name="lbl_nueva_contrasena">Nueva contraseña</string>
+    <string name="lbl_reset_desc">Ingresa el código que recibiste en tu correo y establece una nueva contraseña.</string>
+    <string name="hint_token_recuperacion">Código de recuperación</string>
+    <string name="btn_restablecer">Restablecer contraseña</string>
+    <string name="msg_contrasena_restablecida">Contraseña restablecida. Ya puedes ingresar.</string>
+    <string name="err_token_invalido">Código inválido o expirado. Solicita uno nuevo.</string>
+
     <!-- Foto de perfil -->
     <string name="lbl_foto_perfil">Foto de perfil</string>
     <string name="lbl_cambiar_foto">Cambiar foto</string>

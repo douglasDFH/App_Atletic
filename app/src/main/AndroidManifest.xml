@@ -26,6 +26,15 @@
         <activity android:name=".auth.RegisterActivity"       android:exported="false" />
         <activity android:name=".auth.ForgotPasswordActivity" android:exported="false" />
 
+        <activity android:name=".auth.ResetPasswordActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="atletismo" android:host="reset" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".dashboard.DashboardActivity"           android:exported="false" />
         <activity android:name=".dashboard.AtletaDashboardActivity"     android:exported="false" />
         <activity android:name=".dashboard.EntrenadorDashboardActivity" android:exported="false" />

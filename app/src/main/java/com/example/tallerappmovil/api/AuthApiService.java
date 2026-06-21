@@ -20,4 +20,7 @@ public interface AuthApiService {
 
     @POST("auth/forgot-password")
     Call<Void> forgotPassword(@Body Map<String, String> body);
+
+    @POST("auth/reset-password")
+    Call<Void> resetPassword(@Body Map<String, String> body);
 }

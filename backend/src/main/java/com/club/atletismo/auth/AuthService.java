@@ -20,6 +20,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authManager;
+    private final PasswordResetService passwordResetService;
 
     public TokenResponse login(LoginRequest request) {
         authManager.authenticate(
@@ -49,9 +50,10 @@ public class AuthService {
     }
 
     public void forgotPassword(String correo) {
-        // En producción: generar token y enviar correo
-        // Para desarrollo se registra en logs
-        usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new IllegalArgumentException("Correo no encontrado"));
+        passwordResetService.solicitarReset(correo);
+    }
+
+    public void resetPassword(String token, String nuevaContrasena) {
+        passwordResetService.resetearPassword(token, nuevaContrasena);
     }
 }

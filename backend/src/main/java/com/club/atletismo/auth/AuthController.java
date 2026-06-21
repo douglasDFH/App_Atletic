@@ -36,4 +36,10 @@ public class AuthController {
         authService.forgotPassword(body.get("correo"));
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody Map<String, String> body) {
+        authService.resetPassword(body.get("token"), body.get("nuevaContrasena"));
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
 }

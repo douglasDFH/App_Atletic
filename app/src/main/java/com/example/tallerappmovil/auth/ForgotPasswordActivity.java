@@ -73,7 +73,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                         setLoading(false);
                         Toast.makeText(ForgotPasswordActivity.this,
                                 getString(R.string.msg_correo_enviado), Toast.LENGTH_LONG).show();
-                        finish();
+                        startActivity(new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class));
                     }
 
                     @Override

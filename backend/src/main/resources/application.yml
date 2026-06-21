@@ -26,6 +26,14 @@ jwt:
 server:
   port: 8080
 
+spring:
+  mail:
+    host: localhost
+    port: 1025
+    test-connection: false
+    properties:
+      mail.smtp.auth: false
+
 logging:
   level:
     com.club.atletismo: DEBUG
