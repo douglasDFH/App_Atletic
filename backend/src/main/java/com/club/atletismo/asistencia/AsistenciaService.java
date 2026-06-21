@@ -29,6 +29,7 @@ public class AsistenciaService {
 
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
+    @Transactional(readOnly = true)
     public List<AsistenciaAtletaDto> getAsistenciaSesion(Long sesionId) {
         SesionEntrenamiento sesion = sesionRepository.findById(sesionId)
                 .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada"));
@@ -67,6 +68,7 @@ public class AsistenciaService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<AsistenciaHistorialDto> getMiHistorial() {
         Usuario u = usuarioService.getUsuarioActual();
         return asistenciaRepository.findByAtletaIdOrderBySesionHoraInicioDesc(u.getId())
@@ -75,6 +77,7 @@ public class AsistenciaService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<AsistenciaHistorialDto> getHistorialAtleta(Long atletaId) {
         return asistenciaRepository.findByAtletaIdOrderBySesionHoraInicioDesc(atletaId)
                 .stream()
@@ -82,6 +85,7 @@ public class AsistenciaService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ReporteAtletaDto> getReporte(Long grupoId, String mes) {
         YearMonth ym = YearMonth.parse(mes);
         LocalDateTime inicio = ym.atDay(1).atStartOfDay();

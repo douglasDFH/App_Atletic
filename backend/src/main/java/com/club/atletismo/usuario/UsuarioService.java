@@ -29,6 +29,7 @@ public class UsuarioService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
     }
 
+    @Transactional(readOnly = true)
     public PerfilResponse getPerfil() {
         return toPerfilResponse(getUsuarioActual());
     }
@@ -78,12 +79,14 @@ public class UsuarioService {
         return toPerfilResponse(usuarioRepository.save(u));
     }
 
+    @Transactional(readOnly = true)
     public List<AtletaInfoDto> getAtletas() {
         return usuarioRepository.findByRolAndActivo(Rol.ATLETA, true).stream()
                 .map(u -> new AtletaInfoDto(u.getId(), u.getNombreCompleto(), u.getDisciplina()))
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public AtletaDetalleDto getAtleta(Long id) {
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Atleta no encontrado"));

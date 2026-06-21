@@ -25,6 +25,7 @@ public class SesionService {
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    @Transactional(readOnly = true)
     public List<SesionResponse> listarPorSemana(String semana, Long grupoId) {
         LocalDateTime inicio = LocalDate.parse(semana, DATE).atStartOfDay();
         LocalDateTime fin = inicio.plusDays(7);

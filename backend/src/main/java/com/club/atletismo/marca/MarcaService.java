@@ -24,6 +24,7 @@ public class MarcaService {
     private final SesionRepository sesionRepository;
     private final UsuarioService usuarioService;
 
+    @Transactional(readOnly = true)
     public List<MarcaResponse> getMarcas(Long atletaId, String disciplina) {
         List<MarcaPersonal> lista;
         if (atletaId != null && disciplina != null) {

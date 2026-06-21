@@ -20,6 +20,7 @@ public class CompetenciaService {
     private final CompetenciaRepository competenciaRepository;
     private final UsuarioService usuarioService;
 
+    @Transactional(readOnly = true)
     public List<CompetenciaResponse> listar(String estado) {
         Usuario actual = usuarioService.getUsuarioActual();
         List<Competencia> lista = estado != null && !estado.isBlank()
@@ -28,6 +29,7 @@ public class CompetenciaService {
         return lista.stream().map(c -> toResponse(c, actual)).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public CompetenciaResponse getDetalle(Long id) {
         Competencia c = competenciaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Competencia no encontrada"));
@@ -84,6 +86,7 @@ public class CompetenciaService {
         competenciaRepository.save(c);
     }
 
+    @Transactional(readOnly = true)
     public List<AtletaInfoDto> getInscritos(Long competenciaId) {
         Competencia c = competenciaRepository.findById(competenciaId)
                 .orElseThrow(() -> new IllegalArgumentException("Competencia no encontrada"));

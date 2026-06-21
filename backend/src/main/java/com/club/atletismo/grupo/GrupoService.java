@@ -21,12 +21,14 @@ public class GrupoService {
     private final GrupoRepository grupoRepository;
     private final UsuarioRepository usuarioRepository;
 
+    @Transactional(readOnly = true)
     public List<GrupoResumenDto> listar() {
         return grupoRepository.findAll().stream()
                 .map(g -> new GrupoResumenDto(g.getId(), g.getNombre(), g.getDisciplina()))
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public GrupoDetalleDto getDetalle(Long id) {
         Grupo g = grupoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado"));
