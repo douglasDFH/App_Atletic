@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.tallerappmovil.BuildConfig;
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.dashboard.DashboardActivity;
@@ -57,6 +58,9 @@ public class LoginActivity extends AppCompatActivity {
         progressBar      = findViewById(R.id.progressBar);
         tvOlvideContrasena = findViewById(R.id.tvOlvideContrasena);
         tvRegistrarse    = findViewById(R.id.tvRegistrarse);
+
+        TextView tvVersion = findViewById(R.id.tvVersion);
+        tvVersion.setText("v" + BuildConfig.VERSION_NAME);
 
         btnIngresar.setOnClickListener(v -> doLogin());
         tvOlvideContrasena.setOnClickListener(v ->

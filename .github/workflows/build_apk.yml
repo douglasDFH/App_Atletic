@@ -1,4 +1,4 @@
-name: Build APK
+name: Build APK & Release
 
 on:
   push:
@@ -29,34 +29,71 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Get version from commit count
+      - name: Calcular version
         id: version
         run: |
           COUNT=$(git rev-list --count HEAD)
           echo "name=1.${COUNT}" >> $GITHUB_OUTPUT
+          echo "code=${COUNT}" >> $GITHUB_OUTPUT
+
+      - name: Crear google-services.json
+        run: |
+          cat > app/google-services.json << 'EOF'
+          {
+            "project_info": {
+              "project_number": "123456789000",
+              "project_id": "atletismo-app-local-dev",
+              "storage_bucket": "atletismo-app-local-dev.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789000:android:abcdef1234567890abcd",
+                  "android_client_info": {
+                    "package_name": "com.example.tallerappmovil"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyDummyKeyForLocalTestingOnly00000000"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug -PversionName=${{ steps.version.outputs.name }} -PversionCode=${{ steps.version.outputs.code }}
 
-      - name: Rename APK
+      - name: Renombrar APK
         run: |
           mv app/build/outputs/apk/debug/app-debug.apk \
              app/build/outputs/apk/debug/AthleteSCZ-v${{ steps.version.outputs.name }}.apk
 
-      - name: Create GitHub Release
+      - name: Crear GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.name }}
           name: AthleteSCZ v${{ steps.version.outputs.name }}
           body: |
-            ## AthleteSCZ — Club Atlético Santa Cruz
+            ## AthleteSCZ v${{ steps.version.outputs.name }} — Club Atlético Santa Cruz
 
-            ### Instalación
+            ### Instalacion
             1. Descarga el archivo **AthleteSCZ-v${{ steps.version.outputs.name }}.apk**
-            2. En tu Android ve a **Ajustes → Seguridad** y activa **Instalar de fuentes desconocidas**
+            2. En tu Android ve a **Ajustes > Seguridad** y activa **Instalar de fuentes desconocidas**
             3. Abre el APK descargado e instala
 
-            > **Nota:** Esta es una versión de *debug* para pruebas del taller.
-            > Asegúrate de que el servidor backend esté en ejecución y accesible.
+            ### Cambios
+            Commit: ${{ github.sha }}
+
+            > Version de debug para pruebas del taller.
           files: app/build/outputs/apk/debug/AthleteSCZ-v${{ steps.version.outputs.name }}.apk
           make_latest: true
