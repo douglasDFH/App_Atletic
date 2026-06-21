@@ -170,10 +170,11 @@ public class EditarPerfilActivity extends AppCompatActivity {
     }
 
     private void cargarFoto(String url) {
-        if (url == null || url.isEmpty()) return;
+        String fullUrl = ApiClient.resolveUrl(url);
+        if (fullUrl == null) return;
         ivAvatar.setVisibility(View.VISIBLE);
         tvAvatar.setVisibility(View.GONE);
-        Glide.with(this).load(url).transform(new CircleCrop()).into(ivAvatar);
+        Glide.with(this).load(fullUrl).transform(new CircleCrop()).into(ivAvatar);
     }
 
     private void subirFoto(Uri uri) {

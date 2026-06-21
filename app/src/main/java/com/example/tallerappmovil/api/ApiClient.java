@@ -16,6 +16,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
 
     private static final String BASE_URL = "http://xk30jfxsb0mt15cbvkxy0jsn.72.60.143.106.sslip.io/api/v1/";
+    private static final String SERVER_URL = "http://xk30jfxsb0mt15cbvkxy0jsn.72.60.143.106.sslip.io";
+
+    public static String resolveUrl(String path) {
+        if (path == null || path.isEmpty()) return null;
+        if (path.startsWith("http")) return path;
+        return SERVER_URL + path;
+    }
 
     private static Retrofit retrofit;
     private static String authToken = null;

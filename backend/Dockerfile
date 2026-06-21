@@ -16,10 +16,13 @@ RUN ./gradlew bootJar -x test --no-daemon
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-RUN addgroup -S atletismo && adduser -S atletismo -G atletismo
+RUN addgroup -S atletismo && adduser -S atletismo -G atletismo && \
+    mkdir -p /app/uploads/fotos && \
+    chown -R atletismo:atletismo /app
+
 USER atletismo
 
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build --chown=atletismo:atletismo /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
 
