@@ -88,7 +88,10 @@
                     android:id="@+id/avatarCircle"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
-                    android:background="@drawable/bg_avatar">
+                    android:background="@drawable/bg_avatar"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackgroundBorderless">
                     <TextView
                         android:id="@+id/tvAvatar"
                         android:layout_width="match_parent"
@@ -97,6 +100,13 @@
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/colorOnPrimary" />
+                    <ImageView
+                        android:id="@+id/ivAvatar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        android:contentDescription="Foto de perfil" />
                 </FrameLayout>
             </LinearLayout>
 

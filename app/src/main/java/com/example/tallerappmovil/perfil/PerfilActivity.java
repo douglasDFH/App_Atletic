@@ -106,6 +106,7 @@ public class PerfilActivity extends AppCompatActivity {
                                 tvEmail.setText(p.getEmail());
                             }
                             session.saveGrupo(p.getGrupoId(), p.getGrupoNombre());
+                            session.saveFotoUrl(p.getFotoUrl());
                             mostrarDatosLocales(nombre, session.getUserRole());
                             cargarFoto(p.getFotoUrl());
                         }

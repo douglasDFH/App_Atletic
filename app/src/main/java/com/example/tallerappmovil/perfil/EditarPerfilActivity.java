@@ -201,7 +201,9 @@ public class EditarPerfilActivity extends AppCompatActivity {
                         public void onResponse(Call<PerfilUsuario> call, Response<PerfilUsuario> r) {
                             progressBar.setVisibility(View.GONE);
                             if (r.isSuccessful() && r.body() != null) {
-                                cargarFoto(r.body().getFotoUrl());
+                                String url = r.body().getFotoUrl();
+                                new SessionManager(EditarPerfilActivity.this).saveFotoUrl(url);
+                                cargarFoto(url);
                                 Toast.makeText(EditarPerfilActivity.this,
                                         getString(R.string.msg_foto_actualizada), Toast.LENGTH_SHORT).show();
                                 setResult(RESULT_OK);

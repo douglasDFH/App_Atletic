@@ -12,6 +12,7 @@ public class SessionManager {
     private static final String KEY_EMAIL     = "user_email";
     private static final String KEY_GRUPO_ID  = "user_grupo_id";
     private static final String KEY_GRUPO_NOM = "user_grupo_nombre";
+    private static final String KEY_FOTO_URL  = "user_foto_url";
 
     private final SharedPreferences prefs;
 
@@ -59,6 +60,18 @@ public class SessionManager {
         else ed.remove(KEY_GRUPO_ID);
         ed.putString(KEY_GRUPO_NOM, grupoNombre != null ? grupoNombre : "");
         ed.apply();
+    }
+
+    public String getFotoUrl() {
+        return prefs.getString(KEY_FOTO_URL, null);
+    }
+
+    public void saveFotoUrl(String url) {
+        if (url != null && !url.isEmpty()) {
+            prefs.edit().putString(KEY_FOTO_URL, url).apply();
+        } else {
+            prefs.edit().remove(KEY_FOTO_URL).apply();
+        }
     }
 
     public void clearSession() {
