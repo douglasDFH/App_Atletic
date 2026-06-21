@@ -1450,6 +1450,42 @@ Entrenador crea sesión
 - Bottom navigation funcional con las 5 tabs
 - Clic en avatar → `PerfilActivity`
 
+### 9.6 Gráfica de Evolución de Marcas (MPAndroidChart) — 2026-06-21
+
+**Objetivo:** Reemplazar la vista placeholder de `EvolucionMarcasActivity` con una gráfica de línea real usando la biblioteca MPAndroidChart v3.1.0.
+
+**Dependencias agregadas:**
+
+| Archivo | Cambio |
+|---|---|
+| `settings.gradle` | Añadido repositorio `maven { url 'https://jitpack.io' }` bajo `dependencyResolutionManagement.repositories` |
+| `app/build.gradle` | Añadida dependencia `com.github.PhilJay:MPAndroidChart:v3.1.0` |
+
+**Cambios en layout `activity_evolucion_marcas.xml`:**
+- Eliminado el `FrameLayout` contenedor antiguo
+- Añadidos `ProgressBar` (id=`progressBar`) y `tvVacio` como hijos directos del `LinearLayout` raíz
+- Añadido `NestedScrollView` (id=`scrollContent`, weight=1) que contiene:
+  - `com.github.mikephil.charting.charts.LineChart` (id=`lineChart`, altura 220dp)
+  - Etiqueta "HISTORIAL"
+  - `RecyclerView` (id=`recyclerEvolucion`, nestedScrollingEnabled=false)
+- Card de estadísticas (id=`layoutStats`) con: MEJOR MARCA, TOTAL REGISTROS, PRIMERA MARCA, ÚLTIMA MARCA + indicador de tendencia (↑/→/↓)
+
+**Reescritura de `EvolucionMarcasActivity.java`:**
+
+| Método | Descripción |
+|---|---|
+| `configurarGrafica()` | Configura `LineChart`: fondo transparente, sin descripción ni leyenda, ejes con colores del tema dark, cuadrícula gris (`colorBorder`), eje Y derecho desactivado, formateador de eje X con fechas dd/MM |
+| `cargarMarcas(disciplina)` | Llama API (con o sin `atletaId`), ordena por fecha ASC, oculta `layoutStats`+`scrollContent` mientras carga, muestra `tvVacio` si lista vacía |
+| `poblarGrafica()` | Crea `Entry` objects con índice como X y valor numérico como Y; construye `LineDataSet` con color teal (`colorPrimary`), modo CUBIC_BEZIER, relleno debajo con alpha 30, valores formateados con unidad |
+| `calcularStats()` | Calcula y muestra: mejor marca (buscando `isEsMejorMarca()`), total registros, primera y última marca, tendencia con colores: teal=mejora, rojo=baja, gris=igual |
+
+**Resultado visual:**
+- Al cargar datos: estadísticas en cards → gráfica animada (animateX 600ms) → historial en lista timeline
+- Gráfica interactiva: zoom, drag, pinch-to-zoom
+- Línea teal sobre fondo oscuro con círculos en cada punto y relleno semitransparente
+- Eje X con etiquetas de fecha dd/MM (máx 6 visibles)
+- Eje Y con valores de la marca + líneas de guía grises
+
 ---
 
 ## Pendiente (Capítulo 6 + Secciones Finales)
