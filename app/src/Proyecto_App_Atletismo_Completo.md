@@ -1376,6 +1376,51 @@ Control de roles por endpoint: `@PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')"
 
 ---
 
+### 9.4 Push Notifications FCM — 2026-06-21
+
+**Objetivo:** Que los atletas reciban notificaciones push reales cuando el entrenador crea, modifica o cancela una sesión, y cuando se publica una nueva competencia.
+
+**Archivos del backend modificados/creados:**
+
+| Archivo | Tipo | Cambio |
+|---|---|---|
+| `backend/build.gradle` | Config | Añadida dependencia `com.google.firebase:firebase-admin:9.2.0` |
+| `backend/src/main/resources/serviceAccountKey.json` | Credencial | Clave privada Firebase (en `.gitignore`, no se sube al repo) |
+| `config/FirebaseConfig.java` | Nuevo | Inicializa Firebase Admin SDK al arrancar Spring Boot con `@PostConstruct` |
+| `notificacion/FcmService.java` | Nuevo | Envía push a un token FCM individual; errores son silenciosos (log warn) |
+| `notificacion/NotificacionService.java` | Modificado | `crear()` ahora guarda en BD Y llama a `FcmService.sendToToken()`; `crearParaTodos()` delega a `crear()` |
+| `sesion/SesionService.java` | Modificado | `crear()`, `editar()` y `cancelar()` llaman a `notificarGrupo()` que notifica a todos los atletas del grupo |
+| `competencia/CompetenciaService.java` | Modificado | `crear()` notifica a todos los atletas activos al publicar una nueva competencia |
+| `.gitignore` | Config | Añadido `serviceAccountKey.json` |
+
+**Archivo del cliente:**
+- `google-services.json` colocado en `app/google-services.json` (en `.gitignore`, no se sube)
+- `PushNotificationService.java` ya estaba implementado — recibe push y los muestra como notificación del sistema
+- `build.gradle` ya tenía `firebase-messaging` — sin cambios necesarios
+
+**Flujo completo:**
+```
+Entrenador crea sesión
+  → SesionService.crear()
+    → notificarGrupo(grupoId)
+      → por cada atleta del grupo:
+        → NotificacionService.crear(atleta, "SESION", titulo, mensaje)
+          → guarda Notificacion en BD  ← atleta ve en NotificacionesActivity
+          → FcmService.sendToToken(atleta.fcmToken, titulo, mensaje)
+            → Firebase Cloud Messaging
+              → PushNotificationService.onMessageReceived()  ← atleta recibe push
+```
+
+**Eventos que disparan notificaciones:**
+| Evento | Destinatarios | Tipo |
+|---|---|---|
+| Entrenador crea sesión | Atletas del grupo | `SESION` |
+| Entrenador edita sesión | Atletas del grupo | `SESION` |
+| Entrenador cancela sesión | Atletas del grupo | `CANCELACION` |
+| Entrenador crea competencia | Todos los atletas activos | `COMPETENCIA` |
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**

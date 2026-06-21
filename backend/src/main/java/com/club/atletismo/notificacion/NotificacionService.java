@@ -19,6 +19,7 @@ public class NotificacionService {
     private final NotificacionRepository notificacionRepository;
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
+    private final FcmService fcmService;
 
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -44,15 +45,7 @@ public class NotificacionService {
 
     @Transactional
     public void crearParaTodos(String tipo, String titulo, String mensaje) {
-        usuarioRepository.findAll().forEach(u -> {
-            Notificacion n = Notificacion.builder()
-                    .usuario(u)
-                    .tipo(tipo)
-                    .titulo(titulo)
-                    .mensaje(mensaje)
-                    .build();
-            notificacionRepository.save(n);
-        });
+        usuarioRepository.findAll().forEach(u -> crear(u, tipo, titulo, mensaje));
     }
 
     @Transactional
@@ -64,6 +57,7 @@ public class NotificacionService {
                 .mensaje(mensaje)
                 .build();
         notificacionRepository.save(n);
+        fcmService.sendToToken(usuario.getFcmToken(), titulo, mensaje);
     }
 
     private NotificacionDto toDto(Notificacion n) {

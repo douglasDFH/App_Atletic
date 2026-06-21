@@ -2,7 +2,10 @@ package com.club.atletismo.competencia;
 
 import com.club.atletismo.competencia.dto.CompetenciaRequest;
 import com.club.atletismo.competencia.dto.CompetenciaResponse;
+import com.club.atletismo.notificacion.NotificacionService;
+import com.club.atletismo.usuario.Rol;
 import com.club.atletismo.usuario.Usuario;
+import com.club.atletismo.usuario.UsuarioRepository;
 import com.club.atletismo.usuario.UsuarioService;
 import com.club.atletismo.usuario.dto.AtletaInfoDto;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,8 @@ public class CompetenciaService {
 
     private final CompetenciaRepository competenciaRepository;
     private final UsuarioService usuarioService;
+    private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
     @Transactional(readOnly = true)
     public List<CompetenciaResponse> listar(String estado) {
@@ -47,7 +52,12 @@ public class CompetenciaService {
                 .descripcion(req.getDescripcion())
                 .estado(EstadoCompetencia.PROXIMO)
                 .build();
-        return toResponse(competenciaRepository.save(c), usuarioService.getUsuarioActual());
+        CompetenciaResponse resp = toResponse(competenciaRepository.save(c), usuarioService.getUsuarioActual());
+        usuarioRepository.findByRolAndActivo(Rol.ATLETA, true)
+                .forEach(u -> notificacionService.crear(u, "COMPETENCIA",
+                        "Nueva competencia: " + req.getNombre(),
+                        req.getDisciplina() + " · " + req.getFechaEvento() + " en " + req.getLugar()));
+        return resp;
     }
 
     @Transactional

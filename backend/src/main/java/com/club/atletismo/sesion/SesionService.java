@@ -2,8 +2,12 @@ package com.club.atletismo.sesion;
 
 import com.club.atletismo.grupo.Grupo;
 import com.club.atletismo.grupo.GrupoRepository;
+import com.club.atletismo.notificacion.NotificacionService;
 import com.club.atletismo.sesion.dto.SesionRequest;
 import com.club.atletismo.sesion.dto.SesionResponse;
+import com.club.atletismo.usuario.Rol;
+import com.club.atletismo.usuario.Usuario;
+import com.club.atletismo.usuario.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +25,8 @@ public class SesionService {
 
     private final SesionRepository sesionRepository;
     private final GrupoRepository grupoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -47,7 +53,13 @@ public class SesionService {
                 .descripcion(req.getDescripcion())
                 .estado(EstadoSesion.PROGRAMADA)
                 .build();
-        return toResponse(sesionRepository.save(s));
+        SesionResponse resp = toResponse(sesionRepository.save(s));
+        notificarGrupo(g.getId(), "SESION",
+                "Nueva sesión programada",
+                "Sesión el " + s.getHoraInicio().format(DATE) + " a las " +
+                s.getHoraInicio().format(DateTimeFormatter.ofPattern("HH:mm")) +
+                " en " + s.getLugar());
+        return resp;
     }
 
     @Transactional
@@ -61,7 +73,11 @@ public class SesionService {
         s.setHoraFin(LocalDateTime.parse(req.getHoraFin(), DT));
         s.setLugar(req.getLugar());
         s.setDescripcion(req.getDescripcion());
-        return toResponse(sesionRepository.save(s));
+        SesionResponse resp = toResponse(sesionRepository.save(s));
+        notificarGrupo(g.getId(), "SESION",
+                "Sesión modificada",
+                "La sesión del " + s.getHoraInicio().format(DATE) + " fue actualizada — " + s.getLugar());
+        return resp;
     }
 
     @Transactional
@@ -69,8 +85,20 @@ public class SesionService {
         SesionEntrenamiento s = sesionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada"));
         s.setEstado(EstadoSesion.CANCELADA);
-        s.setMotivoCancelacion(body.get("motivo"));
-        return toResponse(sesionRepository.save(s));
+        String motivo = body.get("motivo");
+        s.setMotivoCancelacion(motivo);
+        SesionResponse resp = toResponse(sesionRepository.save(s));
+        notificarGrupo(s.getGrupo().getId(), "CANCELACION",
+                "Sesión cancelada",
+                "La sesión del " + s.getHoraInicio().format(DATE) + " fue cancelada" +
+                (motivo != null && !motivo.isBlank() ? ": " + motivo : ""));
+        return resp;
+    }
+
+    private void notificarGrupo(Long grupoId, String tipo, String titulo, String mensaje) {
+        usuarioRepository.findByRolAndActivo(Rol.ATLETA, true).stream()
+                .filter(u -> u.getGrupo() != null && u.getGrupo().getId().equals(grupoId))
+                .forEach(u -> notificacionService.crear(u, tipo, titulo, mensaje));
     }
 
     @Transactional
