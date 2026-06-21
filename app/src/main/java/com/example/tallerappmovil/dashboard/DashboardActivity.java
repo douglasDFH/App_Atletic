@@ -54,6 +54,7 @@ public class DashboardActivity extends AppCompatActivity {
 
     private TextView tvAvatar;
     private ImageView ivAvatar;
+    private TextView tvSaludo;
 
     private ActividadRecenteAdapter actividadAdapter;
     private TextView tvSinActividad;
@@ -73,17 +74,13 @@ public class DashboardActivity extends AppCompatActivity {
         String rol    = session.getUserRole();
         esEntrenador  = "ENTRENADOR".equals(rol) || "ADMIN".equals(rol);
 
-        TextView tvSaludo    = findViewById(R.id.tvSaludo);
+        tvSaludo  = findViewById(R.id.tvSaludo);
         TextView tvSubtitulo = findViewById(R.id.tvSubtitulo);
         tvAvatar  = findViewById(R.id.tvAvatar);
         ivAvatar  = findViewById(R.id.ivAvatar);
 
-        String firstName = nombre.contains(" ") ? nombre.split(" ")[0] : nombre;
-        tvSaludo.setText("Hola, " + firstName + " 👋");
         tvSubtitulo.setText(esEntrenador ? "Panel del Entrenador" : "Club Atlético Santa Cruz");
-        if (!nombre.isEmpty()) {
-            tvAvatar.setText(String.valueOf(nombre.charAt(0)).toUpperCase());
-        }
+        actualizarSaludo(nombre);
 
         // Navegar a perfil al tocar el avatar
         findViewById(R.id.avatarCircle).setOnClickListener(v ->
@@ -186,8 +183,10 @@ public class DashboardActivity extends AppCompatActivity {
         nav.setSelectedItemId(R.id.nav_inicio);
         loadStats();
         loadNotifBadge();
-        // Refrescar foto por si cambió en PerfilActivity
-        String cachedFoto = new SessionManager(this).getFotoUrl();
+        // Refrescar nombre y foto por si cambiaron en PerfilActivity
+        SessionManager session = new SessionManager(this);
+        actualizarSaludo(session.getUserName());
+        String cachedFoto = session.getFotoUrl();
         if (cachedFoto != null) mostrarFotoAvatar(cachedFoto);
     }
 
@@ -198,12 +197,24 @@ public class DashboardActivity extends AppCompatActivity {
                     public void onResponse(Call<PerfilUsuario> call, Response<PerfilUsuario> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             PerfilUsuario p = response.body();
-                            new SessionManager(DashboardActivity.this).saveFotoUrl(p.getFotoUrl());
+                            SessionManager sm = new SessionManager(DashboardActivity.this);
+                            sm.saveFotoUrl(p.getFotoUrl());
+                            if (p.getNombreCompleto() != null) {
+                                sm.saveUserName(p.getNombreCompleto());
+                                actualizarSaludo(p.getNombreCompleto());
+                            }
                             mostrarFotoAvatar(p.getFotoUrl());
                         }
                     }
                     @Override public void onFailure(Call<PerfilUsuario> call, Throwable t) {}
                 });
+    }
+
+    private void actualizarSaludo(String nombre) {
+        if (nombre == null || nombre.isEmpty()) return;
+        String firstName = nombre.contains(" ") ? nombre.split(" ")[0] : nombre;
+        tvSaludo.setText("Hola, " + firstName + " 👋");
+        tvAvatar.setText(String.valueOf(nombre.charAt(0)).toUpperCase());
     }
 
     private void mostrarFotoAvatar(String url) {
