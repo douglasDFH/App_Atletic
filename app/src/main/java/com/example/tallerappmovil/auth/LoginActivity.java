@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.tallerappmovil.BuildConfig;
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
+import com.example.tallerappmovil.dashboard.AtletaDashboardActivity;
 import com.example.tallerappmovil.dashboard.DashboardActivity;
 import com.example.tallerappmovil.model.LoginRequest;
 import com.example.tallerappmovil.model.TokenResponse;
@@ -122,7 +123,9 @@ public class LoginActivity extends AppCompatActivity {
 
     private void redirectToDashboard(String rol, String nombre) {
         enviarFcmTokenAlServidor();
-        Intent intent = new Intent(this, DashboardActivity.class);
+        boolean esEntrenador = "ENTRENADOR".equals(rol) || "ADMIN".equals(rol);
+        Class<?> destino = esEntrenador ? DashboardActivity.class : AtletaDashboardActivity.class;
+        Intent intent = new Intent(this, destino);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

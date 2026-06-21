@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -14,17 +14,17 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="20dp">
 
-            <!-- Header navy -->
+            <!-- Header: saludo + campanita + avatar -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:background="@color/colorSurface"
-                android:padding="24dp"
-                android:paddingTop="48dp">
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="20dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -33,27 +33,64 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tvSaludo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/lbl_panel_atleta"
-                        android:textSize="13sp"
-                        android:textColor="@color/colorTextSecondary" />
-
-                    <TextView
-                        android:id="@+id/tvBienvenido"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Bienvenido"
+                        android:text="Hola 👋"
                         android:textSize="22sp"
                         android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary"
-                        android:layout_marginTop="4dp" />
+                        android:textColor="@color/colorTextPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Club Atlético Santa Cruz"
+                        android:textSize="13sp"
+                        android:textColor="@color/colorTextSecondary"
+                        android:layout_marginTop="2dp" />
                 </LinearLayout>
 
+                <!-- Campanita con badge -->
                 <FrameLayout
+                    android:id="@+id/btnNotificaciones"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/bg_avatar"
+                    android:backgroundTint="@color/colorSurfaceVariant">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="🔔"
+                        android:textSize="17sp" />
+                    <TextView
+                        android:id="@+id/tvBadgeNotif"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="2dp"
+                        android:background="@drawable/bg_avatar"
+                        android:backgroundTint="@color/colorCancelled"
+                        android:gravity="center"
+                        android:textSize="9sp"
+                        android:textColor="@color/colorTextPrimary"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+                </FrameLayout>
+
+                <!-- Avatar con foto -->
+                <FrameLayout
+                    android:id="@+id/avatarCircle"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
-                    android:background="@drawable/bg_avatar">
+                    android:background="@drawable/bg_avatar"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackgroundBorderless">
                     <TextView
                         android:id="@+id/tvAvatar"
                         android:layout_width="match_parent"
@@ -62,91 +99,206 @@
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/colorOnPrimary" />
+                    <ImageView
+                        android:id="@+id/ivAvatar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        android:contentDescription="Foto de perfil" />
                 </FrameLayout>
             </LinearLayout>
 
-            <!-- Contenido -->
+            <!-- Stats: próxima sesión y competencia -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="MÓDULOS"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorTextSecondary"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.1"
-                    android:layout_marginBottom="12dp" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
-
-                    <LinearLayout
-                        android:id="@+id/cardAgenda"
-                        android:layout_width="0dp"
-                        android:layout_height="100dp"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:background="@drawable/bg_card_stat"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📅" android:textSize="28sp" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lbl_agenda" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/cardHistorial"
-                        android:layout_width="0dp"
-                        android:layout_height="100dp"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:background="@drawable/bg_card_stat"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📊" android:textSize="28sp" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lbl_mi_historial" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/cardCompetencias"
-                        android:layout_width="0dp"
-                        android:layout_height="100dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_card_stat"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🏆" android:textSize="28sp" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lbl_competencias" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
-                    </LinearLayout>
+                    android:id="@+id/cardProxSesion"
+                    android:layout_width="0dp"
+                    android:layout_height="90dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_card_stat"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PRÓX. SESIÓN"
+                        android:textSize="9sp"
+                        android:textColor="@color/colorTextSecondary"
+                        android:textAllCaps="true" />
+                    <TextView
+                        android:id="@+id/tvProxSesion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary" />
                 </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCerrarSesion"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:text="@string/btn_cerrar_sesion"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="@color/colorCancelled"
-                    android:layout_marginTop="24dp" />
-
+                <LinearLayout
+                    android:id="@+id/cardProxCompetencia"
+                    android:layout_width="0dp"
+                    android:layout_height="90dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_stat"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PRÓX. COMPETENCIA"
+                        android:textSize="9sp"
+                        android:textColor="@color/colorTextSecondary"
+                        android:textAllCaps="true" />
+                    <TextView
+                        android:id="@+id/tvProxCompetencia"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorTextPrimary" />
+                </LinearLayout>
             </LinearLayout>
+
+            <!-- Módulos -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MÓDULOS"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorTextSecondary"
+                android:textAllCaps="true"
+                android:letterSpacing="0.1"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="12dp" />
+
+            <!-- Fila 1: Agenda, Marcas, Evolución -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <LinearLayout
+                    android:id="@+id/cardAgenda"
+                    android:layout_width="0dp"
+                    android:layout_height="90dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_card_stat"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📅" android:textSize="24sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lbl_agenda" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cardMarcas"
+                    android:layout_width="0dp"
+                    android:layout_height="90dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_card_stat"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⏱️" android:textSize="24sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Mis Marcas" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cardEvolucion"
+                    android:layout_width="0dp"
+                    android:layout_height="90dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_stat"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📊" android:textSize="24sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Evolución" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Fila 2: Competencias, Ranking, Asistencia -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:id="@+id/cardCompetencias"
+                    android:layout_width="0dp"
+                    android:layout_height="90dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_card_stat"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🏆" android:textSize="24sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lbl_competencias" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cardRanking"
+                    android:layout_width="0dp"
+                    android:layout_height="90dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_card_stat"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🥇" android:textSize="24sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ranking" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cardAsistencia"
+                    android:layout_width="0dp"
+                    android:layout_height="90dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_stat"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="✅" android:textSize="24sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Asistencia" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

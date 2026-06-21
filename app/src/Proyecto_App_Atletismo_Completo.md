@@ -1421,6 +1421,37 @@ Entrenador crea sesión
 
 ---
 
+### 9.5 Dashboard del Atleta y enrutamiento por rol — 2026-06-21
+
+**Problema:** `AtletaDashboardActivity` era un placeholder sin funcionalidad real. `LoginActivity` enviaba a todos los usuarios a `DashboardActivity` sin importar el rol.
+
+**Cambios aplicados:**
+
+| Archivo | Cambio |
+|---|---|
+| `auth/LoginActivity.java` | `redirectToDashboard()` ahora enruta: ENTRENADOR/ADMIN → `DashboardActivity`, ATLETA/PADRE → `AtletaDashboardActivity` |
+| `res/layout/activity_atleta_dashboard.xml` | Rediseño completo: header con saludo dinámico + campanita con badge + avatar con foto; stats de próxima sesión y competencia; 6 cards de módulos (Agenda, Marcas, Evolución, Competencias, Ranking, Asistencia); bottom navigation |
+| `dashboard/AtletaDashboardActivity.java` | Reescritura completa con: `actualizarSaludo()`, `cargarFotoAvatar()` + Glide, `mostrarFotoAvatar()`, `loadNotifBadge()`, `cargarStats()` (próxima sesión + competencia), `setupBottomNav()`, `onResume()` para refrescar nombre/foto/badge |
+
+**Cards del atleta ahora conectados:**
+| Card | Destino |
+|---|---|
+| Agenda | `AgendaActivity` |
+| Mis Marcas | `MarcasActivity` |
+| Evolución | `EvolucionMarcasActivity` |
+| Competencias | `EventosActivity` |
+| Ranking | `RankingActivity` |
+| Asistencia | `HistorialAsistenciaActivity` |
+
+**Funcionalidades igualadas al dashboard del entrenador:**
+- Foto de perfil en avatar (Glide + CircleCrop, caché via SessionManager)
+- Saludo dinámico "Hola, Nombre 👋" que se actualiza en `onResume()`
+- Badge de notificaciones no leídas en campanita
+- Bottom navigation funcional con las 5 tabs
+- Clic en avatar → `PerfilActivity`
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**
