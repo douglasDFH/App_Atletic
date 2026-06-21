@@ -1233,6 +1233,149 @@ class RendimientoServiceTest {
 
 ---
 
+---
+
+## 9. Registro de Cambios — Implementación Real
+
+> Esta sección documenta el stack real utilizado y los cambios/correcciones aplicados durante el desarrollo, complementando el diseño teórico de los capítulos anteriores.
+
+### 9.1 Stack Real Implementado
+
+| Capa | Diseño original | Implementación real |
+|---|---|---|
+| Frontend móvil | React Native + Expo | Android nativo (Java + XML layouts) |
+| Cliente HTTP | Axios | Retrofit2 + OkHttp3 |
+| Estado global | Redux Toolkit | SharedPreferences (`SessionManager`) |
+| Imágenes | — | Glide 4.16.0 con `CircleCrop` |
+| Backend | Spring Boot 3.3 | Spring Boot 3.3.6 + Java 21 |
+| Base de datos | PostgreSQL 16 | PostgreSQL (prod) vía Coolify v4.1.2 |
+| Despliegue | Docker + Railway | Coolify v4.1.2 (auto-redeploy en push a master) |
+| URL producción | — | `http://xk30jfxsb0mt15cbvkxy0jsn.72.60.143.106.sslip.io` |
+| CI/CD | — | GitHub Actions → build APK → GitHub Release |
+
+---
+
+### 9.2 Cambios Aplicados — 2026-06-20
+
+#### 9.2.1 Foto de perfil en avatar del Dashboard
+
+**Problema:** El dashboard del entrenador mostraba la letra inicial ("E") en el círculo de avatar en lugar de la foto de perfil real.
+
+**Causa:** `activity_dashboard.xml` no contenía ningún `<ImageView>` dentro del `FrameLayout` del avatar, y `DashboardActivity` nunca llamaba a la API de perfil para obtener la `fotoUrl`.
+
+**Archivos modificados:**
+
+| Archivo | Cambio |
+|---|---|
+| `app/src/main/res/layout/activity_dashboard.xml` | Añadido `<ImageView android:id="@+id/ivAvatar">` dentro de `FrameLayout#avatarCircle`; atributos `clickable`, `focusable` y `foreground` selectable al FrameLayout |
+| `app/src/main/java/.../session/SessionManager.java` | Añadida constante `KEY_FOTO_URL`, métodos `getFotoUrl()` y `saveFotoUrl(String)` para caché en SharedPreferences |
+| `app/src/main/java/.../dashboard/DashboardActivity.java` | `tvAvatar`, `tvSaludo` promovidos a campos de clase; campo `ivAvatar` añadido; listener de click en `avatarCircle` → navega a `PerfilActivity`; métodos `cargarFotoAvatar()` y `mostrarFotoAvatar(String)` añadidos; `onResume()` carga foto cacheada y actualiza saludo |
+| `app/src/main/java/.../perfil/PerfilActivity.java` | Añadido `session.saveFotoUrl(p.getFotoUrl())` en `cargarPerfilApi()` |
+| `app/src/main/java/.../perfil/EditarPerfilActivity.java` | Añadido `new SessionManager(...).saveFotoUrl(url)` al subir foto exitosamente |
+
+**Fragmento clave — `DashboardActivity.java`:**
+```java
+private void cargarFotoAvatar() {
+    ApiClient.getUsuariosService().getPerfil()
+            .enqueue(new Callback<PerfilUsuario>() {
+                @Override
+                public void onResponse(Call<PerfilUsuario> call, Response<PerfilUsuario> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        PerfilUsuario p = response.body();
+                        SessionManager sm = new SessionManager(DashboardActivity.this);
+                        sm.saveFotoUrl(p.getFotoUrl());
+                        if (p.getNombreCompleto() != null) {
+                            sm.saveUserName(p.getNombreCompleto());
+                            actualizarSaludo(p.getNombreCompleto());
+                        }
+                        mostrarFotoAvatar(p.getFotoUrl());
+                    }
+                }
+                @Override public void onFailure(Call<PerfilUsuario> call, Throwable t) {}
+            });
+}
+
+private void mostrarFotoAvatar(String url) {
+    String fullUrl = ApiClient.resolveUrl(url);
+    if (fullUrl == null || ivAvatar == null) return;
+    ivAvatar.setVisibility(View.VISIBLE);
+    tvAvatar.setVisibility(View.GONE);
+    Glide.with(this).load(fullUrl).transform(new CircleCrop()).into(ivAvatar);
+}
+```
+
+---
+
+#### 9.2.2 Actualización del saludo al cambiar nombre en perfil
+
+**Problema:** Al cambiar el nombre en `PerfilActivity` y volver al dashboard, el saludo ("Hola, Nombre 👋") no se actualizaba.
+
+**Causa:** `tvSaludo` era variable local en `onCreate()`. Al volver de otra Activity, Android ejecuta `onResume()` (no `onCreate()`), por lo que la referencia era inaccesible.
+
+**Archivo modificado:** `DashboardActivity.java`
+- `tvSaludo` promovido a campo de clase
+- Añadido método `actualizarSaludo(String nombre)` que actualiza texto del saludo y letra del avatar
+- `onResume()` llama a `actualizarSaludo(session.getUserName())`
+
+```java
+private void actualizarSaludo(String nombre) {
+    if (nombre == null || nombre.isEmpty()) return;
+    String firstName = nombre.contains(" ") ? nombre.split(" ")[0] : nombre;
+    tvSaludo.setText("Hola, " + firstName + " 👋");
+    tvAvatar.setText(String.valueOf(nombre.charAt(0)).toUpperCase());
+}
+```
+
+---
+
+#### 9.2.3 Corrección de "Error de conexión" en Agenda y Competencias
+
+**Problema:** Las pantallas de Agenda y Competencias mostraban "Error de conexión" aunque la red era correcta.
+
+**Causa raíz:** `backend/src/main/resources/application-prod.yml` tiene `spring.jpa.open-in-view: false`. Hibernate cierra la sesión de BD tras cada transacción de repositorio. Los métodos de servicio sin `@Transactional` accedían a asociaciones lazy (`@ManyToOne`, `@ManyToMany`) fuera de la sesión Hibernate → `LazyInitializationException` → HTTP 500 → "error de conexión" en la app.
+
+**Solución:** Añadir `@Transactional(readOnly = true)` a 14 métodos de lectura en 6 servicios del backend.
+
+| Servicio | Métodos corregidos | Asociación lazy |
+|---|---|---|
+| `SesionService.java` | `listarPorSemana()` | `s.getGrupo().getNombre()` (`@ManyToOne`) |
+| `CompetenciaService.java` | `listar()`, `getDetalle()`, `getInscritos()` | `c.getInscritos()` (`@ManyToMany Set<Usuario>`) |
+| `UsuarioService.java` | `getPerfil()`, `getAtletas()`, `getAtleta()` | `u.getGrupo().getNombre()` (`@ManyToOne`) |
+| `GrupoService.java` | `listar()`, `getDetalle()` | Asociaciones atleta-grupo |
+| `AsistenciaService.java` | `getAsistenciaSesion()`, `getMiHistorial()`, `getHistorialAtleta()`, `getReporte()` | `s.getGrupo().getNombre()`, `u.getGrupo().getId()` |
+| `MarcaService.java` | `getMarcas()` | `m.getAtleta().getId()`, `m.getAtleta().getNombreCompleto()` |
+
+**Total:** 14 métodos corregidos en 6 servicios. El backend se redespliega automáticamente en Coolify al hacer push a master.
+
+---
+
+### 9.3 Arquitectura de Seguridad Backend Real
+
+```java
+@Configuration
+@EnableMethodSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+    private final JwtAuthFilter jwtAuthFilter;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/auth/**", "/uploads/**").permitAll()
+                .anyRequest().authenticated())
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
+    }
+}
+```
+
+Control de roles por endpoint: `@PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")` en controladores que requieren permisos elevados.
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**
