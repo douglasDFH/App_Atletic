@@ -95,7 +95,9 @@ public class DashboardActivity extends AppCompatActivity {
         if (esEntrenador) {
             cardAtletas.setClickable(true);
             cardAtletas.setFocusable(true);
-            cardAtletas.setForeground(getDrawable(android.R.attr.selectableItemBackground));
+            android.util.TypedValue tv = new android.util.TypedValue();
+            getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true);
+            cardAtletas.setForeground(getDrawable(tv.resourceId));
             cardAtletas.setOnClickListener(v ->
                     startActivity(new Intent(this, AtletasActivity.class)));
 
