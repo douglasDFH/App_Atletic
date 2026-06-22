@@ -32,6 +32,11 @@ jwt:
 server:
   port: 8080
 
+management:
+  health:
+    mail:
+      enabled: false
+
 logging:
   level:
     com.club.atletismo: DEBUG

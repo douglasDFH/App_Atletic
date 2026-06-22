@@ -38,6 +38,20 @@ jwt:
 server:
   port: ${PORT:8080}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+  health:
+    # El indicador de mail intenta conectar a Gmail SMTP; sin credenciales da DOWN
+    # y tumbaba /actuator/health a 503 → fallaba el healthcheck del contenedor.
+    mail:
+      enabled: false
+
 app:
   reset-url-scheme: ${RESET_URL_SCHEME:atletismo://reset}
 

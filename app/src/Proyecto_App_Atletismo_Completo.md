@@ -1692,6 +1692,39 @@ El commit de recuperación de contraseña agregó la navegación a `ResetPasswor
 
 ---
 
+### 9.12 Healthcheck 503 por indicador de mail en /actuator/health — 2026-06-22
+
+**Avance respecto a los anteriores:** tras los fixes 9.10 (Firebase) y 9.11 (YAML), el backend **ya arranca y escucha** en el puerto 8080. El healthcheck dejó de dar `Connection refused` y pasó a `HTTP/1.1 503` — es decir, la app responde pero el endpoint de salud reporta DOWN.
+
+**Healthcheck del Dockerfile:**
+```dockerfile
+HEALTHCHECK ... CMD wget -qO- http://localhost:8080/actuator/health || exit 1
+```
+
+**Causa:** El proyecto usa `spring-boot-starter-actuator` sin configuración `management`, por lo que **todos** los health indicators están activos por defecto. Al haberse añadido `spring.mail` (config de Gmail), Spring Boot auto-registró el `MailHealthIndicator`, que en cada llamada a `/actuator/health` intenta conectar a `smtp.gmail.com:587`. Sin `MAIL_USERNAME`/`MAIL_PASSWORD` configuradas en Coolify, la conexión falla → `mail` = DOWN → estado global DOWN → **HTTP 503** → healthcheck falla → rollback. (El stack trace en los logs mostraba la excepción SMTP dentro del hilo de la petición a `/actuator/health`, confirmando el origen.)
+
+**Solución — desactivar el health indicator de mail:**
+
+| Archivo | Cambio |
+|---|---|
+| `application-prod.yml` | Bloque `management` con `management.health.mail.enabled: false` (+ `endpoints.web.exposure.include: health,info`, `endpoint.health.show-details: never`) |
+| `application.yml` | Mismo `management.health.mail.enabled: false` para dev |
+
+El indicador `db` sigue activo (sí es señal válida de liveness: si la BD cae, la app debe reportarse no-sana). Que Gmail SMTP sea alcanzable NO debe decidir la salud del contenedor.
+
+**Resultado:** `/actuator/health` responde `200 UP` (db/diskSpace/ping UP, mail ya no evaluado) → healthcheck pasa → sin rollback.
+
+**Cadena completa de errores resuelta (commits 65accd4 → 9.12):**
+1. XML namespace en `activity_reset_password.xml` → APK no compilaba (CI)
+2. `serviceAccountKey.json` ausente → crash backend (Coolify)
+3. Clave `spring:` duplicada en YAML → crash backend (Coolify)
+4. Import `Intent` faltante → APK no compilaba (CI)
+5. `MailHealthIndicator` → `/actuator/health` 503 → healthcheck falla (Coolify)
+
+Todos originados en los commits de FCM (`18f383c`) y forgot-password (`e78bf29`) subidos sin compilar/desplegar localmente.
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**
