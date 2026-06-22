@@ -5,6 +5,7 @@ import com.club.atletismo.usuario.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,5 +56,28 @@ public class UsuarioController {
     @GetMapping("/api/v1/atletas/{id}")
     public ResponseEntity<AtletaDetalleDto> getAtleta(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.getAtleta(id));
+    }
+
+    // ---- Gestión de vínculo PADRE/Tutor ↔ atleta (solo entrenador/admin) ----
+
+    @GetMapping("/api/v1/padres")
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
+    public ResponseEntity<List<PadreDto>> getPadres() {
+        return ResponseEntity.ok(usuarioService.getPadres());
+    }
+
+    @PutMapping("/api/v1/padres/{padreId}/hijo/{atletaId}")
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> vincularHijo(@PathVariable Long padreId,
+                                                          @PathVariable Long atletaId) {
+        usuarioService.vincularHijo(padreId, atletaId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @DeleteMapping("/api/v1/padres/{padreId}/hijo")
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> desvincularHijo(@PathVariable Long padreId) {
+        usuarioService.desvincularHijo(padreId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
     }
 }

@@ -26,12 +26,14 @@ public class MarcaService {
 
     @Transactional(readOnly = true)
     public List<MarcaResponse> getMarcas(Long atletaId, String disciplina) {
-        // Un atleta/padre solo puede ver SUS propias marcas, sin importar el filtro
-        // de disciplina ni cualquier atletaId recibido (evita fuga de marcas ajenas).
+        // Un atleta solo ve SUS propias marcas; un padre ve las de su hijo vinculado.
+        // Se ignora cualquier atletaId/disciplina recibido para evitar fuga de marcas ajenas.
         Usuario actual = usuarioService.getUsuarioActual();
         String rol = actual.getRol().name();
-        if ("ATLETA".equals(rol) || "PADRE".equals(rol)) {
+        if ("ATLETA".equals(rol)) {
             atletaId = actual.getId();
+        } else if ("PADRE".equals(rol)) {
+            atletaId = actual.getAtletaVinculado() != null ? actual.getAtletaVinculado().getId() : -1L;
         }
 
         List<MarcaPersonal> lista;

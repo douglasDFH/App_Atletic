@@ -7,7 +7,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Collection;
 import java.util.List;
 
@@ -38,9 +40,37 @@ public class Usuario implements UserDetails {
     private String fcmToken;
     private String fotoUrl;
 
+    // Fecha de nacimiento del atleta (para calcular si es menor de edad)
+    private LocalDate fechaNacimiento;
+
+    // Datos del tutor de emergencia (obligatorios si el atleta es menor) — protección de datos de menores
+    private String tutorNombre;
+    private String tutorParentesco;
+    private String tutorTelefono;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grupo_id")
     private Grupo grupo;
+
+    // Vínculo PADRE → atleta (hijo) que el padre/tutor puede observar. Solo aplica a rol PADRE.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "atleta_vinculado_id")
+    private Usuario atletaVinculado;
+
+    /** Edad en años a partir de la fecha de nacimiento (null si no hay fecha). */
+    @Transient
+    public Integer getEdad() {
+        return fechaNacimiento != null
+                ? Period.between(fechaNacimiento, LocalDate.now()).getYears()
+                : null;
+    }
+
+    /** True si el atleta es menor de 18 años (mayoría de edad en Bolivia). */
+    @Transient
+    public boolean isMenorDeEdad() {
+        Integer edad = getEdad();
+        return edad != null && edad < 18;
+    }
 
     @Builder.Default
     @Column(nullable = false)

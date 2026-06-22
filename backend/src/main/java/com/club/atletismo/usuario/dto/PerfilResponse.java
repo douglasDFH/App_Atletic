@@ -17,4 +17,8 @@ public class PerfilResponse {
     private Long grupoId;
     private String grupoNombre;
     private String fotoUrl;
+
+    // Solo para rol PADRE: atleta (hijo) vinculado que observa
+    private Long atletaVinculadoId;
+    private String atletaVinculadoNombre;
 }

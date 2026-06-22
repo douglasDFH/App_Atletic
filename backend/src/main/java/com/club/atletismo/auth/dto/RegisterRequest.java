@@ -21,4 +21,13 @@ public class RegisterRequest {
 
     @Pattern(regexp = "ATLETA|PADRE", message = "Rol inválido")
     private String rol;
+
+    // Datos del atleta (opcionales en el DTO; el servicio valida según rol/edad)
+    private String fechaNacimiento;   // "2010-05-20"
+    private String disciplina;
+
+    // Datos del tutor — obligatorios si el atleta es menor de edad (se valida en AuthService)
+    private String tutorNombre;
+    private String tutorParentesco;
+    private String tutorTelefono;
 }

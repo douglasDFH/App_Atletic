@@ -10,4 +10,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByCorreo(String correo);
     List<Usuario> findByRol(Rol rol);
     List<Usuario> findByRolAndActivo(Rol rol, boolean activo);
+
+    // Cuenta PADRE vinculada a un atleta (hijo)
+    Optional<Usuario> findFirstByAtletaVinculadoId(Long atletaId);
 }

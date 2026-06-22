@@ -12,6 +12,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.Period;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -38,15 +41,49 @@ public class AuthService {
 
         Rol rol = request.getRol() != null ? Rol.valueOf(request.getRol()) : Rol.ATLETA;
 
-        Usuario usuario = Usuario.builder()
+        Usuario.UsuarioBuilder builder = Usuario.builder()
                 .nombreCompleto(request.getNombreCompleto())
                 .correo(request.getCorreo())
                 .contrasenaHash(passwordEncoder.encode(request.getContrasena()))
                 .rol(rol)
-                .activo(true)
-                .build();
+                .activo(true);
 
-        usuarioRepository.save(usuario);
+        // Datos del atleta (fecha de nacimiento + validación de menor de edad)
+        if (rol == Rol.ATLETA) {
+            LocalDate fechaNac = parseFechaNacimiento(request.getFechaNacimiento());
+            builder.fechaNacimiento(fechaNac)
+                   .disciplina(request.getDisciplina());
+
+            boolean esMenor = fechaNac != null
+                    && Period.between(fechaNac, LocalDate.now()).getYears() < 18;
+            if (esMenor) {
+                // Protección de datos de menores: el tutor es obligatorio (RF-01, HU-01, RNF-02)
+                if (isBlank(request.getTutorNombre())
+                        || isBlank(request.getTutorParentesco())
+                        || isBlank(request.getTutorTelefono())) {
+                    throw new IllegalArgumentException(
+                            "El atleta es menor de edad: se requieren nombre, parentesco y teléfono del tutor");
+                }
+                builder.tutorNombre(request.getTutorNombre())
+                       .tutorParentesco(request.getTutorParentesco())
+                       .tutorTelefono(request.getTutorTelefono());
+            }
+        }
+
+        usuarioRepository.save(builder.build());
+    }
+
+    private LocalDate parseFechaNacimiento(String fecha) {
+        if (isBlank(fecha)) return null;
+        try {
+            return LocalDate.parse(fecha);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Fecha de nacimiento inválida (formato esperado: AAAA-MM-DD)");
+        }
+    }
+
+    private boolean isBlank(String s) {
+        return s == null || s.isBlank();
     }
 
     public void forgotPassword(String correo) {

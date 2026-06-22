@@ -1900,6 +1900,46 @@ Auditoría exhaustiva de TODOS los requisitos (HU, RF, RNF, CU) contra el códig
 
 ---
 
+### 9.17 Rol PADRE/Tutor + protección de datos de menores — BACKEND — 2026-06-22
+
+Implementación del vínculo padre↔hijo y datos de tutor (RF-01, HU-01/12, RNF-02). Diseño acordado: **el entrenador vincula** (1 hijo por padre); **fecha de nacimiento + datos de tutor obligatorios si el atleta es menor**.
+
+**Modelo de datos (`Usuario`):**
+| Campo nuevo | Uso |
+|---|---|
+| `fechaNacimiento` (LocalDate) | Calcular si el atleta es menor de 18 |
+| `tutorNombre`, `tutorParentesco`, `tutorTelefono` | Contacto de emergencia del tutor (obligatorio si menor) |
+| `atletaVinculado` (ManyToOne self) | Hijo que observa una cuenta PADRE |
+| Helpers `getEdad()`, `isMenorDeEdad()` | `@Transient`, edad y mayoría de edad (Bolivia: 18) |
+
+Las columnas se crean automáticamente con `ddl-auto: update` al redeploy (no requiere migración manual).
+
+**Registro con validación de menor (`AuthService.register`):**
+- Si rol ATLETA: guarda `fechaNacimiento` y `disciplina`.
+- Si es **menor** y faltan `tutorNombre`/`tutorParentesco`/`tutorTelefono` → error 400 "se requieren datos del tutor". (Cumple CU-02 FA-03.)
+
+**Endpoints nuevos (solo ENTRENADOR/ADMIN):**
+| Método | Endpoint | Acción |
+|---|---|---|
+| GET | `/api/v1/padres` | Lista cuentas PADRE con su hijo vinculado |
+| PUT | `/api/v1/padres/{padreId}/hijo/{atletaId}` | Vincula padre↔hijo (valida roles) |
+| DELETE | `/api/v1/padres/{padreId}/hijo` | Desvincula |
+
+**El PADRE ve los datos de su HIJO (no los suyos):**
+- `MarcaService.getMarcas`: si rol PADRE → `atletaId = hijo.id` (sin hijo → vacío).
+- `AsistenciaService.getMiHistorial`: si rol PADRE → historial del hijo.
+- `PerfilResponse`: para PADRE devuelve `atletaVinculadoId/Nombre` y el `grupoId/grupoNombre` del **hijo** (así la Agenda filtra por el grupo del hijo).
+
+**DTOs ampliados:**
+- `AtletaDetalleDto`: + `fechaNacimiento, edad, esMenor, tutorNombre, tutorParentesco, tutorTelefono, tutorVinculadoId, tutorVinculadoNombre` (el entrenador ve el contacto de emergencia y qué padre está vinculado).
+- `PadreDto` (nuevo): id, nombre, email, hijoId, hijoNombre.
+
+**Protección de datos de menores (RNF-02):** los endpoints de gestión de padres y el detalle del atleta (con datos de tutor) están restringidos a ENTRENADOR/ADMIN; el padre solo accede a los datos de SU hijo vinculado.
+
+**Pendiente — APP (Android):** registro de atleta con fecha de nacimiento + datos de tutor si es menor; pantalla del entrenador para vincular padre↔hijo; dashboard del padre mostrando al hijo; mostrar contacto de tutor en el perfil del atleta (vista entrenador).
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**

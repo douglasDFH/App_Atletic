@@ -71,7 +71,11 @@ public class AsistenciaService {
     @Transactional(readOnly = true)
     public List<AsistenciaHistorialDto> getMiHistorial() {
         Usuario u = usuarioService.getUsuarioActual();
-        return asistenciaRepository.findByAtletaIdOrderBySesionHoraInicioDesc(u.getId())
+        // Un padre ve el historial de asistencia de su hijo vinculado
+        Long atletaId = u.getRol() == Rol.PADRE
+                ? (u.getAtletaVinculado() != null ? u.getAtletaVinculado().getId() : -1L)
+                : u.getId();
+        return asistenciaRepository.findByAtletaIdOrderBySesionHoraInicioDesc(atletaId)
                 .stream()
                 .map(this::toHistorialDto)
                 .collect(Collectors.toList());

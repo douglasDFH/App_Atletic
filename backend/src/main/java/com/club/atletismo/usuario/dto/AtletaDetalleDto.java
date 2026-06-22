@@ -14,4 +14,16 @@ public class AtletaDetalleDto {
     private String categoria;
     private String grupoNombre;
     private String estado;
+
+    // Datos de edad y tutor (contacto de emergencia / protección de datos de menores)
+    private String fechaNacimiento;
+    private Integer edad;
+    private boolean esMenor;
+    private String tutorNombre;
+    private String tutorParentesco;
+    private String tutorTelefono;
+
+    // Cuenta PADRE vinculada a este atleta (si existe)
+    private Long tutorVinculadoId;
+    private String tutorVinculadoNombre;
 }
