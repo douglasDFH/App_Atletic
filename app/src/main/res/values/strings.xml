@@ -41,7 +41,6 @@
 
     <!-- Registro: fecha de nacimiento y tutor de menor -->
     <string name="hint_fecha_nacimiento">Fecha de nacimiento</string>
-    <string name="hint_disciplina">Disciplina (opcional)</string>
     <string name="lbl_datos_tutor">Datos del tutor (atleta menor de edad)</string>
     <string name="lbl_datos_tutor_desc">Por ser menor de edad, se requieren los datos del tutor para emergencias.</string>
     <string name="hint_tutor_nombre">Nombre completo del tutor</string>
