@@ -1782,6 +1782,26 @@ Efecto colateral positivo: `EvolucionMarcasActivity` del atleta (que llama `getM
 
 ---
 
+### 9.15 Crear sesión fallaba tras activar Firebase — envío FCM síncrono — 2026-06-22
+
+**Síntoma:** Tras configurar `FIREBASE_CREDENTIALS` en Coolify, al **crear** una sesión (POST /sesiones) la app mostraba "error de conexión, verifique su internet". Los GET (ver grupos, agenda, marcas, competencias) funcionaban; solo fallaba el guardado.
+
+**Causa:** `SesionService.crear/editar/cancelar` y `CompetenciaService.crear` notifican al grupo dentro de su `@Transactional`. La cadena `notificarGrupo → NotificacionService.crear → FcmService.sendToToken` ejecutaba el envío push **de forma síncrona y bloqueante** (llamada de red a Firebase Cloud Messaging). Mientras Firebase estuvo deshabilitado, `sendToToken` retornaba de inmediato (sin init) y no había impacto. Al **activar Firebase**, el envío real se ejecuta: por cada atleta del grupo con `fcmToken` se hace un round-trip a FCM, alargando el POST hasta superar el timeout de OkHttp (10s) → "error de conexión".
+
+**Solución — push asíncrono:**
+| Archivo | Cambio |
+|---|---|
+| `notificacion/FcmService.java` | `sendToToken` anotado `@Async` → se ejecuta en un hilo aparte; el envío push nunca bloquea ni rompe la operación que lo dispara |
+| `config/FirebaseConfig.java` | Añadido `@EnableAsync` |
+
+Ahora crear/editar/cancelar sesión y crear competencia responden al instante (solo persistencia en BD); el push se entrega en segundo plano.
+
+**Segundo factor a vigilar — filtro de red sobre el dominio:** durante el diagnóstico se observó que un **control parental / filtro de contenido** bloqueaba las peticiones POST al dominio del backend (`...sslip.io` con IP cruda). Este tipo de dominio es frecuentemente bloqueado por controles parentales, antivirus, filtros DNS y operadoras móviles. Si "crear" sigue fallando en cierta red tras este fix, probar en otra red (datos móviles vs WiFi). **Solución de fondo recomendada: dominio propio + HTTPS** para el backend.
+
+**Bug menor detectado (no corregido aquí):** `GET /sesiones` sin el parámetro `semana` devuelve 500 (debería ser 400). La app siempre envía `semana`, así que no afecta el uso normal.
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**

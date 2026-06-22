@@ -5,12 +5,16 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class FcmService {
 
+    // Asíncrono: el envío push NUNCA debe bloquear ni romper la operación que lo dispara
+    // (crear/editar/cancelar sesión, crear competencia). Se ejecuta en un hilo aparte.
+    @Async
     public void sendToToken(String token, String titulo, String mensaje) {
         if (token == null || token.isBlank()) return;
         // Si Firebase no se inicializó (sin credencial), no intentar enviar:
