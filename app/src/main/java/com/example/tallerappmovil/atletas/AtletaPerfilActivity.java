@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,7 +19,10 @@ import com.example.tallerappmovil.asistencia.HistorialAsistenciaActivity;
 import com.example.tallerappmovil.marcas.MarcasAdapter;
 import com.example.tallerappmovil.model.AtletaDetalle;
 import com.example.tallerappmovil.model.MarcaPersonal;
+import com.example.tallerappmovil.model.PadreInfo;
+import com.google.android.material.button.MaterialButton;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -29,10 +34,13 @@ public class AtletaPerfilActivity extends AppCompatActivity {
     private TextView tvAvatarGrande, tvNombreCompleto, tvDisciplinaPerfil;
     private TextView tvCategoriaPerfil, tvGrupoPerfil;
     private TextView tvTotalMarcas, tvTotalPRs, tvSinMarcas;
+    private TextView tvTutorInfo, tvPadreVinculado;
+    private MaterialButton btnVincularPadre;
     private ProgressBar progressBar;
     private MarcasAdapter marcasAdapter;
 
     private Long atletaId;
+    private Long padreVinculadoId; // cuenta de padre actualmente vinculada a este atleta
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +62,12 @@ public class AtletaPerfilActivity extends AppCompatActivity {
         tvTotalMarcas     = findViewById(R.id.tvTotalMarcas);
         tvTotalPRs        = findViewById(R.id.tvTotalPRs);
         tvSinMarcas       = findViewById(R.id.tvSinMarcas);
+        tvTutorInfo       = findViewById(R.id.tvTutorInfo);
+        tvPadreVinculado  = findViewById(R.id.tvPadreVinculado);
+        btnVincularPadre  = findViewById(R.id.btnVincularPadre);
         progressBar       = findViewById(R.id.progressBar);
+
+        btnVincularPadre.setOnClickListener(v -> abrirDialogoVincular());
 
         // Muestra el nombre mientras carga el detalle completo
         if (nombreExtra != null) {
@@ -110,10 +123,100 @@ public class AtletaPerfilActivity extends AppCompatActivity {
                                 tvGrupoPerfil.setText(sep + d.getGrupoNombre());
                                 tvGrupoPerfil.setVisibility(View.VISIBLE);
                             }
+                            mostrarTutor(d);
                         }
                     }
                     @Override public void onFailure(Call<AtletaDetalle> call, Throwable t) {}
                 });
+    }
+
+    private void mostrarTutor(AtletaDetalle d) {
+        // Contacto de emergencia del tutor
+        if (d.getTutorNombre() != null && !d.getTutorNombre().isEmpty()) {
+            String parent = d.getTutorParentesco() != null ? " (" + d.getTutorParentesco() + ")" : "";
+            String tel = d.getTutorTelefono() != null ? "  ·  📞 " + d.getTutorTelefono() : "";
+            String menor = d.isEsMenor() ? "  ·  MENOR" : "";
+            tvTutorInfo.setText(d.getTutorNombre() + parent + tel + menor);
+        } else {
+            String edad = d.getEdad() != null ? d.getEdad() + " años" : "Sin fecha de nacimiento";
+            tvTutorInfo.setText(edad + (d.isEsMenor() ? "  ·  MENOR (sin datos de tutor)" : ""));
+        }
+
+        // Cuenta de padre/tutor vinculada
+        padreVinculadoId = d.getTutorVinculadoId();
+        if (d.getTutorVinculadoNombre() != null && !d.getTutorVinculadoNombre().isEmpty()) {
+            tvPadreVinculado.setText("Cuenta vinculada: " + d.getTutorVinculadoNombre());
+        } else {
+            tvPadreVinculado.setText(getString(R.string.lbl_sin_vinculo));
+        }
+    }
+
+    private void abrirDialogoVincular() {
+        ApiClient.getUsuariosService().getPadres().enqueue(new Callback<List<PadreInfo>>() {
+            @Override
+            public void onResponse(Call<List<PadreInfo>> call, Response<List<PadreInfo>> response) {
+                if (!response.isSuccessful() || response.body() == null || response.body().isEmpty()) {
+                    Toast.makeText(AtletaPerfilActivity.this,
+                            "No hay cuentas de padre/tutor registradas", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                mostrarSelectorPadres(response.body());
+            }
+            @Override
+            public void onFailure(Call<List<PadreInfo>> call, Throwable t) {
+                Toast.makeText(AtletaPerfilActivity.this,
+                        getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void mostrarSelectorPadres(List<PadreInfo> padres) {
+        List<PadreInfo> opciones = new ArrayList<>(padres);
+        List<String> labels = new ArrayList<>();
+        for (PadreInfo p : opciones) {
+            String yaTiene = p.getHijoNombre() != null ? "  (vinculado a " + p.getHijoNombre() + ")" : "";
+            labels.add(p.getNombreCompleto() + yaTiene);
+        }
+
+        AlertDialog.Builder b = new AlertDialog.Builder(this)
+                .setTitle(R.string.lbl_elegir_padre)
+                .setItems(labels.toArray(new String[0]), (dialog, which) ->
+                        vincular(opciones.get(which).getId()));
+
+        // Si ya hay una cuenta vinculada, permitir desvincular
+        if (padreVinculadoId != null) {
+            b.setNeutralButton(R.string.lbl_desvincular, (dialog, which) -> desvincular(padreVinculadoId));
+        }
+        b.setNegativeButton(android.R.string.cancel, null);
+        b.show();
+    }
+
+    private void vincular(Long padreId) {
+        ApiClient.getUsuariosService().vincularHijo(padreId, atletaId).enqueue(new Callback<Void>() {
+            @Override public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(AtletaPerfilActivity.this,
+                            getString(R.string.msg_vinculo_guardado), Toast.LENGTH_SHORT).show();
+                    cargarDetalle();
+                } else {
+                    Toast.makeText(AtletaPerfilActivity.this,
+                            getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(AtletaPerfilActivity.this,
+                        getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void desvincular(Long padreId) {
+        ApiClient.getUsuariosService().desvincularHijo(padreId).enqueue(new Callback<Void>() {
+            @Override public void onResponse(Call<Void> call, Response<Void> response) {
+                cargarDetalle();
+            }
+            @Override public void onFailure(Call<Void> call, Throwable t) {}
+        });
     }
 
     private void cargarMarcas() {

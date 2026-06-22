@@ -1938,7 +1938,9 @@ Las columnas se crean automáticamente con `ddl-auto: update` al redeploy (no re
 
 **APP (Android) — progreso:**
 - ✅ **Registro de atleta con fecha de nacimiento + datos de tutor si es menor** (`RegisterActivity`): selector de fecha, cálculo de edad, y si <18 muestra y **exige** nombre/parentesco/teléfono del tutor; envía todo en `RegisterRequest`. Para rol PADRE oculta estos campos.
-- ⏳ Pendiente: pantalla del entrenador para vincular padre↔hijo; dashboard del padre mostrando al hijo; mostrar contacto de tutor en el perfil del atleta (vista entrenador).
+- ✅ **Vínculo padre↔hijo desde el perfil del atleta (entrenador)** (`AtletaPerfilActivity`): muestra el **contacto de emergencia del tutor** (nombre/parentesco/teléfono, edad, si es menor) y la cuenta de padre vinculada; botón "Vincular cuenta de padre/tutor" → diálogo con la lista de padres (`GET /padres`) → `PUT /padres/{id}/hijo/{atletaId}`; opción de desvincular. API Android: `getPadres/vincularHijo/desvincularHijo`; modelos `PadreInfo`, `AtletaDetalle` ampliado.
+- ✅ **Dashboard del padre** (`AtletaDashboardActivity`): muestra "Viendo a: [hijo]" y, gracias al backend, sus pantallas (marcas, asistencia, agenda) ya muestran los datos del hijo vinculado. `PerfilUsuario` ampliado con `atletaVinculado*`.
+- ⏳ Pendiente menor: el rol PADRE comparte el `AtletaDashboardActivity`; las tarjetas que no apliquen al padre podrían ocultarse a futuro.
 
 ---
 

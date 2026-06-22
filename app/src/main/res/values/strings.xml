@@ -51,6 +51,9 @@
     <string name="err_fecha_nac_requerida">Selecciona la fecha de nacimiento</string>
     <!-- Vínculo padre-hijo (entrenador) -->
     <string name="lbl_vincular_hijo">Vincular hijo</string>
+    <string name="lbl_vincular_padre">Vincular cuenta de padre/tutor</string>
+    <string name="lbl_elegir_padre">Elegir cuenta de padre/tutor</string>
+    <string name="lbl_desvincular">Desvincular</string>
     <string name="lbl_padres_tutores">Padres / Tutores</string>
     <string name="msg_vinculo_guardado">Vínculo guardado</string>
     <string name="lbl_sin_vinculo">Sin hijo vinculado</string>

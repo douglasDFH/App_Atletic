@@ -143,7 +143,13 @@ public class AtletaDashboardActivity extends AppCompatActivity {
                             SessionManager sm = new SessionManager(AtletaDashboardActivity.this);
                             sm.saveFotoUrl(p.getFotoUrl());
                             // Cachear el grupo del atleta para que la Agenda pueda filtrar "Mi grupo"
+                            // (para un PADRE, el backend devuelve el grupo del hijo vinculado)
                             sm.saveGrupo(p.getGrupoId(), p.getGrupoNombre());
+                            // Si es PADRE, mostrar a qué hijo está observando
+                            if ("PADRE".equals(sm.getUserRole()) && p.getAtletaVinculadoNombre() != null) {
+                                TextView sub = findViewById(R.id.tvSubtituloAtleta);
+                                if (sub != null) sub.setText("Viendo a: " + p.getAtletaVinculadoNombre());
+                            }
                             if (p.getNombreCompleto() != null) {
                                 sm.saveUserName(p.getNombreCompleto());
                                 actualizarSaludo(p.getNombreCompleto());
