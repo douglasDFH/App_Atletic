@@ -27,8 +27,14 @@ public class ApiClient {
     private static Retrofit retrofit;
     private static String authToken = null;
 
+    // Evita relanzar LoginActivity varias veces si llegan 401 simultáneos.
+    // Se re-arma al iniciar una nueva sesión (setToken).
+    private static final java.util.concurrent.atomic.AtomicBoolean handlingUnauthorized =
+            new java.util.concurrent.atomic.AtomicBoolean(false);
+
     public static void setToken(String token) {
         authToken = token;
+        handlingUnauthorized.set(false);
     }
 
     public static void clearToken() {
@@ -44,12 +50,16 @@ public class ApiClient {
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(logging)
                     .addInterceptor(chain -> {
-                        Request.Builder builder = chain.request().newBuilder();
+                        Request original = chain.request();
+                        Request.Builder builder = original.newBuilder();
                         if (authToken != null) {
                             builder.addHeader("Authorization", "Bearer " + authToken);
                         }
                         Response response = chain.proceed(builder.build());
-                        if (response.code() == 401) {
+                        // Un 401 en /auth/** (login, registro, recuperación) significa
+                        // "credenciales inválidas" y debe mostrarse en pantalla, no relanzar Login.
+                        boolean esEndpointAuth = original.url().encodedPath().contains("/auth/");
+                        if (response.code() == 401 && !esEndpointAuth) {
                             handleUnauthorized();
                         }
                         return response;
@@ -66,12 +76,17 @@ public class ApiClient {
     }
 
     private static void handleUnauthorized() {
+        // Solo el primer 401 dispara la redirección; el flag se re-arma en setToken().
+        if (!handlingUnauthorized.compareAndSet(false, true)) return;
         android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
         main.post(() -> {
             android.content.Context ctx = AtletismoApp.getContext();
             new SessionManager(ctx).clearSession();
             authToken = null;
             retrofit   = null;
+            android.widget.Toast.makeText(ctx,
+                    "Tu sesión expiró, inicia sesión de nuevo",
+                    android.widget.Toast.LENGTH_LONG).show();
             Intent intent = new Intent(ctx, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             ctx.startActivity(intent);

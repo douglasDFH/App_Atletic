@@ -1550,6 +1550,86 @@ Para obtener contraseña de aplicación Gmail: Cuenta Google → Seguridad → V
 
 ---
 
+### 9.8 Corrección de build del APK + endurecimiento del interceptor 401 — 2026-06-21
+
+**Problema 1 — APK no compilaba en CI (GitHub Actions):**
+El workflow `assembleDebug` fallaba en la tarea `:app:mergeDebugResources` con el error:
+```
+Failed to compile resource file: activity_reset_password.xml
+javax.xml.stream.XMLStreamException: AttributePrefixUnbound
+  com.google.android.material.textfield.TextInputLayout & app:passwordToggleEnabled
+```
+
+**Causa:** En `activity_reset_password.xml` la declaración del namespace `xmlns:app` estaba puesta en un nodo hijo (el segundo `TextInputLayout`), no en la raíz. Los namespaces XML solo aplican al elemento donde se declaran y a sus descendientes; el tercer `TextInputLayout` es **hermano**, así que el prefijo `app:` quedaba sin enlazar → error de parseo y build roto.
+
+**Solución:** Mover `xmlns:app="http://schemas.android.com/apk/res-auto"` al elemento raíz `<ScrollView>` y eliminar la declaración local duplicada.
+
+| Archivo | Cambio |
+|---|---|
+| `app/src/main/res/layout/activity_reset_password.xml` | `xmlns:app` movido a la raíz `<ScrollView>`; eliminada la declaración local en el `TextInputLayout` de "nueva contraseña" |
+
+---
+
+**Problema 2 — Interceptor de token 401 sin endurecer:**
+El interceptor de OkHttp en `ApiClient` ya redirigía a `LoginActivity` al recibir HTTP 401, pero tenía dos defectos:
+1. Disparaba en **todos** los 401, incluidos los de `/auth/**`. Un login con contraseña incorrecta (backend responde 401) provocaba limpiar la sesión y relanzar Login en lugar de mostrar "credenciales inválidas".
+2. Sin guarda contra disparos simultáneos: varias llamadas con 401 a la vez podían relanzar `LoginActivity` múltiples veces.
+
+**Solución (`ApiClient.java`):**
+
+| Cambio | Descripción |
+|---|---|
+| Exclusión de `/auth/**` | Se comprueba `original.url().encodedPath().contains("/auth/")`; si el 401 viene de un endpoint de auth NO se redirige (el error se muestra en pantalla) |
+| Guarda `AtomicBoolean handlingUnauthorized` | Solo el primer 401 dispara la redirección; el flag se re-arma en `setToken()` al iniciar una nueva sesión |
+| Toast informativo | "Tu sesión expiró, inicia sesión de nuevo" antes de navegar al Login |
+
+```java
+boolean esEndpointAuth = original.url().encodedPath().contains("/auth/");
+if (response.code() == 401 && !esEndpointAuth) {
+    handleUnauthorized();
+}
+// ...
+private static void handleUnauthorized() {
+    if (!handlingUnauthorized.compareAndSet(false, true)) return; // solo el 1er 401
+    new Handler(Looper.getMainLooper()).post(() -> {
+        new SessionManager(ctx).clearSession();
+        authToken = null; retrofit = null;
+        Toast.makeText(ctx, "Tu sesión expiró, inicia sesión de nuevo", LENGTH_LONG).show();
+        startActivity(LoginActivity con FLAG_ACTIVITY_NEW_TASK | CLEAR_TASK);
+    });
+}
+```
+
+**Resultado:** el interceptor de token expirado (pendiente crítico #1 del roadmap original) queda completo y robusto. El APK vuelve a compilar en CI.
+
+---
+
+### 9.9 Estado real auditado del proyecto — 2026-06-21
+
+Auditoría directa sobre el código (backend + app) que corrige el roadmap previo. Varias funcionalidades marcadas como "pendientes" ya estaban implementadas:
+
+| Funcionalidad | Estado real | Evidencia |
+|---|---|---|
+| Interceptor token 401 | ✅ Completo | `ApiClient` (endurecido en 9.8) |
+| Editar competencia | ✅ Completo | `CompetenciaDetalleActivity` → `CrearCompetenciaActivity` modo edición (`PUT /competencias/{id}`) |
+| Editar grupo | ✅ Completo | `GrupoDetalleActivity` → `CrearGrupoActivity` modo edición (`PUT /grupos/{id}`) |
+| Eliminar marca personal | ✅ Completo | `MarcasActivity` (`DELETE /marcas/{id}`) |
+| Eliminar sesión | ✅ Completo | `SesionDetalleActivity` (`DELETE /sesiones/{id}`) |
+| Foto de perfil (avatar) | ✅ Completo | Glide + CircleCrop, caché en `SessionManager` |
+| Push notifications FCM | ✅ Completo | Sección 9.4 |
+
+**Pendientes reales que quedan:**
+
+| Pendiente | Tipo | Notas |
+|---|---|---|
+| Variables `MAIL_USERNAME`/`MAIL_PASSWORD` en Coolify | Despliegue | Sin ellas el correo de recuperación no se envía en producción. Usar contraseña de aplicación Gmail (16 chars) |
+| Rol PADRE diferenciado | Funcionalidad | Hoy un PADRE entra igual que un ATLETA (mismo dashboard). Falta vista de "rendimiento del hijo" |
+| Enumeración de correos en `forgot-password` | Seguridad | Responde "Correo no encontrado" (400) si el email no existe → revela qué correos están registrados. Recomendado: éxito genérico siempre |
+| Disciplinas hardcodeadas en código | Mejora | No vienen del backend |
+| Paginación en listas largas | Mejora | — |
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**
