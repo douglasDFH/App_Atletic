@@ -18,6 +18,12 @@ spring:
       enabled: true
       max-file-size: 5MB
       max-request-size: 10MB
+  mail:
+    host: localhost
+    port: 1025
+    test-connection: false
+    properties:
+      mail.smtp.auth: false
 
 jwt:
   secret: atletismo-super-secret-key-very-long-2026-UPDS-Santa-Cruz-Bolivia
@@ -25,14 +31,6 @@ jwt:
 
 server:
   port: 8080
-
-spring:
-  mail:
-    host: localhost
-    port: 1025
-    test-connection: false
-    properties:
-      mail.smtp.auth: false
 
 logging:
   level:

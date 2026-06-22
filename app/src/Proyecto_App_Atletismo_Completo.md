@@ -1658,6 +1658,40 @@ Error starting ApplicationContext ... Application run failed
 
 ---
 
+### 9.11 Dos crashes ocultos tras el fix de Firebase — 2026-06-22
+
+Al resolverse el crash de Firebase (9.10), el arranque avanzó y dejó al descubierto **dos errores más** que venían en los commits de FCM y recuperación de contraseña, nunca compilados antes de subirlos:
+
+**a) Backend — clave `spring:` duplicada en YAML (rollback en Coolify):**
+```
+org.yaml.snakeyaml.constructor.DuplicateKeyException: found duplicate key spring
+  in 'reader', line 29, column 1
+```
+Tanto `application-prod.yml` como `application.yml` tenían **dos bloques `spring:`**: el original (datasource/jpa) y un segundo añadido con `spring.mail`. SnakeYAML (Spring Boot) prohíbe claves top-level duplicadas → el contexto no arranca → healthcheck falla → rollback.
+
+| Archivo | Cambio |
+|---|---|
+| `application-prod.yml` | Bloque `mail:` fusionado dentro del único `spring:`. `MAIL_USERNAME`/`MAIL_PASSWORD` con default vacío (`${VAR:}`) para que la app arranque aunque no estén configuradas en Coolify |
+| `application.yml` | Mismo arreglo para el perfil de desarrollo |
+
+**b) Android — import faltante (build APK falla en CI):**
+```
+ForgotPasswordActivity.java:76: error: cannot find symbol
+  startActivity(new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class));
+  symbol: class Intent
+```
+El commit de recuperación de contraseña agregó la navegación a `ResetPasswordActivity` usando `Intent` pero olvidó `import android.content.Intent;`.
+
+| Archivo | Cambio |
+|---|---|
+| `auth/ForgotPasswordActivity.java` | Añadido `import android.content.Intent;` |
+
+**Verificación previa al push:** se barrió todo el proyecto confirmando que (1) ningún otro `.java` usa `new Intent(` sin su import y (2) cada YAML tiene un solo bloque `spring:`.
+
+**Lección:** los commits de FCM (`18f383c`) y forgot-password (`e78bf29`) se subieron sin compilar localmente; cada deploy revelaba el siguiente error en cadena (XML → Firebase → YAML → import). A partir de aquí, compilar antes de pushear.
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**
