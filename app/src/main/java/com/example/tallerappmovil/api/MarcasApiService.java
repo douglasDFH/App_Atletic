@@ -30,6 +30,10 @@ public interface MarcasApiService {
     @DELETE("marcas/{id}")
     Call<Void> eliminarMarca(@Path("id") Long id);
 
+    // Ranking / leaderboard: todas las marcas (por disciplina si se indica)
+    @GET("marcas/ranking")
+    Call<List<MarcaPersonal>> getRanking(@Query("disciplina") String disciplina);
+
     @GET("atletas")
     Call<List<AtletaInfo>> getAtletas();
 }

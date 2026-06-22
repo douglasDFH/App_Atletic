@@ -26,6 +26,14 @@ public class MarcaService {
 
     @Transactional(readOnly = true)
     public List<MarcaResponse> getMarcas(Long atletaId, String disciplina) {
+        // Un atleta/padre solo puede ver SUS propias marcas, sin importar el filtro
+        // de disciplina ni cualquier atletaId recibido (evita fuga de marcas ajenas).
+        Usuario actual = usuarioService.getUsuarioActual();
+        String rol = actual.getRol().name();
+        if ("ATLETA".equals(rol) || "PADRE".equals(rol)) {
+            atletaId = actual.getId();
+        }
+
         List<MarcaPersonal> lista;
         if (atletaId != null && disciplina != null) {
             lista = marcaRepository.findByAtletaIdAndDisciplinaOrderByFechaDesc(atletaId, disciplina);
@@ -34,15 +42,17 @@ public class MarcaService {
         } else if (disciplina != null) {
             lista = marcaRepository.findByDisciplinaOrderByFechaDesc(disciplina);
         } else {
-            // Si no es entrenador, solo sus marcas
-            Usuario actual = usuarioService.getUsuarioActual();
-            String rol = actual.getRol().name();
-            if ("ATLETA".equals(rol) || "PADRE".equals(rol)) {
-                lista = marcaRepository.findByAtletaIdOrderByFechaDesc(actual.getId());
-            } else {
-                lista = marcaRepository.findAllByOrderByFechaDesc();
-            }
+            lista = marcaRepository.findAllByOrderByFechaDesc();
         }
+        return lista.stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    /** Ranking / leaderboard: todas las marcas (por disciplina si se indica), visible a cualquier rol. */
+    @Transactional(readOnly = true)
+    public List<MarcaResponse> getRanking(String disciplina) {
+        List<MarcaPersonal> lista = (disciplina != null)
+                ? marcaRepository.findByDisciplinaOrderByFechaDesc(disciplina)
+                : marcaRepository.findAllByOrderByFechaDesc();
         return lista.stream().map(this::toResponse).collect(Collectors.toList());
     }
 

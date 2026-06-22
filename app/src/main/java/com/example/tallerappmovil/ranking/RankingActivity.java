@@ -103,8 +103,9 @@ public class RankingActivity extends AppCompatActivity {
         tvVacio.setVisibility(View.GONE);
         layoutPodio.setVisibility(View.GONE);
 
-        // Carga todas las marcas de la disciplina y filtra solo los PRs (un PR por atleta)
-        ApiClient.getMarcasService().getMarcas(disciplinaSeleccionada)
+        // Ranking: usa el endpoint dedicado que devuelve TODAS las marcas de la disciplina
+        // (getMarcas limita al atleta a las suyas, no sirve para el leaderboard)
+        ApiClient.getMarcasService().getRanking(disciplinaSeleccionada)
                 .enqueue(new Callback<List<MarcaPersonal>>() {
                     @Override
                     public void onResponse(Call<List<MarcaPersonal>> call,

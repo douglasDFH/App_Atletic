@@ -142,6 +142,8 @@ public class AtletaDashboardActivity extends AppCompatActivity {
                             PerfilUsuario p = response.body();
                             SessionManager sm = new SessionManager(AtletaDashboardActivity.this);
                             sm.saveFotoUrl(p.getFotoUrl());
+                            // Cachear el grupo del atleta para que la Agenda pueda filtrar "Mi grupo"
+                            sm.saveGrupo(p.getGrupoId(), p.getGrupoNombre());
                             if (p.getNombreCompleto() != null) {
                                 sm.saveUserName(p.getNombreCompleto());
                                 actualizarSaludo(p.getNombreCompleto());

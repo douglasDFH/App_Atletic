@@ -26,6 +26,12 @@ public class MarcaController {
         return ResponseEntity.ok(marcaService.getMarcas(atletaId, disciplina));
     }
 
+    @GetMapping("/ranking")
+    public ResponseEntity<List<MarcaResponse>> getRanking(
+            @RequestParam(required = false) String disciplina) {
+        return ResponseEntity.ok(marcaService.getRanking(disciplina));
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
     public ResponseEntity<MarcaResponse> registrar(@Valid @RequestBody MarcaRequest req) {

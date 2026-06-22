@@ -1751,6 +1751,37 @@ Esto deja funcional el promedio de Estadísticas sin romper el Reporte por grupo
 
 ---
 
+### 9.14 Auditoría funcional módulo por módulo (Atleta) — 2026-06-22
+
+**Bug de PRIVACIDAD corregido — Mis Marcas filtraba mostraba marcas ajenas:**
+El endpoint `GET /marcas` con `disciplina` pero sin `atletaId` devolvía **todas** las marcas de esa disciplina (de todos los atletas). Como "Mis Marcas" del atleta llama `getMarcas(disciplina)`, al filtrar por disciplina **el atleta veía las marcas de los demás**. El scope por atleta solo se aplicaba cuando no había filtro de disciplina.
+
+**Conflicto de diseño detrás del bug:** el mismo endpoint `getMarcas(disciplina)` lo usaban dos pantallas con intención opuesta — "Mis Marcas" (solo las propias) y "Ranking" (las de todos, leaderboard).
+
+**Solución:**
+| Archivo | Cambio |
+|---|---|
+| `MarcaService.getMarcas` | Si el usuario es ATLETA/PADRE, **siempre** se fija `atletaId = su propio id` (ignora disciplina/atletaId recibido) → nunca ve marcas ajenas |
+| `MarcaService.getRanking` (nuevo) | Devuelve todas las marcas por disciplina (leaderboard), para cualquier rol |
+| `MarcaController` | Nuevo endpoint `GET /api/v1/marcas/ranking?disciplina=` |
+| `MarcasApiService` (Android) | Nuevo método `getRanking(disciplina)` |
+| `RankingActivity` | Usa `getRanking()` en vez de `getMarcas()` (el leaderboard necesita todas las marcas) |
+
+Efecto colateral positivo: `EvolucionMarcasActivity` del atleta (que llama `getMarcas(disciplina)`) ahora también queda correctamente limitada a sus propias marcas.
+
+**Bug/gap corregido — grupo del atleta no se cacheaba:**
+`saveGrupo()` solo se llamaba en `PerfilActivity`, así que el `grupoId` del atleta en `SessionManager` quedaba null hasta que el atleta abría su Perfil. La Agenda lee `miGrupoId = session.getGrupoId()` para el chip/filtro "Mi grupo" → no funcionaba al entrar.
+
+| Archivo | Cambio |
+|---|---|
+| `AtletaDashboardActivity` | Al cargar el perfil (`getPerfil`) ahora llama `sm.saveGrupo(p.getGrupoId(), p.getGrupoNombre())` → el grupo queda disponible desde que el atleta entra |
+
+**Módulos del atleta verificados OK:** Dashboard (saludo/foto/badge/stats), Agenda (ve sesiones; filtro "Mi grupo" ahora funciona), Mis Marcas (solo propias), Evolución (gráfica propia), Competencias (inscribirse/desinscribirse cableado), Ranking (leaderboard con endpoint propio), Asistencia (mi-historial = usuario actual), Perfil.
+
+**Nota de diseño:** `TokenResponse` no incluye `grupoId`; el grupo se obtiene del perfil. Correcto, pero por eso es clave cachearlo al entrar (lo anterior).
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**
