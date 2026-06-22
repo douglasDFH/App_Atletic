@@ -1630,6 +1630,34 @@ Auditoría directa sobre el código (backend + app) que corrige el roadmap previ
 
 ---
 
+### 9.10 Backend crasheaba en Coolify por credencial Firebase ausente — 2026-06-21
+
+**Síntoma:** Desde el commit `18f383c` (integración FCM), cada despliegue en Coolify construía la imagen pero el contenedor **fallaba el healthcheck y hacía rollback** al contenedor anterior. Producción seguía corriendo la versión pre-FCM.
+
+**Log de Coolify (causa raíz):**
+```
+Error creating bean with name 'firebaseConfig': Invocation of init method failed
+Caused by: java.io.FileNotFoundException: class path resource [serviceAccountKey.json]
+  cannot be opened because it does not exist
+    at com.club.atletismo.config.FirebaseConfig.initialize(FirebaseConfig.java:20)
+Error starting ApplicationContext ... Application run failed
+```
+
+**Causa:** `FirebaseConfig.initialize()` (`@PostConstruct`) cargaba `serviceAccountKey.json` del classpath y lanzaba `IOException` si no existía. Como ese archivo está en `.gitignore` (no se sube al repo), **no está en la imagen Docker** que construye Coolify → Spring no completa el arranque → la app muere → healthcheck `Connection refused` → rollback.
+
+**Solución — Firebase opcional y resiliente:**
+
+| Archivo | Cambio |
+|---|---|
+| `config/FirebaseConfig.java` | Reescrito: busca la credencial en (1) env var `FIREBASE_CREDENTIALS` con el JSON completo, (2) `serviceAccountKey.json` del classpath. Si no hay ninguna o falla, **loguea WARN y la app arranca igual** (push deshabilitado). Ya no lanza excepción que tumbe el contexto |
+| `notificacion/FcmService.java` | `sendToToken()` ahora verifica `FirebaseApp.getApps().isEmpty()` antes de enviar (evita `IllegalStateException` si Firebase no se inicializó) y captura `Exception` genérica en vez de solo `FirebaseMessagingException` |
+
+**Resultado:** el backend arranca aunque falte la credencial Firebase; el healthcheck pasa y Coolify ya no hace rollback. Login, agenda, marcas, recuperación de contraseña, etc. funcionan sin Firebase.
+
+**Para HABILITAR push en producción** (opcional): en Coolify, crear la variable de entorno `FIREBASE_CREDENTIALS` y pegar **todo el contenido JSON** de `serviceAccountKey.json` como valor. Al reiniciar, el backend lo detecta e inicializa Firebase automáticamente.
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**

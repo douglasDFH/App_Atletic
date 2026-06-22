@@ -1,7 +1,7 @@
 package com.club.atletismo.notificacion;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +13,9 @@ public class FcmService {
 
     public void sendToToken(String token, String titulo, String mensaje) {
         if (token == null || token.isBlank()) return;
+        // Si Firebase no se inicializó (sin credencial), no intentar enviar:
+        // getInstance() lanzaría IllegalStateException y rompería el flujo que lo invoca.
+        if (FirebaseApp.getApps().isEmpty()) return;
         try {
             Message message = Message.builder()
                     .setNotification(Notification.builder()
@@ -22,8 +25,9 @@ public class FcmService {
                     .setToken(token)
                     .build();
             FirebaseMessaging.getInstance().send(message);
-        } catch (FirebaseMessagingException e) {
-            log.warn("FCM send failed for token {}: {}", token.substring(0, 10), e.getMessage());
+        } catch (Exception e) {
+            String prefijo = token.length() >= 10 ? token.substring(0, 10) : token;
+            log.warn("FCM send failed for token {}: {}", prefijo, e.getMessage());
         }
     }
 }
