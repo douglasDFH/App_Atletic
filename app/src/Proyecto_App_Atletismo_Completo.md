@@ -1725,6 +1725,32 @@ Todos originados en los commits de FCM (`18f383c`) y forgot-password (`e78bf29`)
 
 ---
 
+### 9.13 Auditoría funcional módulo por módulo (Entrenador) — 2026-06-22
+
+Auditoría sistemática de cada módulo del entrenador cruzando app ↔ backend (flujos, contratos JSON y permisos).
+
+**Bug real encontrado y corregido — Estadísticas (promedio de asistencia del club):**
+`EstadisticasActivity` calcula el promedio global llamando `getReporte(null, mes)` (sin grupo = todos). Pero:
+- `AsistenciaController.getReporte` tenía `@RequestParam Long grupoId` **obligatorio** → al omitir el parámetro, Spring devolvía **HTTP 400** → el promedio mostraba siempre `--%`.
+- Además la query `WHERE a.sesion.grupo.id = :grupoId` no contemplaba null.
+
+| Archivo | Cambio |
+|---|---|
+| `AsistenciaController.java` | `@RequestParam(required = false) Long grupoId` (permite "todos los grupos") |
+| `AsistenciaRepository.java` | Query: `WHERE (:grupoId IS NULL OR a.sesion.grupo.id = :grupoId) AND ...` para soportar grupoId null |
+
+Esto deja funcional el promedio de Estadísticas sin romper el Reporte por grupo (que sigue pasando un `grupoId` real).
+
+**Aclaración importante — Asistencia NO estaba rota:** salía vacía porque la lista de asistencia se arma con los atletas asignados al grupo de la sesión (`usuario.grupo_id`). Los atletas se registran sin grupo; **es el entrenador** quien los asigna vía Grupos → abrir grupo → FAB "gestionar atletas" (`SeleccionarAtletasActivity` → `agregarAtleta`). Ese flujo ya existe y funciona. Sin ese paso, Asistencia/Agenda/notificaciones del grupo se ven vacías por falta de datos, no por bug.
+
+**Contratos JSON verificados (todos coinciden):** Competencia, Marca, Sesión, Atleta, Perfil, AsistenciaAtleta, ReporteAtleta, AsistenciaHistorial.
+
+**Mejoras menores detectadas (no bloqueantes):**
+- Perfil del atleta (vista entrenador): no muestra el historial de asistencia del atleta, aunque el endpoint `GET /atletas/{id}/asistencia` ya existe.
+- Ranking: disciplinas hardcodeadas en el cliente (no vienen del backend).
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**

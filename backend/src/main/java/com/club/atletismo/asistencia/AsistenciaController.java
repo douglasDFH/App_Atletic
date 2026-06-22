@@ -41,7 +41,7 @@ public class AsistenciaController {
     @GetMapping("/api/v1/asistencia/reporte")
     @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
     public ResponseEntity<List<ReporteAtletaDto>> getReporte(
-            @RequestParam Long grupoId,
+            @RequestParam(required = false) Long grupoId,
             @RequestParam String mes) {
         return ResponseEntity.ok(asistenciaService.getReporte(grupoId, mes));
     }

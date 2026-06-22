@@ -20,7 +20,7 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     List<Asistencia> findByAtletaIdDesde(@Param("atletaId") Long atletaId,
                                          @Param("desde") LocalDateTime desde);
 
-    @Query("SELECT a FROM Asistencia a WHERE a.sesion.grupo.id = :grupoId AND a.sesion.horaInicio >= :inicio AND a.sesion.horaInicio < :fin")
+    @Query("SELECT a FROM Asistencia a WHERE (:grupoId IS NULL OR a.sesion.grupo.id = :grupoId) AND a.sesion.horaInicio >= :inicio AND a.sesion.horaInicio < :fin")
     List<Asistencia> findByGrupoAndPeriodo(@Param("grupoId") Long grupoId,
                                            @Param("inicio") LocalDateTime inicio,
                                            @Param("fin") LocalDateTime fin);
