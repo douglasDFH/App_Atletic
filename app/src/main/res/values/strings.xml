@@ -39,6 +39,22 @@
     <string name="rol_atleta">Atleta</string>
     <string name="rol_padre">Padre / Tutor</string>
 
+    <!-- Registro: fecha de nacimiento y tutor de menor -->
+    <string name="hint_fecha_nacimiento">Fecha de nacimiento</string>
+    <string name="hint_disciplina">Disciplina (opcional)</string>
+    <string name="lbl_datos_tutor">Datos del tutor (atleta menor de edad)</string>
+    <string name="lbl_datos_tutor_desc">Por ser menor de edad, se requieren los datos del tutor para emergencias.</string>
+    <string name="hint_tutor_nombre">Nombre completo del tutor</string>
+    <string name="hint_tutor_parentesco">Parentesco (madre, padre, etc.)</string>
+    <string name="hint_tutor_telefono">Teléfono del tutor</string>
+    <string name="err_tutor_requerido">Completa los datos del tutor (menor de edad)</string>
+    <string name="err_fecha_nac_requerida">Selecciona la fecha de nacimiento</string>
+    <!-- Vínculo padre-hijo (entrenador) -->
+    <string name="lbl_vincular_hijo">Vincular hijo</string>
+    <string name="lbl_padres_tutores">Padres / Tutores</string>
+    <string name="msg_vinculo_guardado">Vínculo guardado</string>
+    <string name="lbl_sin_vinculo">Sin hijo vinculado</string>
+
     <!-- Recuperar contraseña -->
     <string name="lbl_recuperar">Recuperar contraseña</string>
     <string name="lbl_recuperar_desc">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</string>

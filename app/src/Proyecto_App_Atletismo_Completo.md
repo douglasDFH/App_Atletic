@@ -1936,7 +1936,9 @@ Las columnas se crean automáticamente con `ddl-auto: update` al redeploy (no re
 
 **Protección de datos de menores (RNF-02):** los endpoints de gestión de padres y el detalle del atleta (con datos de tutor) están restringidos a ENTRENADOR/ADMIN; el padre solo accede a los datos de SU hijo vinculado.
 
-**Pendiente — APP (Android):** registro de atleta con fecha de nacimiento + datos de tutor si es menor; pantalla del entrenador para vincular padre↔hijo; dashboard del padre mostrando al hijo; mostrar contacto de tutor en el perfil del atleta (vista entrenador).
+**APP (Android) — progreso:**
+- ✅ **Registro de atleta con fecha de nacimiento + datos de tutor si es menor** (`RegisterActivity`): selector de fecha, cálculo de edad, y si <18 muestra y **exige** nombre/parentesco/teléfono del tutor; envía todo en `RegisterRequest`. Para rol PADRE oculta estos campos.
+- ⏳ Pendiente: pantalla del entrenador para vincular padre↔hijo; dashboard del padre mostrando al hijo; mostrar contacto de tutor en el perfil del atleta (vista entrenador).
 
 ---
 
