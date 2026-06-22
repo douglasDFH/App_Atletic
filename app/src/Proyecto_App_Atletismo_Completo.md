@@ -1802,6 +1802,104 @@ Ahora crear/editar/cancelar sesión y crear competencia responden al instante (s
 
 ---
 
+### 9.16 AUDITORÍA COMPLETA — Requisitos originales vs Implementación real — 2026-06-22
+
+Auditoría exhaustiva de TODOS los requisitos (HU, RF, RNF, CU) contra el código real (app Android + backend Spring Boot), por rol. Leyenda: ✅ Implementado · 🟡 Parcial · ❌ No implementado.
+
+#### A) Historias de Usuario (HU-01 a HU-13)
+
+| HU | Requisito | Estado | Qué falta / nota |
+|---|---|---|---|
+| HU-01 | Registro de cuenta | 🟡 | ✅ registro nombre/correo/contraseña, correo duplicado→error. ❌ contraseña no exige mayúscula+número (solo min 8). ❌ **correo de verificación antes de activar**. ❌ **vincular tutor a menor**. ❌ registro offline (cola) |
+| HU-02 | Inicio de sesión | 🟡 | ✅ JWT, error genérico sin revelar campo. ❌ **bloqueo tras 5 intentos (15 min)**. ❌ "Recordarme" 30 días (token dura 24h). 🟡 cada rol a su pantalla (PADRE va igual que ATLETA) |
+| HU-03 | Consultar agenda semanal (atleta) | ✅ | Sesiones por semana con navegación, canceladas con etiqueta/color, "sin sesiones" si vacío |
+| HU-04 | Crear/editar sesión (entrenador) | 🟡 | ✅ crear/editar/cancelar con motivo + push al grupo. ❌ **no valida fechas pasadas** ni **conflicto de horario** |
+| HU-05 | Registro de asistencia (entrenador) | 🟡 | ✅ P/A/J + % resumen. ❌ plazo "hasta 2h después". ❌ "solo Admin modifica una asistencia guardada" |
+| HU-06 | Registro de marcas (entrenador) | ✅ | ✅ atleta/disciplina/fecha/resultado, marca personal automática, atleta no puede modificar. 🟡 disciplinas hardcodeadas; asociar a competencia no (solo a sesión) |
+| HU-07 | Historial de rendimiento propio (atleta) | ✅ | ✅ historial ordenado, filtro disciplina, gráfica evolución, mejor marca destacada, no ve otros (corregido en 9.14) |
+| HU-08 | Ver evolución del grupo (entrenador) | 🟡 | ✅ evolución individual por atleta con tendencia. ❌ comparativa de grupo. ❌ **exportar PDF/Excel** |
+| HU-09 | Publicar convocatoria (entrenador) | 🟡 | ✅ crear competencia + push; atletas confirman/declinan (inscribirse); ve confirmados. ❌ **convocar a grupos/atletas específicos** (notifica a TODOS) |
+| HU-10 | Registrar resultados de competencia | ❌ | ❌ No existe registro de posición/marca/observaciones por atleta en competencia, ni asociación al historial |
+| HU-11 | Recibir notificaciones push (atleta/padre) | 🟡 | ✅ push en crear/editar/cancelar sesión y crear competencia. ❌ **configurar qué notif recibir**. ❌ reintentos 3x. 🟡 historial sin límite de 30 días |
+| HU-12 | Gestionar perfil del atleta (entrenador) | ❌ | ❌ el entrenador **no puede crear ni editar el perfil** de un atleta (solo gestionar grupo). ❌ fecha nacimiento, datos de tutor, foto por el entrenador. ❌ auto-actualizar categoría al cumplir años. ❌ desactivar perfil. ❌ privacidad de menores |
+| HU-13 | Consultar/editar datos propios (atleta) | 🟡 | ✅ edita nombre, correo, foto. ❌ campo teléfono. ❌ confirmación por contraseña. ⚠️ puede editar nombre (debería estar bloqueado) |
+
+#### B) Requisitos Funcionales (RF-01 a RF-18)
+
+| RF | Estado | Nota |
+|---|---|---|
+| RF-01 Registro con rol + menores→tutor | 🟡 | Solo ATLETA/PADRE se auto-registran (no Admin/Entrenador). **Menores→tutor ❌** |
+| RF-02 Autenticación con roles + hash | ✅ | bcrypt + JWT + roles por endpoint |
+| RF-03 Recuperación de contraseña por correo | ✅ | Token UUID por Gmail SMTP (expira 1h) |
+| RF-04 Gestión de perfiles de atletas (CRUD por entrenador) | ❌ | Solo **consultar** (lista + detalle). ❌ crear/editar/desactivar atleta, ❌ datos de tutor |
+| RF-05 Crear/editar sesiones | ✅ | CRUD completo |
+| RF-06 Consultar agenda semanal | ✅ | Navegación + canceladas visibles |
+| RF-07 Registro de asistencia + % | ✅ | |
+| RF-08 Consultar historial de asistencia | ✅ | Entrenador (por atleta) y atleta (propio) |
+| RF-09 Registrar marcas | ✅ | |
+| RF-10 Consultar historial rendimiento + gráfica | ✅ | |
+| RF-11 Ver evolución grupal con indicadores | 🟡 | Individual sí; comparativa grupal no |
+| RF-12 Detectar marca personal | ✅ | (heurística mejorable para lanzamientos/saltos) |
+| RF-13 Publicar convocatorias con convocados | 🟡 | Crea competencia; sin convocados selectivos |
+| RF-14 Confirmación de participación | ✅ | inscribirse/desinscribirse |
+| RF-15 Registrar resultados de competencia | ❌ | No implementado |
+| RF-16 Notificaciones push automáticas | 🟡 | Sesión/competencia sí; resultados no |
+| RF-17 Configuración de notificaciones | ❌ | No implementado |
+| RF-18 Historial de notificaciones 30 días | 🟡 | Hay historial; sin límite de 30 días |
+
+#### C) Requisitos No Funcionales (RNF-01 a RNF-06)
+
+| RNF | Estado | Nota |
+|---|---|---|
+| RNF-01 Rendimiento (<3s / <2s / push<60s / 200 usuarios) | 🟡 | No medido ni garantizado; push ahora asíncrono (9.15) |
+| RNF-02 Seguridad | 🟡 | ✅ bcrypt, JWT. ❌ **datos de menores protegidos**, ❌ **HTTPS/TLS** (backend es HTTP plano), ❌ bloqueo tras 5 intentos |
+| RNF-03 Usabilidad (Android 8+, español, táctil) | ✅ | App Android nativa en español (iOS no aplica) |
+| RNF-04 Disponibilidad 99% + offline | ❌ | Sin caché offline ni cola de asistencia sin conexión |
+| RNF-05 Mantenibilidad (capas, logs auditoría) | 🟡 | Arquitectura en capas ✅; sin logs de auditoría; **0 pruebas** |
+| RNF-06 Portabilidad (Play/App Store, export PDF/Excel) | ❌ | No publicada en stores (APK por GitHub Release); sin exportación |
+
+#### D) Casos de Uso (CU-01 a CU-06)
+
+| CU | Estado | Nota |
+|---|---|---|
+| CU-01 Iniciar sesión | 🟡 | Sin bloqueo por intentos ni verificación de cuenta |
+| CU-02 Registrar atleta (por entrenador) | ❌ | Los atletas se **auto-registran**; el entrenador no los crea ni captura foto/tutor |
+| CU-03 Gestionar agenda | 🟡 | Sin validación de conflicto de horario |
+| CU-04 Registrar asistencia | 🟡 | Sin offline ni plazo de 2h |
+| CU-05 Registrar/consultar rendimiento | ✅ | |
+| CU-06 Publicar convocatoria | 🟡 | Sin convocados selectivos |
+
+#### E) Resumen por ROL
+
+**👔 ENTRENADOR — ~80%:** Agenda, asistencia, marcas, grupos, competencias (crear/editar/eliminar/inscritos), ranking, estadísticas, notificaciones, perfil propio: ✅. **Falta:** crear/editar/desactivar atletas (HU-12/RF-04), registrar resultados de competencia (HU-10), convocatoria selectiva (HU-09), evolución grupal comparativa, exportar PDF/Excel, validación de conflicto de horario, ver/editar datos del tutor.
+
+**🏃 ATLETA — ~90%:** Agenda, marcas propias, evolución, asistencia (mi-historial), competencias (inscribirse), ranking, perfil: ✅. **Falta:** editar teléfono, confirmación por contraseña, bloquear edición de nombre.
+
+**👨‍👧 PADRE / TUTOR — ~5% (prácticamente NO implementado):** Hoy entra como un atleta vacío (sin marcas/asistencia/grupo). **Falta TODO:** vínculo padre↔hijo, ver datos del hijo, datos de tutor de emergencia, protección de datos de menores. Diseño acordado: el **entrenador vincula** (1 hijo por padre) + fecha de nacimiento en registro de atleta + datos de tutor obligatorios si es menor (nombre, parentesco, teléfono).
+
+#### F) Pendientes priorizados (para 100% de requisitos)
+
+**Críticos (requisitos de alta prioridad sin cumplir):**
+1. Rol PADRE + vínculo tutor + protección de datos de menores (RF-01, HU-01/12, RNF-02) — *en diseño, próximo a implementar*
+2. Fecha de nacimiento + datos de tutor obligatorios para menores (CU-02 FA-03)
+3. Gestión de perfiles de atletas por el entrenador: crear/editar/desactivar (RF-04, HU-12)
+4. Registrar resultados de competencia (RF-15, HU-10)
+
+**Importantes:**
+5. Bloqueo tras 5 intentos fallidos (HU-02, RNF-02)
+6. Verificación de correo al registrar (HU-01)
+7. Convocatoria selectiva por grupo/atleta (RF-13, HU-09)
+8. HTTPS/TLS en el backend (RNF-02)
+9. Validación de conflicto de horario y fechas pasadas en sesiones (HU-04, CU-03)
+
+**Secundarios / mejoras:**
+10. Configuración de notificaciones (RF-17), historial 30 días (RF-18)
+11. Exportar PDF/Excel (HU-08, RNF-06), evolución grupal comparativa (RF-11)
+12. Modo offline (RNF-04), logs de auditoría y pruebas unitarias (RNF-05)
+13. Disciplinas desde backend (no hardcodeadas), confirmación por contraseña al editar perfil (HU-13)
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**
