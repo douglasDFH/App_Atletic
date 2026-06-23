@@ -3,6 +3,8 @@ package com.example.tallerappmovil.api;
 import com.example.tallerappmovil.model.Competencia;
 import com.example.tallerappmovil.model.CompetenciaRequest;
 import com.example.tallerappmovil.model.AtletaInfo;
+import com.example.tallerappmovil.model.ResultadoCompetencia;
+import com.example.tallerappmovil.model.ResultadoRequest;
 
 import java.util.List;
 
@@ -40,4 +42,11 @@ public interface CompetenciasApiService {
 
     @GET("competencias/{id}/inscritos")
     Call<List<AtletaInfo>> getInscritos(@Path("id") Long id);
+
+    // Resultados (RF-15, HU-10)
+    @GET("competencias/{id}/resultados")
+    Call<List<ResultadoCompetencia>> getResultados(@Path("id") Long id);
+
+    @POST("competencias/{id}/resultados")
+    Call<ResultadoCompetencia> registrarResultado(@Path("id") Long id, @Body ResultadoRequest request);
 }

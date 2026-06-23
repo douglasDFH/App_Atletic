@@ -169,6 +169,15 @@ public class CompetenciaDetalleActivity extends AppCompatActivity {
             btnInscripcion.setVisibility(View.GONE);
         }
 
+        // Ver / registrar resultados (todos; el entrenador puede registrar)
+        findViewById(R.id.btnResultados).setOnClickListener(v -> {
+            Intent i = new Intent(this, ResultadosCompetenciaActivity.class);
+            i.putExtra(ResultadosCompetenciaActivity.EXTRA_COMP_ID, competenciaId);
+            i.putExtra(ResultadosCompetenciaActivity.EXTRA_COMP_NOMBRE, c.getNombre());
+            i.putExtra(ResultadosCompetenciaActivity.EXTRA_PUEDE_EDITAR, esEntrenador);
+            startActivity(i);
+        });
+
         // Botones editar/eliminar (solo entrenador)
         if (esEntrenador) {
             layoutBotonesEntrenador.setVisibility(View.VISIBLE);

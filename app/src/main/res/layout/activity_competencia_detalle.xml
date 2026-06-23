@@ -201,6 +201,16 @@
                 android:layout_marginTop="20dp"
                 android:visibility="gone" />
 
+            <!-- Ver / registrar resultados (todos) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnResultados"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_resultados"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp" />
+
             <!-- Botones editar/eliminar (solo entrenador) -->
             <LinearLayout
                 android:id="@+id/layoutBotonesEntrenador"

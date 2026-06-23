@@ -1979,7 +1979,10 @@ El entrenador puede registrar el resultado de cada atleta en una competencia (po
 - `getResultados()` ordena por posición.
 - Endpoints: `GET /competencias/{id}/resultados` (público autenticado), `POST /competencias/{id}/resultados` (ENTRENADOR/ADMIN).
 
-**Pendiente — APP:** pantalla de resultados en el detalle de competencia (listar + registrar por atleta inscrito).
+**APP (Android):**
+- ✅ `ResultadosCompetenciaActivity`: lista los resultados (posición · nombre · marca · ⭐récord) y, para el entrenador, un **FAB** que abre un diálogo (`dialog_registrar_resultado`) para registrar un resultado eligiendo un atleta inscrito + posición + marca + observaciones.
+- ✅ Entrada desde `CompetenciaDetalleActivity` (botón "Resultados", visible para todos; el entrenador puede registrar).
+- Modelos `ResultadoCompetencia`/`ResultadoRequest`; `CompetenciasApiService.getResultados/registrarResultado`.
 
 ---
 
