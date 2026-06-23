@@ -6,6 +6,10 @@
         android:title="@string/lbl_editar"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/action_foto_atleta"
+        android:title="@string/lbl_cambiar_foto"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_estado_atleta"
         android:title="@string/lbl_desactivar_atleta"
         app:showAsAction="never" />

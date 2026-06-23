@@ -15,11 +15,14 @@ import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.model.Competencia;
 import com.example.tallerappmovil.model.CompetenciaRequest;
+import com.example.tallerappmovil.model.GrupoEntrenamiento;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -38,12 +41,13 @@ public class CrearCompetenciaActivity extends AppCompatActivity {
 
     private TextInputLayout tilNombre, tilDisciplina, tilFecha, tilLugar;
     private TextInputEditText etNombre, etFecha, etLugar, etDescripcion;
-    private AutoCompleteTextView spinnerDisciplina, spinnerCategoria;
+    private AutoCompleteTextView spinnerDisciplina, spinnerCategoria, spinnerGrupoConvocado;
     private MaterialButton btnGuardar;
     private ProgressBar progressBar;
 
     private int anio, mes, dia;
     private Long competenciaId = null;
+    private List<GrupoEntrenamiento> grupos = new ArrayList<>();
 
     private static final String[] DISCIPLINAS = {
             "100m", "200m", "400m", "Salto Largo", "Lanzamiento de Bala", "Gimnasia", "Múltiples"
@@ -69,8 +73,9 @@ public class CrearCompetenciaActivity extends AppCompatActivity {
         etFecha        = findViewById(R.id.etFecha);
         etLugar        = findViewById(R.id.etLugar);
         etDescripcion  = findViewById(R.id.etDescripcion);
-        spinnerDisciplina = findViewById(R.id.spinnerDisciplina);
-        spinnerCategoria  = findViewById(R.id.spinnerCategoria);
+        spinnerDisciplina    = findViewById(R.id.spinnerDisciplina);
+        spinnerCategoria     = findViewById(R.id.spinnerCategoria);
+        spinnerGrupoConvocado = findViewById(R.id.spinnerGrupoConvocado);
         btnGuardar     = findViewById(R.id.btnGuardar);
         progressBar    = findViewById(R.id.progressBar);
 
@@ -84,6 +89,7 @@ public class CrearCompetenciaActivity extends AppCompatActivity {
 
         etFecha.setOnClickListener(v -> mostrarDatePicker());
         btnGuardar.setOnClickListener(v -> guardar());
+        cargarGrupos();
 
         // Modo edición si viene con id
         if (getIntent().hasExtra(EXTRA_COMPETENCIA_ID)) {
@@ -174,8 +180,15 @@ public class CrearCompetenciaActivity extends AppCompatActivity {
         String descripcion = etDescripcion.getText() != null
                 ? etDescripcion.getText().toString().trim() : "";
 
+        // Grupo convocado opcional (HU-09)
+        Long grupoSeleccionadoId = null;
+        String grupoTexto = spinnerGrupoConvocado.getText().toString().trim();
+        for (GrupoEntrenamiento g : grupos) {
+            if (g.getNombre().equals(grupoTexto)) { grupoSeleccionadoId = g.getId(); break; }
+        }
+
         CompetenciaRequest req = new CompetenciaRequest(nombre, disciplina, fechaIso,
-                lugar, categoria, descripcion);
+                lugar, categoria, descripcion, grupoSeleccionadoId);
 
         setLoading(true);
 
@@ -228,6 +241,27 @@ public class CrearCompetenciaActivity extends AppCompatActivity {
                         }
                     });
         }
+    }
+
+    private void cargarGrupos() {
+        ApiClient.getAgendaService().listarGrupos().enqueue(new Callback<List<GrupoEntrenamiento>>() {
+            @Override
+            public void onResponse(Call<List<GrupoEntrenamiento>> call,
+                                   Response<List<GrupoEntrenamiento>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    grupos = response.body();
+                    List<String> nombres = new ArrayList<>();
+                    nombres.add(""); // opción vacía = todos
+                    for (GrupoEntrenamiento g : grupos) nombres.add(g.getNombre());
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                            CrearCompetenciaActivity.this,
+                            android.R.layout.simple_dropdown_item_1line, nombres);
+                    spinnerGrupoConvocado.setAdapter(adapter);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<GrupoEntrenamiento>> call, Throwable t) {}
+        });
     }
 
     private void setLoading(boolean loading) {

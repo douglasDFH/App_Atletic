@@ -72,7 +72,7 @@
                 android:textSize="12sp"
                 android:textColor="@color/colorPrimary" />
 
-            <!-- Nombre completo -->
+            <!-- Nombre (solo lectura — no editable por el atleta, HU-13) -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilNombre"
                 android:layout_width="match_parent"
@@ -88,8 +88,11 @@
                     android:id="@+id/etNombre"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPersonName|textCapWords"
-                    android:textColor="@color/colorTextPrimary" />
+                    android:focusable="false"
+                    android:enabled="false"
+                    android:inputType="none"
+                    android:textColor="@color/colorTextSecondary"
+                    android:alpha="0.7" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Email -->
@@ -97,7 +100,7 @@
                 android:id="@+id/tilEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="16dp"
                 android:hint="@string/hint_correo"
                 app:boxBackgroundColor="@color/colorSurface"
                 app:boxBackgroundMode="outline"
@@ -109,6 +112,47 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textEmailAddress"
+                    android:textColor="@color/colorTextPrimary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Teléfono (opcional, HU-13) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilTelefono"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/hint_telefono"
+                app:boxBackgroundColor="@color/colorSurface"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/colorBorder"
+                app:hintTextColor="@color/colorTextSecondary"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTelefono"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="phone"
+                    android:textColor="@color/colorTextPrimary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Contraseña actual (requerida para confirmar cambios, HU-13) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilContrasenaActual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:hint="@string/hint_contrasena_actual"
+                app:boxBackgroundColor="@color/colorSurface"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/colorBorder"
+                app:hintTextColor="@color/colorTextSecondary"
+                app:passwordToggleEnabled="true"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etContrasenaActual"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
                     android:textColor="@color/colorTextPrimary" />
             </com.google.android.material.textfield.TextInputLayout>
 

@@ -37,8 +37,8 @@ import retrofit2.Response;
 
 public class EditarPerfilActivity extends AppCompatActivity {
 
-    private TextInputLayout tilNombre, tilEmail;
-    private TextInputEditText etNombre, etEmail;
+    private TextInputLayout tilNombre, tilEmail, tilTelefono, tilContrasenaActual;
+    private TextInputEditText etNombre, etEmail, etTelefono, etContrasenaActual;
     private MaterialButton btnGuardar;
     private View progressBar;
     private android.widget.TextView tvAvatar;
@@ -55,11 +55,15 @@ public class EditarPerfilActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        tilNombre   = findViewById(R.id.tilNombre);
-        tilEmail    = findViewById(R.id.tilEmail);
-        etNombre    = findViewById(R.id.etNombre);
-        etEmail     = findViewById(R.id.etEmail);
-        btnGuardar  = findViewById(R.id.btnGuardar);
+        tilNombre          = findViewById(R.id.tilNombre);
+        tilEmail           = findViewById(R.id.tilEmail);
+        tilTelefono        = findViewById(R.id.tilTelefono);
+        tilContrasenaActual = findViewById(R.id.tilContrasenaActual);
+        etNombre           = findViewById(R.id.etNombre);
+        etEmail            = findViewById(R.id.etEmail);
+        etTelefono         = findViewById(R.id.etTelefono);
+        etContrasenaActual = findViewById(R.id.etContrasenaActual);
+        btnGuardar         = findViewById(R.id.btnGuardar);
         progressBar = findViewById(R.id.progressBar);
         tvAvatar    = findViewById(R.id.tvAvatar);
         ivAvatar    = findViewById(R.id.ivAvatar);
@@ -89,6 +93,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
                             PerfilUsuario p = response.body();
                             etNombre.setText(p.getNombreCompleto());
                             etEmail.setText(p.getEmail());
+                            if (p.getTelefono() != null) etTelefono.setText(p.getTelefono());
                             actualizarAvatar(p.getNombreCompleto());
                             cargarFoto(p.getFotoUrl());
                         } else {
@@ -111,19 +116,20 @@ public class EditarPerfilActivity extends AppCompatActivity {
     }
 
     private void guardarCambios() {
-        String nombre = text(etNombre);
-        String email  = text(etEmail);
+        String email       = text(etEmail);
+        String telefono    = text(etTelefono);
+        String pwdActual   = text(etContrasenaActual);
+
+        tilEmail.setError(null);
+        tilContrasenaActual.setError(null);
 
         boolean valido = true;
-        tilNombre.setError(null);
-        tilEmail.setError(null);
-
-        if (TextUtils.isEmpty(nombre)) {
-            tilNombre.setError(getString(R.string.err_campo_requerido));
-            valido = false;
-        }
         if (TextUtils.isEmpty(email) || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             tilEmail.setError(getString(R.string.err_correo_invalido));
+            valido = false;
+        }
+        if (TextUtils.isEmpty(pwdActual)) {
+            tilContrasenaActual.setError(getString(R.string.err_campo_requerido));
             valido = false;
         }
         if (!valido) return;
@@ -132,24 +138,24 @@ public class EditarPerfilActivity extends AppCompatActivity {
         btnGuardar.setText(R.string.lbl_guardando);
 
         ApiClient.getUsuariosService()
-                .editarPerfil(new EditarPerfilRequest(nombre, email))
+                .editarPerfil(new EditarPerfilRequest(email, telefono.isEmpty() ? null : telefono, pwdActual))
                 .enqueue(new Callback<PerfilUsuario>() {
                     @Override
                     public void onResponse(Call<PerfilUsuario> call, Response<PerfilUsuario> response) {
                         btnGuardar.setEnabled(true);
                         btnGuardar.setText(R.string.btn_guardar_perfil);
                         if (response.isSuccessful() && response.body() != null) {
-                            // Actualizar nombre en sesión local
-                            new SessionManager(EditarPerfilActivity.this)
-                                    .saveUserName(response.body().getNombreCompleto());
                             Toast.makeText(EditarPerfilActivity.this,
                                     getString(R.string.msg_perfil_actualizado),
                                     Toast.LENGTH_SHORT).show();
                             setResult(RESULT_OK);
                             finish();
                         } else {
+                            String msg = extractErrorMessage(response);
                             Toast.makeText(EditarPerfilActivity.this,
-                                    getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                                    msg != null ? msg : getString(R.string.err_conexion),
+                                    Toast.LENGTH_LONG).show();
+                            btnGuardar.setText(R.string.btn_guardar_perfil);
                         }
                     }
 
@@ -222,6 +228,21 @@ public class EditarPerfilActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(this, getString(R.string.err_foto_subida), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private String extractErrorMessage(retrofit2.Response<?> response) {
+        try {
+            if (response.errorBody() != null) {
+                String body = response.errorBody().string();
+                int idx = body.indexOf("\"message\":");
+                if (idx >= 0) {
+                    int start = body.indexOf('"', idx + 10) + 1;
+                    int end   = body.indexOf('"', start);
+                    if (start > 0 && end > start) return body.substring(start, end);
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     private String text(TextInputEditText et) {

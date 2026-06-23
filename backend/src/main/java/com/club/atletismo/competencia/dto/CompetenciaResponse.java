@@ -17,4 +17,5 @@ public class CompetenciaResponse {
     private String estado;
     private boolean estaInscrito;
     private int totalInscritos;
+    private Long grupoConvocadoId;
 }

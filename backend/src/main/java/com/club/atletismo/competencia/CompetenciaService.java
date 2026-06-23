@@ -58,10 +58,15 @@ public class CompetenciaService {
                 .lugar(req.getLugar())
                 .categoria(req.getCategoria())
                 .descripcion(req.getDescripcion())
+                .grupoConvocadoId(req.getGrupoId())
                 .estado(EstadoCompetencia.PROXIMO)
                 .build();
         CompetenciaResponse resp = toResponse(competenciaRepository.save(c), usuarioService.getUsuarioActual());
-        usuarioRepository.findByRolAndActivo(Rol.ATLETA, true)
+        // Notificación selectiva: si grupoId != null, solo ese grupo; si null, todos (HU-09)
+        final Long grupoFiltro = req.getGrupoId();
+        usuarioRepository.findByRolAndActivo(Rol.ATLETA, true).stream()
+                .filter(u -> grupoFiltro == null
+                        || (u.getGrupo() != null && u.getGrupo().getId().equals(grupoFiltro)))
                 .forEach(u -> notificacionService.crear(u, "COMPETENCIA",
                         "Nueva competencia: " + req.getNombre(),
                         req.getDisciplina() + " · " + req.getFechaEvento() + " en " + req.getLugar()));
@@ -149,6 +154,12 @@ public class CompetenciaService {
 
         ResultadoCompetencia guardado = resultadoRepository.save(r);
 
+        // Notificar al atleta sobre su resultado (HU-11)
+        String mensajeResult = "Posición " + req.getPosicion() + " · Marca: " + req.getMarca()
+                + (guardado.isEsMarcaPersonal() ? " ⭐ ¡Nuevo récord personal!" : "");
+        notificacionService.crear(atleta, "RESULTADO",
+                "Resultado registrado: " + c.getNombre(), mensajeResult);
+
         // Una competencia con resultados se considera finalizada
         if (c.getEstado() != EstadoCompetencia.FINALIZADO) {
             c.setEstado(EstadoCompetencia.FINALIZADO);
@@ -190,6 +201,7 @@ public class CompetenciaService {
                 .estado(c.getEstado().name())
                 .estaInscrito(inscrito)
                 .totalInscritos(c.getInscritos().size())
+                .grupoConvocadoId(c.getGrupoConvocadoId())
                 .build();
     }
 }

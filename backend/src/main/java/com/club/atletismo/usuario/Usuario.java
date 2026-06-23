@@ -37,6 +37,7 @@ public class Usuario implements UserDetails {
 
     private String disciplina;
     private String categoria;
+    private String telefono;
     private String fcmToken;
     private String fotoUrl;
 

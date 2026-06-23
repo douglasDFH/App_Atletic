@@ -36,6 +36,10 @@ public interface UsuariosApiService {
     @PUT("usuarios/foto-perfil")
     Call<PerfilUsuario> subirFotoPerfil(@Part MultipartBody.Part foto);
 
+    @Multipart
+    @PUT("atletas/{id}/foto")
+    Call<PerfilUsuario> subirFotoAtleta(@Path("id") Long atletaId, @Part MultipartBody.Part foto);
+
     // Vínculo padre/tutor ↔ hijo (solo entrenador/admin)
     @GET("padres")
     Call<List<PadreInfo>> getPadres();

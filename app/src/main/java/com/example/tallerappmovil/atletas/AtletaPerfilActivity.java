@@ -1,6 +1,8 @@
 package com.example.tallerappmovil.atletas;
 
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,11 +11,20 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
@@ -42,8 +53,9 @@ public class AtletaPerfilActivity extends AppCompatActivity {
     private MarcasAdapter marcasAdapter;
 
     private Long atletaId;
-    private Long padreVinculadoId; // cuenta de padre actualmente vinculada a este atleta
+    private Long padreVinculadoId;
     private boolean atletaActivo = true;
+    private ActivityResultLauncher<String> pickFotoLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +83,10 @@ public class AtletaPerfilActivity extends AppCompatActivity {
         progressBar       = findViewById(R.id.progressBar);
 
         btnVincularPadre.setOnClickListener(v -> abrirDialogoVincular());
+
+        pickFotoLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> { if (uri != null) subirFotoAtleta(uri); });
 
         // Muestra el nombre mientras carga el detalle completo
         if (nombreExtra != null) {
@@ -276,6 +292,9 @@ public class AtletaPerfilActivity extends AppCompatActivity {
             startActivity(new Intent(this, EditarAtletaActivity.class)
                     .putExtra(EditarAtletaActivity.EXTRA_ATLETA_ID, atletaId));
             return true;
+        } else if (id == R.id.action_foto_atleta) {
+            pickFotoLauncher.launch("image/*");
+            return true;
         } else if (id == R.id.action_estado_atleta) {
             confirmarCambioEstado();
             return true;
@@ -318,6 +337,47 @@ public class AtletaPerfilActivity extends AppCompatActivity {
                         getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void subirFotoAtleta(Uri uri) {
+        try {
+            ContentResolver cr = getContentResolver();
+            String mime = cr.getType(uri);
+            if (mime == null) mime = "image/jpeg";
+            InputStream is = cr.openInputStream(uri);
+            if (is == null) return;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buf = new byte[4096];
+            int len;
+            while ((len = is.read(buf)) != -1) baos.write(buf, 0, len);
+            is.close();
+            RequestBody rb   = RequestBody.create(MediaType.parse(mime), baos.toByteArray());
+            MultipartBody.Part part = MultipartBody.Part.createFormData("foto", "foto.jpg", rb);
+            progressBar.setVisibility(View.VISIBLE);
+            ApiClient.getUsuariosService().subirFotoAtleta(atletaId, part)
+                    .enqueue(new Callback<com.example.tallerappmovil.model.PerfilUsuario>() {
+                        @Override
+                        public void onResponse(Call<com.example.tallerappmovil.model.PerfilUsuario> call,
+                                               Response<com.example.tallerappmovil.model.PerfilUsuario> r) {
+                            progressBar.setVisibility(View.GONE);
+                            if (r.isSuccessful()) {
+                                Toast.makeText(AtletaPerfilActivity.this,
+                                        getString(R.string.msg_foto_actualizada), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(AtletaPerfilActivity.this,
+                                        getString(R.string.err_foto_subida), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        @Override
+                        public void onFailure(Call<com.example.tallerappmovil.model.PerfilUsuario> call, Throwable t) {
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(AtletaPerfilActivity.this,
+                                    getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.err_foto_subida), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

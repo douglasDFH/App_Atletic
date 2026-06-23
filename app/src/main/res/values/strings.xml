@@ -304,6 +304,12 @@
     <!-- Recordarme (HU-02) -->
     <string name="lbl_recordarme">Recordarme por 30 días</string>
 
+    <!-- Convocatoria selectiva (HU-09) -->
+    <string name="hint_grupo_convocado">Convocar grupo específico (opcional — vacío = todos)</string>
+
+    <!-- Editar perfil (HU-13) -->
+    <string name="hint_telefono">Teléfono (opcional)</string>
+
     <!-- Contraseña fuerte (HU-01) -->
     <string name="err_contrasena_requisitos">Mínimo 8 caracteres, una mayúscula y un número</string>
 

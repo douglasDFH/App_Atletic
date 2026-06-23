@@ -6,8 +6,9 @@ import lombok.Data;
 
 @Data
 public class EditarPerfilRequest {
-    @NotBlank
-    private String nombreCompleto;
     @Email @NotBlank
     private String email;
+    private String telefono;
+    @NotBlank
+    private String contrasenaActual;
 }

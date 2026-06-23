@@ -9,6 +9,7 @@ public class PerfilUsuario {
     private Long grupoId;
     private String grupoNombre;
     private String fotoUrl;
+    private String telefono;
     // Solo rol PADRE: hijo (atleta) vinculado que observa
     private Long atletaVinculadoId;
     private String atletaVinculadoNombre;
@@ -21,6 +22,7 @@ public class PerfilUsuario {
     public Long getGrupoId()          { return grupoId; }
     public String getGrupoNombre()    { return grupoNombre; }
     public String getFotoUrl()        { return fotoUrl; }
+    public String getTelefono()       { return telefono; }
     public Long getAtletaVinculadoId()      { return atletaVinculadoId; }
     public String getAtletaVinculadoNombre(){ return atletaVinculadoNombre; }
 }

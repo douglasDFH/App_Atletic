@@ -58,6 +58,13 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.getAtleta(id));
     }
 
+    @PutMapping("/api/v1/atletas/{id}/foto")
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
+    public ResponseEntity<PerfilResponse> subirFotoAtleta(@PathVariable Long id,
+            @RequestPart("foto") MultipartFile foto) throws IOException {
+        return ResponseEntity.ok(usuarioService.subirFotoAtleta(id, foto));
+    }
+
     // ---- Gestión de atletas por el entrenador (RF-04, HU-12) ----
 
     @PostMapping("/api/v1/atletas")

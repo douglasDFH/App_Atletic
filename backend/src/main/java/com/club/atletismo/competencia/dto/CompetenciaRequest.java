@@ -14,4 +14,5 @@ public class CompetenciaRequest {
     private String lugar;
     private String categoria;
     private String descripcion;
+    private Long grupoId; // null = convocar a todos los atletas (HU-09)
 }

@@ -40,12 +40,17 @@ public class UsuarioService {
     @Transactional
     public PerfilResponse editarPerfil(EditarPerfilRequest req) {
         Usuario u = getUsuarioActual();
-        u.setNombreCompleto(req.getNombreCompleto());
+        if (!passwordEncoder.matches(req.getContrasenaActual(), u.getContrasenaHash())) {
+            throw new IllegalArgumentException("Contraseña actual incorrecta");
+        }
         if (!u.getCorreo().equals(req.getEmail()) &&
             usuarioRepository.existsByCorreo(req.getEmail())) {
             throw new IllegalArgumentException("El correo ya está en uso");
         }
         u.setCorreo(req.getEmail());
+        if (req.getTelefono() != null && !req.getTelefono().isBlank()) {
+            u.setTelefono(req.getTelefono());
+        }
         return toPerfilResponse(usuarioRepository.save(u));
     }
 
@@ -73,6 +78,23 @@ public class UsuarioService {
         Files.createDirectories(Paths.get(dir));
         String ext = foto.getOriginalFilename() != null
                 && foto.getOriginalFilename().contains(".")
+                ? foto.getOriginalFilename().substring(foto.getOriginalFilename().lastIndexOf("."))
+                : ".jpg";
+        String nombre = UUID.randomUUID() + ext;
+        Path ruta = Paths.get(dir + nombre);
+        Files.write(ruta, foto.getBytes());
+        u.setFotoUrl("/uploads/fotos/" + nombre);
+        return toPerfilResponse(usuarioRepository.save(u));
+    }
+
+    /** El entrenador sube/cambia la foto de un atleta específico (HU-12). */
+    @Transactional
+    public PerfilResponse subirFotoAtleta(Long atletaId, MultipartFile foto) throws IOException {
+        Usuario u = usuarioRepository.findById(atletaId)
+                .orElseThrow(() -> new IllegalArgumentException("Atleta no encontrado"));
+        String dir = System.getProperty("user.dir") + "/uploads/fotos/";
+        Files.createDirectories(Paths.get(dir));
+        String ext = foto.getOriginalFilename() != null && foto.getOriginalFilename().contains(".")
                 ? foto.getOriginalFilename().substring(foto.getOriginalFilename().lastIndexOf("."))
                 : ".jpg";
         String nombre = UUID.randomUUID() + ext;
@@ -248,6 +270,7 @@ public class UsuarioService {
                 .grupoId(grupoCtx != null ? grupoCtx.getId() : null)
                 .grupoNombre(grupoCtx != null ? grupoCtx.getNombre() : null)
                 .fotoUrl(u.getFotoUrl())
+                .telefono(u.getTelefono())
                 .atletaVinculadoId(hijo != null ? hijo.getId() : null)
                 .atletaVinculadoNombre(hijo != null ? hijo.getNombreCompleto() : null)
                 .build();

@@ -1818,11 +1818,11 @@ Auditoría exhaustiva de TODOS los requisitos (HU, RF, RNF, CU) contra el códig
 | HU-06 | Registro de marcas (entrenador) | ✅ | ✅ atleta/disciplina/fecha/resultado, marca personal automática, atleta no puede modificar. 🟡 disciplinas hardcodeadas; asociar a competencia no (solo a sesión) |
 | HU-07 | Historial de rendimiento propio (atleta) | ✅ | ✅ historial ordenado, filtro disciplina, gráfica evolución, mejor marca destacada, no ve otros (corregido en 9.14) |
 | HU-08 | Ver evolución del grupo (entrenador) | 🟡 | ✅ evolución individual por atleta con tendencia. ❌ comparativa de grupo. ❌ **exportar PDF/Excel** |
-| HU-09 | Publicar convocatoria (entrenador) | 🟡 | ✅ crear competencia + push; atletas confirman/declinan (inscribirse); ve confirmados. ❌ **convocar a grupos/atletas específicos** (notifica a TODOS) |
+| HU-09 | Publicar convocatoria (entrenador) | ✅ | ✅ crear competencia + push. ✅ **grupo específico** (spinner opcional; null = todos). ✅ atletas confirman/declinan; ve confirmados |
 | HU-10 | Registrar resultados de competencia | ❌ | ❌ No existe registro de posición/marca/observaciones por atleta en competencia, ni asociación al historial |
-| HU-11 | Recibir notificaciones push (atleta/padre) | 🟡 | ✅ push en crear/editar/cancelar sesión y crear competencia. ❌ **configurar qué notif recibir**. ❌ reintentos 3x. 🟡 historial sin límite de 30 días |
-| HU-12 | Gestionar perfil del atleta (entrenador) | ❌ | ❌ el entrenador **no puede crear ni editar el perfil** de un atleta (solo gestionar grupo). ❌ fecha nacimiento, datos de tutor, foto por el entrenador. ❌ auto-actualizar categoría al cumplir años. ❌ desactivar perfil. ❌ privacidad de menores |
-| HU-13 | Consultar/editar datos propios (atleta) | 🟡 | ✅ edita nombre, correo, foto. ❌ campo teléfono. ❌ confirmación por contraseña. ⚠️ puede editar nombre (debería estar bloqueado) |
+| HU-11 | Recibir notificaciones push (atleta/padre) | 🟡 | ✅ push sesión/competencia/resultado. ✅ **notificación push al atleta al registrar resultado**. ❌ configurar qué notif recibir. ❌ reintentos 3x. 🟡 historial sin límite de 30 días |
+| HU-12 | Gestionar perfil del atleta (entrenador) | 🟡 | ✅ crear/editar/desactivar atleta (9.18). ✅ fecha nac + datos tutor (9.17). ✅ **foto atleta por el entrenador** (menú "Cambiar foto"). ✅ **auto-categoría diaria** (`CategoriaSchedulerService @Scheduled`). ❌ notificar al atleta del cambio de categoría |
+| HU-13 | Consultar/editar datos propios (atleta) | 🟡 | ✅ edita correo, foto. ✅ **nombre bloqueado** (read-only). ✅ **teléfono opcional**. ✅ **confirmación por contraseña actual** (backend valida). 🟡 contrasena no muestra error específico en campo al fallar |
 
 #### B) Requisitos Funcionales (RF-01 a RF-18)
 
@@ -1840,10 +1840,10 @@ Auditoría exhaustiva de TODOS los requisitos (HU, RF, RNF, CU) contra el códig
 | RF-10 Consultar historial rendimiento + gráfica | ✅ | |
 | RF-11 Ver evolución grupal con indicadores | 🟡 | Individual sí; comparativa grupal no |
 | RF-12 Detectar marca personal | ✅ | (heurística mejorable para lanzamientos/saltos) |
-| RF-13 Publicar convocatorias con convocados | 🟡 | Crea competencia; sin convocados selectivos |
+| RF-13 Publicar convocatorias con convocados | ✅ | ✅ spinner de grupo opcional; null = notifica a todos |
 | RF-14 Confirmación de participación | ✅ | inscribirse/desinscribirse |
 | RF-15 Registrar resultados de competencia | ❌ | No implementado |
-| RF-16 Notificaciones push automáticas | 🟡 | Sesión/competencia sí; resultados no |
+| RF-16 Notificaciones push automáticas | 🟡 | Sesión/competencia/resultado ✅; configuración ❌; reintentos ❌ |
 | RF-17 Configuración de notificaciones | ❌ | No implementado |
 | RF-18 Historial de notificaciones 30 días | 🟡 | Hay historial; sin límite de 30 días |
 
@@ -2097,6 +2097,78 @@ Implementación del batch HU-01→HU-05 (excluyendo HU-03/06/07 que ya estaban a
 | HU-04 Conflicto horario | 🟡 ~75% | 🟡 ~90% (falta fecha pasada) |
 | HU-05 Asistencia 2h/Admin | 🟡 ~70% | ✅ ~95% |
 | RF-03 Token reset 24h | 🟡 (bug 1h) | ✅ correcto |
+
+---
+
+### 9.22 HU-09/11/12/13 — Convocatoria selectiva, Push resultado, Scheduler categorías, Foto atleta, Editar perfil seguro — 2026-06-23
+
+---
+
+#### HU-09 — Convocatoria selectiva por grupo (completado)
+
+**BACKEND:**
+- `Competencia`: nuevo campo `Long grupoConvocadoId` (null = todos, ddl-auto genera la columna).
+- `CompetenciaRequest` DTO: nuevo campo `Long grupoId`.
+- `CompetenciaResponse` DTO: nuevo campo `Long grupoConvocadoId`.
+- `CompetenciaService.crear()`: filtra la notificación push por grupo si `req.getGrupoId() != null`; guarda `grupoConvocadoId` en la entidad. Si `grupoId == null` → notifica a todos los atletas activos (comportamiento anterior).
+- `toResponse()`: incluye `grupoConvocadoId`.
+
+**APP:**
+- `CompetenciaRequest` model: nuevo campo `Long grupoId`; constructor actualizado a 7 args.
+- `activity_crear_competencia.xml`: `AutoCompleteTextView spinnerGrupoConvocado` (opcional — vacío = todos).
+- `CrearCompetenciaActivity`: carga grupos al iniciar (`ApiClient.getAgendaService().listarGrupos()`); al guardar, busca el grupo seleccionado y pasa su id (o null si no se seleccionó ninguno).
+
+---
+
+#### HU-11 — Push notification al atleta cuando se registra su resultado (completado)
+
+**BACKEND (`CompetenciaService.registrarResultado`):**
+- Después de guardar el resultado: `notificacionService.crear(atleta, "RESULTADO", "Resultado registrado: [competencia]", "Posición X · Marca: Y [⭐ ¡Nuevo récord personal!]")`.
+- La notificación llega solo al atleta cuyo resultado se registró (no a todos).
+
+---
+
+#### HU-12 — Auto-categoría por edad (scheduler) + Foto atleta por entrenador (completado)
+
+**BACKEND — Scheduler:**
+- `AtletismoApplication`: `@EnableScheduling` habilitado.
+- `CategoriaSchedulerService` (nuevo): `@Scheduled(cron = "0 0 1 * * *")` → cada día a la 1:00 am revisa todos los atletas activos con `fechaNacimiento` y actualiza `categoria` si cambió. Regla: ≤10 → "Pre-Infantil"; 11-13 → "Infantil"; 14-17 → "Juvenil"; ≥18 → "Mayores".
+
+**BACKEND — Foto atleta:**
+- `UsuarioService.subirFotoAtleta(Long atletaId, MultipartFile)`: mismo flujo que `subirFoto` pero sobre el atleta indicado por el entrenador.
+- `UsuarioController`: `PUT /api/v1/atletas/{id}/foto` restringido a `ENTRENADOR/ADMIN`.
+
+**APP:**
+- `UsuariosApiService`: `@Multipart @PUT("atletas/{id}/foto") subirFotoAtleta(@Path Long id, @Part foto)`.
+- `menu_atleta_perfil.xml`: ítem "Cambiar foto" (action_foto_atleta).
+- `AtletaPerfilActivity`: `ActivityResultLauncher` para elegir imagen; al seleccionar, llama `subirFotoAtleta(uri)` que convierte a `MultipartBody.Part` y llama `ApiClient.getUsuariosService().subirFotoAtleta(atletaId, part)`.
+
+---
+
+#### HU-13 — Editar perfil seguro: nombre bloqueado + teléfono + contraseña actual (completado)
+
+**BACKEND:**
+- `Usuario`: nuevo campo `String telefono`.
+- `PerfilResponse`: nuevo campo `String telefono`.
+- `EditarPerfilRequest`: eliminado `@NotBlank String nombreCompleto`; añadido `@NotBlank String contrasenaActual` y `String telefono` (opcional). El backend ya no actualiza el nombre del atleta desde este endpoint.
+- `UsuarioService.editarPerfil()`: verifica `contrasenaActual` contra `contrasenaHash` antes de cualquier cambio → HTTP 400 si incorrecta. Solo actualiza `correo` y `telefono` (no el nombre). `toPerfilResponse()` incluye `telefono`.
+
+**APP:**
+- `PerfilUsuario` model: campo `String telefono` + getter.
+- `EditarPerfilRequest` model: ahora tiene `email`, `telefono`, `contrasenaActual`; constructor de 3 args.
+- `activity_editar_perfil.xml`: campo nombre `android:enabled="false"` + `android:focusable="false"` (solo lectura); nuevos campos `etTelefono` (opcional) y `etContrasenaActual` (obligatorio).
+- `EditarPerfilActivity`: carga y muestra el teléfono existente; valida email + contraseña actual obligatorios; pasa `new EditarPerfilRequest(email, telefonoONull, pwdActual)`; extrae mensaje de error del backend (ej. "Contraseña actual incorrecta").
+
+---
+
+**Estado tras este commit:**
+
+| HU | Antes | Ahora |
+|---|---|---|
+| HU-09 Convocatoria selectiva | 🟡 ~80% | ✅ ~95% |
+| HU-11 Push resultado | 🟡 ~65% | 🟡 ~85% (falta configurar notif) |
+| HU-12 Scheduler + foto | 🟡 ~60% | 🟡 ~90% (falta notif cambio categoría) |
+| HU-13 Perfil seguro | 🟡 ~65% | 🟡 ~90% (campo pwd no resalta rojo en el TIL) |
 
 ---
 
