@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -110,6 +112,86 @@ public class UsuarioService {
                 .tutorVinculadoNombre(padre != null ? padre.getNombreCompleto() : null)
                 .build();
     }
+
+    /** Alta de atleta por el entrenador (CU-02). Crea la cuenta con contraseña inicial. */
+    @Transactional
+    public void crearAtleta(AtletaCrearRequest req) {
+        if (usuarioRepository.existsByCorreo(req.getCorreo())) {
+            throw new IllegalArgumentException("El correo ya está registrado");
+        }
+        LocalDate fechaNac = parseFecha(req.getFechaNacimiento());
+        validarTutorSiMenor(fechaNac, req.getTutorNombre(), req.getTutorParentesco(), req.getTutorTelefono());
+
+        Usuario u = Usuario.builder()
+                .nombreCompleto(req.getNombreCompleto())
+                .correo(req.getCorreo())
+                .contrasenaHash(passwordEncoder.encode(req.getContrasena()))
+                .rol(Rol.ATLETA)
+                .disciplina(req.getDisciplina())
+                .categoria(req.getCategoria())
+                .fechaNacimiento(fechaNac)
+                .tutorNombre(req.getTutorNombre())
+                .tutorParentesco(req.getTutorParentesco())
+                .tutorTelefono(req.getTutorTelefono())
+                .activo(true)
+                .build();
+        usuarioRepository.save(u);
+    }
+
+    /** Edición del perfil de un atleta por el entrenador (RF-04, HU-12). */
+    @Transactional
+    public AtletaDetalleDto editarAtleta(Long id, AtletaEditarRequest req) {
+        Usuario u = usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Atleta no encontrado"));
+        if (u.getRol() != Rol.ATLETA) {
+            throw new IllegalArgumentException("La cuenta no es un atleta");
+        }
+        if (req.getNombreCompleto() != null && !req.getNombreCompleto().isBlank()) {
+            u.setNombreCompleto(req.getNombreCompleto());
+        }
+        u.setDisciplina(req.getDisciplina());
+        u.setCategoria(req.getCategoria());
+        LocalDate fechaNac = parseFecha(req.getFechaNacimiento());
+        if (fechaNac != null) u.setFechaNacimiento(fechaNac);
+        validarTutorSiMenor(u.getFechaNacimiento(), req.getTutorNombre(),
+                req.getTutorParentesco(), req.getTutorTelefono());
+        u.setTutorNombre(req.getTutorNombre());
+        u.setTutorParentesco(req.getTutorParentesco());
+        u.setTutorTelefono(req.getTutorTelefono());
+        usuarioRepository.save(u);
+        return getAtleta(id);
+    }
+
+    /** Activa/desactiva un atleta sin borrar su historial (HU-12). */
+    @Transactional
+    public void cambiarEstadoAtleta(Long id, boolean activo) {
+        Usuario u = usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Atleta no encontrado"));
+        if (u.getRol() != Rol.ATLETA) {
+            throw new IllegalArgumentException("La cuenta no es un atleta");
+        }
+        u.setActivo(activo);
+        usuarioRepository.save(u);
+    }
+
+    private LocalDate parseFecha(String fecha) {
+        if (fecha == null || fecha.isBlank()) return null;
+        try {
+            return LocalDate.parse(fecha);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Fecha de nacimiento inválida (formato AAAA-MM-DD)");
+        }
+    }
+
+    private void validarTutorSiMenor(LocalDate fechaNac, String tNombre, String tParent, String tTel) {
+        boolean menor = fechaNac != null && Period.between(fechaNac, LocalDate.now()).getYears() < 18;
+        if (menor && (esVacio(tNombre) || esVacio(tParent) || esVacio(tTel))) {
+            throw new IllegalArgumentException(
+                    "El atleta es menor de edad: se requieren nombre, parentesco y teléfono del tutor");
+        }
+    }
+
+    private boolean esVacio(String s) { return s == null || s.isBlank(); }
 
     /** Lista de cuentas PADRE/Tutor con el hijo que tienen vinculado (para el entrenador). */
     @Transactional(readOnly = true)

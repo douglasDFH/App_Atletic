@@ -1944,6 +1944,26 @@ Las columnas se crean automáticamente con `ddl-auto: update` al redeploy (no re
 
 ---
 
+### 9.18 Gestión de atletas por el entrenador (crear/editar/desactivar) — 2026-06-22
+
+Implementa RF-04 y HU-12 (el entrenador antes solo podía consultar atletas).
+
+**BACKEND:**
+| Método | Endpoint | Acción |
+|---|---|---|
+| POST | `/api/v1/atletas` | Crear atleta (cuenta + contraseña inicial); exige tutor si es menor |
+| PUT | `/api/v1/atletas/{id}` | Editar nombre/disciplina/categoría/fecha nac/datos de tutor |
+| PUT | `/api/v1/atletas/{id}/estado` | Activar/desactivar (soft-delete, conserva historial) |
+
+- DTOs nuevos: `AtletaCrearRequest`, `AtletaEditarRequest`.
+- `UsuarioService`: `crearAtleta`, `editarAtleta`, `cambiarEstadoAtleta` + validación de tutor si menor (reutilizada).
+- Todos restringidos a ENTRENADOR/ADMIN.
+- Desactivar pone `activo=false` → el atleta no inicia sesión (UserDetails.isEnabled) y desaparece de la lista (`findByRolAndActivo(ATLETA,true)`), preservando su historial.
+
+**Pendiente — APP:** botones Editar/Desactivar en el perfil del atleta; FAB para crear atleta en la lista; formulario `EditarAtletaActivity`.
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**

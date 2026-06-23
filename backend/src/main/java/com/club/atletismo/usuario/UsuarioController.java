@@ -58,6 +58,30 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.getAtleta(id));
     }
 
+    // ---- Gestión de atletas por el entrenador (RF-04, HU-12) ----
+
+    @PostMapping("/api/v1/atletas")
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> crearAtleta(@Valid @RequestBody AtletaCrearRequest req) {
+        usuarioService.crearAtleta(req);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @PutMapping("/api/v1/atletas/{id}")
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
+    public ResponseEntity<AtletaDetalleDto> editarAtleta(@PathVariable Long id,
+                                                         @RequestBody AtletaEditarRequest req) {
+        return ResponseEntity.ok(usuarioService.editarAtleta(id, req));
+    }
+
+    @PutMapping("/api/v1/atletas/{id}/estado")
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> cambiarEstado(@PathVariable Long id,
+                                                           @RequestBody Map<String, Boolean> body) {
+        usuarioService.cambiarEstadoAtleta(id, Boolean.TRUE.equals(body.get("activo")));
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
     // ---- Gestión de vínculo PADRE/Tutor ↔ atleta (solo entrenador/admin) ----
 
     @GetMapping("/api/v1/padres")
