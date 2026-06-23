@@ -42,4 +42,10 @@ public class AuthController {
         authService.resetPassword(body.get("token"), body.get("nuevaContrasena"));
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam String token) {
+        authService.verifyEmail(token);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
 }

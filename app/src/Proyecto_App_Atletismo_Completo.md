@@ -1986,6 +1986,44 @@ El entrenador puede registrar el resultado de cada atleta en una competencia (po
 
 ---
 
+### 9.20 Bloqueo tras 5 intentos fallidos (HU-02) + Verificación de correo al registrar (HU-01) — 2026-06-23
+
+Implementación de las dos funcionalidades de seguridad pendientes en autenticación.
+
+**BACKEND:**
+
+**HU-02 — Bloqueo de cuenta:**
+- `Usuario`: nuevos campos `intentosFallidos` (int, default 0) y `bloqueadoHasta` (LocalDateTime, nullable).
+- `AuthService.login()`: reescrito para verificar contraseña manualmente (sin `authManager.authenticate()`):
+  - Si `bloqueadoHasta` está en el futuro → `CuentaBloqueadaException` (HTTP 423) con minutos restantes.
+  - Si la contraseña falla: incrementa `intentosFallidos`; al llegar a 5 → `bloqueadoHasta = now + 15 min` e `intentosFallidos = 0`.
+  - Si éxito → limpia contadores.
+- `CuentaBloqueadaException` → manejada en `GlobalExceptionHandler` con HTTP 423 LOCKED.
+
+**HU-01 — Verificación de correo:**
+- `Usuario`: nuevos campos `emailVerificado` (Boolean, null = cuenta legacy sin restricción) y `tokenVerificacion` (String).
+- `AuthService.register()`: genera UUID token, guarda `emailVerificado=false`/`tokenVerificacion`, luego llama `emailService.sendVerificationEmail()` (no lanza si falla el correo).
+- `AuthService.verifyEmail(token)`: busca por `tokenVerificacion`, activa `emailVerificado=true` y limpia el token.
+- `AuthService.login()`: si `emailVerificado == false` → `CorreoNoVerificadoException` (HTTP 403); si `null` (cuentas pre-HU-01) → sin restricción (retrocompatible).
+- `CorreoNoVerificadoException` → HTTP 403 en `GlobalExceptionHandler`.
+- `EmailService.sendVerificationEmail()`: correo con código UUID y deep link `atletismo://verify?token=xxx`.
+- Nuevo endpoint: `GET /api/v1/auth/verify-email?token=xxx` (público, sin JWT).
+- `UsuarioRepository`: nuevo método `findByTokenVerificacion(String)`.
+- `UsuarioService.crearAtleta()`: pone `emailVerificado=true` (entrenador crea cuentas directamente, sin verificación).
+
+**APP (Android):**
+- `AuthApiService`: nuevo `@GET("auth/verify-email") verifyEmail(@Query("token") String)`.
+- `LoginActivity`: maneja HTTP 423 (toast con mensaje del backend con minutos restantes) y HTTP 403 (navega a `VerificarCorreoActivity`).
+- `RegisterActivity`: al registrar exitosamente, navega a `VerificarCorreoActivity` (antes hacía `finish()`).
+- `VerificarCorreoActivity` (nueva): campo para ingresar el código UUID + botón "Verificar". Maneja también el deep link `atletismo://verify?token=xxx` (auto-completa y verifica). Al éxito navega a Login.
+- `activity_verificar_correo.xml` (nuevo): layout de verificación.
+- `AndroidManifest`: `VerificarCorreoActivity` con `intent-filter` para `atletismo://verify`.
+- Strings nuevos: `lbl_verificar_correo`, `lbl_verificar_correo_desc`, `hint_codigo_verificacion`, `btn_verificar`, `msg_correo_verificado`, `err_codigo_requerido`, `err_correo_no_verificado`.
+
+**Retrocompatibilidad:** cuentas existentes en BD tienen `email_verificado = NULL` → `Boolean.FALSE.equals(null) = false` → no se bloquean. Solo las cuentas creadas después de este commit tienen `emailVerificado=false` hasta verificar.
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**

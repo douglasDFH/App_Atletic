@@ -1,5 +1,7 @@
 package com.club.atletismo.shared;
 
+import com.club.atletismo.auth.CuentaBloqueadaException;
+import com.club.atletismo.auth.CorreoNoVerificadoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +20,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleBadCredentials() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error("Correo o contraseña incorrectos"));
+    }
+
+    @ExceptionHandler(CuentaBloqueadaException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCuentaBloqueada(CuentaBloqueadaException ex) {
+        return ResponseEntity.status(HttpStatus.LOCKED)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(CorreoNoVerificadoException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCorreoNoVerificado(CorreoNoVerificadoException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

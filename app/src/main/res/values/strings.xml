@@ -289,4 +289,15 @@
     <string name="lbl_cambiar_foto">Cambiar foto</string>
     <string name="msg_foto_actualizada">Foto de perfil actualizada</string>
     <string name="err_foto_subida">Error al subir la foto</string>
+
+    <!-- Verificación de correo (HU-01) -->
+    <string name="lbl_verificar_correo">Verifica tu correo</string>
+    <string name="lbl_verificar_correo_desc">Ingresa el código que enviamos a tu correo electrónico. Si no lo ves, revisa tu carpeta de spam.</string>
+    <string name="hint_codigo_verificacion">Código de verificación</string>
+    <string name="btn_verificar">Verificar cuenta</string>
+    <string name="msg_correo_verificado">¡Correo verificado! Ya puedes iniciar sesión.</string>
+    <string name="err_codigo_requerido">Ingresa el código de verificación</string>
+
+    <!-- Bloqueo de cuenta (HU-02) -->
+    <string name="err_correo_no_verificado">Verifica tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.</string>
 </resources>

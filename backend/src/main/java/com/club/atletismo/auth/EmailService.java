@@ -20,6 +20,29 @@ public class EmailService {
     @Value("${app.reset-url-scheme:atletismo://reset}")
     private String resetUrlScheme;
 
+    public void sendVerificationEmail(String toEmail, String nombreCompleto, String token) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromAddress);
+            message.setTo(toEmail);
+            message.setSubject("AthleteSCZ — Verifica tu correo electrónico");
+            message.setText(
+                    "Hola " + nombreCompleto + ",\n\n" +
+                    "¡Bienvenido/a a AthleteSCZ! Para activar tu cuenta ingresa este código en la app:\n\n" +
+                    token + "\n\n" +
+                    "O toca este enlace desde tu teléfono:\n" +
+                    "atletismo://verify?token=" + token + "\n\n" +
+                    "Si no creaste esta cuenta, ignora este mensaje.\n\n" +
+                    "— Club Atlético Santa Cruz de la Sierra"
+            );
+            mailSender.send(message);
+            log.info("Correo de verificación enviado a {}", toEmail);
+        } catch (Exception e) {
+            log.error("Error al enviar correo de verificación a {}: {}", toEmail, e.getMessage());
+            // No relanzar: el usuario queda registrado; puede reenviar manualmente
+        }
+    }
+
     public void sendPasswordResetEmail(String toEmail, String nombreCompleto, String token) {
         try {
             String resetLink = resetUrlScheme + "?token=" + token;

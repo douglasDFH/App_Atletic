@@ -13,4 +13,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     // Cuenta PADRE vinculada a un atleta (hijo)
     Optional<Usuario> findFirstByAtletaVinculadoId(Long atletaId);
+
+    Optional<Usuario> findByTokenVerificacion(String tokenVerificacion);
 }

@@ -104,6 +104,17 @@ public class LoginActivity extends AppCompatActivity {
                                     .saveSession(token.getAccessToken(), token.getRol(), token.getNombreCompleto());
                             ApiClient.setToken(token.getAccessToken());
                             redirectToDashboard(token.getRol(), token.getNombreCompleto());
+                        } else if (response.code() == 423) {
+                            // Cuenta bloqueada por intentos fallidos (HU-02)
+                            String msg = extractErrorMessage(response);
+                            Toast.makeText(LoginActivity.this,
+                                    msg != null ? msg : "Cuenta bloqueada temporalmente. Intenta más tarde.",
+                                    Toast.LENGTH_LONG).show();
+                        } else if (response.code() == 403) {
+                            // Correo sin verificar (HU-01)
+                            Toast.makeText(LoginActivity.this,
+                                    getString(R.string.err_correo_no_verificado), Toast.LENGTH_LONG).show();
+                            startActivity(new Intent(LoginActivity.this, VerificarCorreoActivity.class));
                         } else {
                             tilCorreo.setError(getString(R.string.err_credenciales));
                             tilContrasena.setError(getString(R.string.err_credenciales));
@@ -141,6 +152,21 @@ public class LoginActivity extends AppCompatActivity {
                         @Override public void onFailure(Call<Void> c, Throwable t) {}
                     });
         });
+    }
+
+    private String extractErrorMessage(retrofit2.Response<?> response) {
+        try {
+            if (response.errorBody() != null) {
+                String body = response.errorBody().string();
+                int idx = body.indexOf("\"message\":");
+                if (idx >= 0) {
+                    int start = body.indexOf('"', idx + 10) + 1;
+                    int end   = body.indexOf('"', start);
+                    if (start > 0 && end > start) return body.substring(start, end);
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     private void setLoading(boolean loading) {

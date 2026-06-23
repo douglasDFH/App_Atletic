@@ -134,6 +134,7 @@ public class UsuarioService {
                 .tutorParentesco(req.getTutorParentesco())
                 .tutorTelefono(req.getTutorTelefono())
                 .activo(true)
+                .emailVerificado(true)  // cuenta creada por entrenador, no requiere verificación
                 .build();
         usuarioRepository.save(u);
     }

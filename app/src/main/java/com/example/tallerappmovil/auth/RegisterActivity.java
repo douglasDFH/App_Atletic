@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tallerappmovil.R;
@@ -197,8 +198,9 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         setLoading(false);
                         if (response.isSuccessful()) {
-                            Toast.makeText(RegisterActivity.this,
-                                    getString(R.string.msg_registro_exitoso), Toast.LENGTH_LONG).show();
+                            // Navegar a pantalla de verificación de correo (HU-01)
+                            Intent intent = new Intent(RegisterActivity.this, VerificarCorreoActivity.class);
+                            startActivity(intent);
                             finish();
                         } else {
                             Toast.makeText(RegisterActivity.this,

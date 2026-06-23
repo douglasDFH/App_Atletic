@@ -57,6 +57,15 @@ public class Usuario implements UserDetails {
     @JoinColumn(name = "atleta_vinculado_id")
     private Usuario atletaVinculado;
 
+    // Bloqueo de cuenta tras intentos fallidos (HU-02)
+    @Builder.Default
+    private int intentosFallidos = 0;
+    private LocalDateTime bloqueadoHasta;
+
+    // Verificación de correo al registrar (HU-01). null = cuenta legacy (sin restricción).
+    private Boolean emailVerificado;
+    private String tokenVerificacion;
+
     /** Edad en años a partir de la fecha de nacimiento (null si no hay fecha). */
     @Transient
     public Integer getEdad() {
