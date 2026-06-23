@@ -1960,7 +1960,11 @@ Implementa RF-04 y HU-12 (el entrenador antes solo podía consultar atletas).
 - Todos restringidos a ENTRENADOR/ADMIN.
 - Desactivar pone `activo=false` → el atleta no inicia sesión (UserDetails.isEnabled) y desaparece de la lista (`findByRolAndActivo(ATLETA,true)`), preservando su historial.
 
-**Pendiente — APP:** botones Editar/Desactivar en el perfil del atleta; FAB para crear atleta en la lista; formulario `EditarAtletaActivity`.
+**APP (Android):**
+- ✅ `EditarAtletaActivity` (crear/editar): formulario con nombre, correo+contraseña (solo crear), disciplina, categoría, fecha de nacimiento y, si es menor, datos de tutor obligatorios (mismo cálculo de edad que el registro).
+- ✅ `AtletasActivity`: **FAB** para crear atleta + refresco en `onResume`.
+- ✅ `AtletaPerfilActivity`: menú con **Editar** (→ `EditarAtletaActivity`) y **Activar/Desactivar** (con confirmación). Modelos `AtletaCrearRequest`/`AtletaEditarRequest`; `AtletasApiService` con `crearAtleta/editarAtleta/cambiarEstado`.
+- Nota: al desactivar, el atleta desaparece de la lista (activos). Reactivar desde un atleta inactivo requeriría listarlos (mejora menor futura).
 
 ---
 

@@ -73,5 +73,15 @@
             android:layout_height="match_parent"
             android:padding="8dp"
             android:clipToPadding="false" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabNuevoAtleta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="20dp"
+            android:src="@android:drawable/ic_input_add"
+            app:tint="@color/colorOnPrimary"
+            app:backgroundTint="@color/colorPrimary" />
     </FrameLayout>
 </LinearLayout>

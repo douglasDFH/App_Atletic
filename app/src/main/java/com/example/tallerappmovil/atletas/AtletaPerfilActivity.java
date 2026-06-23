@@ -2,6 +2,8 @@ package com.example.tallerappmovil.atletas;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -41,6 +43,7 @@ public class AtletaPerfilActivity extends AppCompatActivity {
 
     private Long atletaId;
     private Long padreVinculadoId; // cuenta de padre actualmente vinculada a este atleta
+    private boolean atletaActivo = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +134,8 @@ public class AtletaPerfilActivity extends AppCompatActivity {
     }
 
     private void mostrarTutor(AtletaDetalle d) {
+        atletaActivo = !"INACTIVO".equals(d.getEstado());
+        invalidateOptionsMenu();
         // Contacto de emergencia del tutor
         if (d.getTutorNombre() != null && !d.getTutorNombre().isEmpty()) {
             String parent = d.getTutorParentesco() != null ? " (" + d.getTutorParentesco() + ")" : "";
@@ -248,6 +253,71 @@ public class AtletaPerfilActivity extends AppCompatActivity {
                         tvSinMarcas.setVisibility(View.VISIBLE);
                     }
                 });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (atletaId != -1L) cargarDetalle(); // refrescar tras editar
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_atleta_perfil, menu);
+        menu.findItem(R.id.action_estado_atleta).setTitle(
+                atletaActivo ? R.string.lbl_desactivar_atleta : R.string.lbl_activar_atleta);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_editar_atleta) {
+            startActivity(new Intent(this, EditarAtletaActivity.class)
+                    .putExtra(EditarAtletaActivity.EXTRA_ATLETA_ID, atletaId));
+            return true;
+        } else if (id == R.id.action_estado_atleta) {
+            confirmarCambioEstado();
+            return true;
+        } else if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void confirmarCambioEstado() {
+        if (atletaActivo) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.lbl_desactivar_atleta)
+                    .setMessage(R.string.confirm_desactivar_atleta)
+                    .setPositiveButton(R.string.lbl_desactivar_atleta, (d, w) -> cambiarEstado(false))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        } else {
+            cambiarEstado(true);
+        }
+    }
+
+    private void cambiarEstado(boolean activo) {
+        java.util.Map<String, Boolean> body = new java.util.HashMap<>();
+        body.put("activo", activo);
+        ApiClient.getAtletasService().cambiarEstado(atletaId, body).enqueue(new Callback<Void>() {
+            @Override public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(AtletaPerfilActivity.this,
+                            getString(R.string.msg_estado_actualizado), Toast.LENGTH_SHORT).show();
+                    cargarDetalle();
+                } else {
+                    Toast.makeText(AtletaPerfilActivity.this,
+                            getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(AtletaPerfilActivity.this,
+                        getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

@@ -47,6 +47,7 @@
 
         <activity android:name=".atletas.AtletasActivity"         android:exported="false" />
         <activity android:name=".atletas.AtletaPerfilActivity"  android:exported="false" />
+        <activity android:name=".atletas.EditarAtletaActivity"  android:exported="false" />
 
         <activity android:name=".grupos.GruposActivity"         android:exported="false" />
         <activity android:name=".grupos.GrupoDetalleActivity"   android:exported="false" />

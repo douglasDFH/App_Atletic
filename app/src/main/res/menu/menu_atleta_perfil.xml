@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_editar_atleta"
+        android:title="@string/lbl_editar"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_estado_atleta"
+        android:title="@string/lbl_desactivar_atleta"
+        app:showAsAction="never" />
+</menu>

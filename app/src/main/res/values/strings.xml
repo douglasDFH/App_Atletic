@@ -49,6 +49,17 @@
     <string name="err_tutor_requerido">Completa los datos del tutor (menor de edad)</string>
     <string name="err_fecha_nac_requerida">Selecciona la fecha de nacimiento</string>
     <!-- Vínculo padre-hijo (entrenador) -->
+    <!-- Gestión de atletas (entrenador) -->
+    <string name="btn_guardar">Guardar</string>
+    <string name="lbl_nuevo_atleta">Nuevo atleta</string>
+    <string name="lbl_editar_atleta">Editar atleta</string>
+    <string name="lbl_editar">Editar</string>
+    <string name="msg_atleta_creado">Atleta creado</string>
+    <string name="msg_atleta_actualizado">Atleta actualizado</string>
+    <string name="lbl_desactivar_atleta">Desactivar atleta</string>
+    <string name="lbl_activar_atleta">Activar atleta</string>
+    <string name="confirm_desactivar_atleta">¿Desactivar este atleta? No podrá iniciar sesión, pero se conserva su historial.</string>
+    <string name="msg_estado_actualizado">Estado actualizado</string>
     <string name="lbl_vincular_hijo">Vincular hijo</string>
     <string name="lbl_vincular_padre">Vincular cuenta de padre/tutor</string>
     <string name="lbl_elegir_padre">Elegir cuenta de padre/tutor</string>

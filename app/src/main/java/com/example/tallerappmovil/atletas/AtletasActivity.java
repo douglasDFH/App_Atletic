@@ -59,6 +59,9 @@ public class AtletasActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        findViewById(R.id.fabNuevoAtleta).setOnClickListener(v ->
+                startActivity(new Intent(this, EditarAtletaActivity.class)));
+
         TextInputEditText etBusqueda = findViewById(R.id.etBusqueda);
         etBusqueda.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -71,6 +74,12 @@ public class AtletasActivity extends AppCompatActivity {
         });
 
         cargarAtletas();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cargarAtletas(); // refrescar tras crear/editar un atleta
     }
 
     private void cargarAtletas() {
