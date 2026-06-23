@@ -22,10 +22,14 @@ public class JwtService {
     private long expiration;
 
     public String generateToken(UserDetails user) {
+        return generateToken(user, expiration);
+    }
+
+    public String generateToken(UserDetails user, long expirationMs) {
         return Jwts.builder()
                 .subject(user.getUsername())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getKey())
                 .compact();
     }

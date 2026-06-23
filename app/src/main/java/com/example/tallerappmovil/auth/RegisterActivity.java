@@ -159,6 +159,10 @@ public class RegisterActivity extends AppCompatActivity {
         if (nombre.isEmpty()) { tilNombre.setError(getString(R.string.err_campo_requerido)); return; }
         if (!Patterns.EMAIL_ADDRESS.matcher(correo).matches()) { tilCorreo.setError(getString(R.string.err_correo_invalido)); return; }
         if (password.length() < 8) { tilContrasena.setError(getString(R.string.err_contrasena_corta)); return; }
+        if (!password.matches(".*[A-Z].*") || !password.matches(".*[0-9].*")) {
+            tilContrasena.setError(getString(R.string.err_contrasena_requisitos));
+            return;
+        }
         if (!password.equals(confirm)) { tilConfirmar.setError(getString(R.string.err_contrasenas_no_coinciden)); return; }
 
         boolean atleta = esAtletaSeleccionado();

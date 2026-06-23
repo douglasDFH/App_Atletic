@@ -19,4 +19,14 @@ public interface SesionRepository extends JpaRepository<SesionEntrenamiento, Lon
                                                    @Param("grupoId") Long grupoId);
 
     List<SesionEntrenamiento> findByGrupoIdOrderByHoraInicioDesc(Long grupoId);
+
+    @Query("SELECT COUNT(s) FROM SesionEntrenamiento s " +
+           "WHERE s.grupo.id = :grupoId " +
+           "AND s.estado <> com.club.atletismo.sesion.EstadoSesion.CANCELADA " +
+           "AND s.horaInicio < :fin AND s.horaFin > :inicio " +
+           "AND s.id <> :excludeId")
+    long countConflictos(@Param("grupoId") Long grupoId,
+                         @Param("inicio") LocalDateTime inicio,
+                         @Param("fin") LocalDateTime fin,
+                         @Param("excludeId") Long excludeId);
 }

@@ -74,7 +74,11 @@ public class AuthService {
             usuarioRepository.save(usuario);
         }
 
-        String token = jwtService.generateToken(usuario);
+        // Recordarme 30 días (HU-02)
+        long expMs = request.isRecordarme()
+                ? 30L * 24 * 60 * 60 * 1000
+                : 86_400_000L;
+        String token = jwtService.generateToken(usuario, expMs);
         return new TokenResponse(token, token, usuario.getRol().name(), usuario.getNombreCompleto());
     }
 
@@ -83,6 +87,7 @@ public class AuthService {
         if (usuarioRepository.existsByCorreo(request.getCorreo())) {
             throw new IllegalArgumentException("El correo ya está registrado");
         }
+        validarContrasena(request.getContrasena());
 
         Rol rol = request.getRol() != null ? Rol.valueOf(request.getRol()) : Rol.ATLETA;
 
@@ -140,6 +145,15 @@ public class AuthService {
         } catch (Exception e) {
             throw new IllegalArgumentException("Fecha de nacimiento inválida (formato esperado: AAAA-MM-DD)");
         }
+    }
+
+    private void validarContrasena(String pwd) {
+        if (pwd == null || pwd.length() < 8)
+            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres");
+        if (!pwd.matches(".*[A-Z].*"))
+            throw new IllegalArgumentException("La contraseña debe contener al menos una letra mayúscula");
+        if (!pwd.matches(".*[0-9].*"))
+            throw new IllegalArgumentException("La contraseña debe contener al menos un número");
     }
 
     private boolean isBlank(String s) {

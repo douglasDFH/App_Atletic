@@ -45,10 +45,16 @@ public class SesionService {
     public SesionResponse crear(SesionRequest req) {
         Grupo g = grupoRepository.findById(req.getGrupoId())
                 .orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado"));
+        LocalDateTime horaInicio = LocalDateTime.parse(req.getHoraInicio(), DT);
+        LocalDateTime horaFin    = LocalDateTime.parse(req.getHoraFin(), DT);
+        if (sesionRepository.countConflictos(req.getGrupoId(), horaInicio, horaFin, -1L) > 0) {
+            throw new IllegalArgumentException(
+                    "Ya existe una sesión programada para este grupo en ese horario");
+        }
         SesionEntrenamiento s = SesionEntrenamiento.builder()
                 .grupo(g)
-                .horaInicio(LocalDateTime.parse(req.getHoraInicio(), DT))
-                .horaFin(LocalDateTime.parse(req.getHoraFin(), DT))
+                .horaInicio(horaInicio)
+                .horaFin(horaFin)
                 .lugar(req.getLugar())
                 .descripcion(req.getDescripcion())
                 .estado(EstadoSesion.PROGRAMADA)
@@ -68,9 +74,15 @@ public class SesionService {
                 .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada"));
         Grupo g = grupoRepository.findById(req.getGrupoId())
                 .orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado"));
+        LocalDateTime horaInicio = LocalDateTime.parse(req.getHoraInicio(), DT);
+        LocalDateTime horaFin    = LocalDateTime.parse(req.getHoraFin(), DT);
+        if (sesionRepository.countConflictos(req.getGrupoId(), horaInicio, horaFin, id) > 0) {
+            throw new IllegalArgumentException(
+                    "Ya existe una sesión programada para este grupo en ese horario");
+        }
         s.setGrupo(g);
-        s.setHoraInicio(LocalDateTime.parse(req.getHoraInicio(), DT));
-        s.setHoraFin(LocalDateTime.parse(req.getHoraFin(), DT));
+        s.setHoraInicio(horaInicio);
+        s.setHoraFin(horaFin);
         s.setLugar(req.getLugar());
         s.setDescripcion(req.getDescripcion());
         SesionResponse resp = toResponse(sesionRepository.save(s));

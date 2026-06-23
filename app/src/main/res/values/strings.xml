@@ -300,4 +300,17 @@
 
     <!-- Bloqueo de cuenta (HU-02) -->
     <string name="err_correo_no_verificado">Verifica tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.</string>
+
+    <!-- Recordarme (HU-02) -->
+    <string name="lbl_recordarme">Recordarme por 30 días</string>
+
+    <!-- Contraseña fuerte (HU-01) -->
+    <string name="err_contrasena_requisitos">Mínimo 8 caracteres, una mayúscula y un número</string>
+
+    <!-- Conflicto de horario (HU-04) -->
+    <string name="err_conflicto_horario">Ya existe una sesión programada para este grupo en ese horario</string>
+
+    <!-- Asistencia (HU-05) -->
+    <string name="err_asistencia_fuera_plazo">El plazo para registrar asistencia ha vencido (máx. 2 h tras la sesión)</string>
+    <string name="err_asistencia_bloqueada">La asistencia ya fue guardada. Solo el Administrador puede modificarla.</string>
 </resources>

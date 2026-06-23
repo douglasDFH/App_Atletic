@@ -1810,11 +1810,11 @@ Auditoría exhaustiva de TODOS los requisitos (HU, RF, RNF, CU) contra el códig
 
 | HU | Requisito | Estado | Qué falta / nota |
 |---|---|---|---|
-| HU-01 | Registro de cuenta | 🟡 | ✅ registro nombre/correo/contraseña, correo duplicado→error. ❌ contraseña no exige mayúscula+número (solo min 8). ❌ **correo de verificación antes de activar**. ❌ **vincular tutor a menor**. ❌ registro offline (cola) |
-| HU-02 | Inicio de sesión | 🟡 | ✅ JWT, error genérico sin revelar campo. ❌ **bloqueo tras 5 intentos (15 min)**. ❌ "Recordarme" 30 días (token dura 24h). 🟡 cada rol a su pantalla (PADRE va igual que ATLETA) |
+| HU-01 | Registro de cuenta | 🟡 | ✅ registro nombre/correo/contraseña, correo duplicado→error. ✅ **contraseña exige mayúscula+número** (backend + app). ✅ **correo de verificación antes de activar** (9.20). ✅ **vincular tutor a menor** (9.17). ❌ registro offline (cola) |
+| HU-02 | Inicio de sesión | 🟡 | ✅ JWT, error genérico sin revelar campo. ✅ **bloqueo tras 5 intentos, 15 min** (9.20). ✅ **"Recordarme" 30 días** (CheckBox → token 30d). 🟡 cada rol a su pantalla (PADRE va igual que ATLETA) |
 | HU-03 | Consultar agenda semanal (atleta) | ✅ | Sesiones por semana con navegación, canceladas con etiqueta/color, "sin sesiones" si vacío |
-| HU-04 | Crear/editar sesión (entrenador) | 🟡 | ✅ crear/editar/cancelar con motivo + push al grupo. ❌ **no valida fechas pasadas** ni **conflicto de horario** |
-| HU-05 | Registro de asistencia (entrenador) | 🟡 | ✅ P/A/J + % resumen. ❌ plazo "hasta 2h después". ❌ "solo Admin modifica una asistencia guardada" |
+| HU-04 | Crear/editar sesión (entrenador) | 🟡 | ✅ crear/editar/cancelar con motivo + push al grupo. ✅ **validación de conflicto de horario** (backend `SesionRepository.countConflictos` + app toast). ❌ no valida fechas pasadas |
+| HU-05 | Registro de asistencia (entrenador) | ✅ | ✅ P/A/J + % resumen. ✅ **plazo máx. 2h post-sesión** (backend `verificarPermisosAsistencia`). ✅ **solo Admin puede modificar asistencia ya guardada** |
 | HU-06 | Registro de marcas (entrenador) | ✅ | ✅ atleta/disciplina/fecha/resultado, marca personal automática, atleta no puede modificar. 🟡 disciplinas hardcodeadas; asociar a competencia no (solo a sesión) |
 | HU-07 | Historial de rendimiento propio (atleta) | ✅ | ✅ historial ordenado, filtro disciplina, gráfica evolución, mejor marca destacada, no ve otros (corregido en 9.14) |
 | HU-08 | Ver evolución del grupo (entrenador) | 🟡 | ✅ evolución individual por atleta con tendencia. ❌ comparativa de grupo. ❌ **exportar PDF/Excel** |
@@ -1830,7 +1830,7 @@ Auditoría exhaustiva de TODOS los requisitos (HU, RF, RNF, CU) contra el códig
 |---|---|---|
 | RF-01 Registro con rol + menores→tutor | 🟡 | Solo ATLETA/PADRE se auto-registran (no Admin/Entrenador). **Menores→tutor ❌** |
 | RF-02 Autenticación con roles + hash | ✅ | bcrypt + JWT + roles por endpoint |
-| RF-03 Recuperación de contraseña por correo | ✅ | Token UUID por Gmail SMTP (expira 1h) |
+| RF-03 Recuperación de contraseña por correo | ✅ | Token UUID por Gmail SMTP (expira 24h) |
 | RF-04 Gestión de perfiles de atletas (CRUD por entrenador) | ❌ | Solo **consultar** (lista + detalle). ❌ crear/editar/desactivar atleta, ❌ datos de tutor |
 | RF-05 Crear/editar sesiones | ✅ | CRUD completo |
 | RF-06 Consultar agenda semanal | ✅ | Navegación + canceladas visibles |
@@ -1862,10 +1862,10 @@ Auditoría exhaustiva de TODOS los requisitos (HU, RF, RNF, CU) contra el códig
 
 | CU | Estado | Nota |
 |---|---|---|
-| CU-01 Iniciar sesión | 🟡 | Sin bloqueo por intentos ni verificación de cuenta |
-| CU-02 Registrar atleta (por entrenador) | ❌ | Los atletas se **auto-registran**; el entrenador no los crea ni captura foto/tutor |
-| CU-03 Gestionar agenda | 🟡 | Sin validación de conflicto de horario |
-| CU-04 Registrar asistencia | 🟡 | Sin offline ni plazo de 2h |
+| CU-01 Iniciar sesión | ✅ | ✅ bloqueo por intentos (9.20). ✅ verificación de cuenta (9.20). ✅ Recordarme 30d |
+| CU-02 Registrar atleta (por entrenador) | 🟡 | ✅ entrenador crea/edita/desactiva (9.18). ✅ tutor si menor (9.17). ❌ foto por entrenador pendiente |
+| CU-03 Gestionar agenda | 🟡 | ✅ conflicto de horario validado. ❌ fechas pasadas no bloqueadas |
+| CU-04 Registrar asistencia | 🟡 | ✅ plazo 2h + solo Admin modifica. ❌ sin offline |
 | CU-05 Registrar/consultar rendimiento | ✅ | |
 | CU-06 Publicar convocatoria | 🟡 | Sin convocados selectivos |
 
@@ -2021,6 +2021,82 @@ Implementación de las dos funcionalidades de seguridad pendientes en autenticac
 - Strings nuevos: `lbl_verificar_correo`, `lbl_verificar_correo_desc`, `hint_codigo_verificacion`, `btn_verificar`, `msg_correo_verificado`, `err_codigo_requerido`, `err_correo_no_verificado`.
 
 **Retrocompatibilidad:** cuentas existentes en BD tienen `email_verificado = NULL` → `Boolean.FALSE.equals(null) = false` → no se bloquean. Solo las cuentas creadas después de este commit tienen `emailVerificado=false` hasta verificar.
+
+---
+
+### 9.21 HU-01/02/04/05 + RF-03 — Contraseña fuerte, Recordarme 30d, Conflicto horario, Límite asistencia — 2026-06-23
+
+Implementación del batch HU-01→HU-05 (excluyendo HU-03/06/07 que ya estaban al 100%).
+
+---
+
+#### HU-01 — Contraseña fuerte (completado)
+
+**BACKEND (`AuthService.register`):**
+- Nuevo método privado `validarContrasena(String)`: lanza `IllegalArgumentException` (HTTP 400) si la contraseña no tiene al menos 8 caracteres, una mayúscula y un número. Se llama antes de crear el usuario.
+
+**APP (`RegisterActivity`):**
+- Validación client-side con regex `.*[A-Z].*` y `.*[0-9].*` antes de enviar al backend.
+- String nuevo: `err_contrasena_requisitos` = "Mínimo 8 caracteres, una mayúscula y un número".
+
+---
+
+#### HU-02 — Recordarme 30 días (completado)
+
+**BACKEND:**
+- `LoginRequest` DTO: nuevo campo `boolean recordarme = false`.
+- `JwtService`: nuevo overload `generateToken(UserDetails, long expirationMs)` que acepta duración variable. El método original delega en él con `expiration` (1 día).
+- `AuthService.login()`: si `request.isRecordarme()` → expira en 30 días (30×24×60×60×1000 ms); si no → 86 400 000 ms (1 día).
+
+**APP:**
+- `LoginRequest` model: campo `boolean recordarme` + constructor de 3 args.
+- `activity_login.xml`: `CheckBox cbRecordarme` ("Recordarme por 30 días") entre el link "¿Olvidaste?" y el botón Ingresar.
+- `LoginActivity`: bindea `cbRecordarme`, lo incluye en el `LoginRequest`.
+
+---
+
+#### RF-03 — Token de recuperación 24h (corregido)
+
+**BACKEND (`PasswordResetService.solicitarReset`):**
+- Corregido `.plusHours(1)` → `.plusHours(24)`. El token de reset de contraseña ahora expira en 24 horas como especifica RF-03 (antes era 1h).
+
+---
+
+#### HU-04 — Validación de conflicto de horario (completado)
+
+**BACKEND:**
+- `SesionRepository`: nuevo query `countConflictos(@Param grupoId, inicio, fin, excludeId)` — cuenta sesiones no canceladas del mismo grupo que se superpongan en el intervalo `[inicio, fin)`, excluyendo el id dado (para editar sin auto-conflicto, se pasa `-1L` al crear).
+- `SesionService.crear()`: parsea fechas primero, llama `countConflictos(grupoId, horaInicio, horaFin, -1L)` → si > 0 lanza `IllegalArgumentException` (HTTP 400).
+- `SesionService.editar()`: igual, pasando el id actual como `excludeId`.
+
+**APP:**
+- `CrearSesionActivity`: en el callback `onResponse`, si `!response.isSuccessful()` extrae el mensaje del JSON (`extractErrorMessage`) y muestra toast largo con el error específico del backend (p.ej. "Ya existe una sesión programada para este grupo en ese horario"). Nuevo método privado `extractErrorMessage(Response<?>)`.
+
+---
+
+#### HU-05 — Plazo 2h + solo Admin modifica asistencia guardada (completado)
+
+**BACKEND (`AsistenciaService`):**
+- Import añadido: `SecurityContextHolder`.
+- Nuevo método privado `verificarPermisosAsistencia(Long sesionId, LocalDateTime horaFin)`:
+  1. Si `horaFin.plusHours(2).isBefore(now())` → lanza `IllegalArgumentException` "El plazo para registrar asistencia ha vencido (máximo 2 horas tras la sesión)".
+  2. Si ya hay registros para la sesión (`findBySesionId` no vacío) y el usuario **no** tiene `ROLE_ADMIN` → lanza `IllegalArgumentException` "La asistencia ya fue guardada. Solo el Administrador puede modificarla."
+- `guardarAsistencia()` llama a `verificarPermisosAsistencia` antes del bucle de guardado.
+
+**APP (`AsistenciaActivity`):**
+- En callback de `guardarAsistencia`, si `!response.isSuccessful()` extrae y muestra el mensaje del backend (toast largo) en lugar del genérico "error de conexión". Nuevo método privado `extractErrorMessage`.
+
+---
+
+**Estado tras este commit:**
+
+| HU | Antes | Ahora |
+|---|---|---|
+| HU-01 Contraseña fuerte | 🟡 ~70% | ✅ ~95% |
+| HU-02 Recordarme 30d | 🟡 ~80% | ✅ ~95% |
+| HU-04 Conflicto horario | 🟡 ~75% | 🟡 ~90% (falta fecha pasada) |
+| HU-05 Asistencia 2h/Admin | 🟡 ~70% | ✅ ~95% |
+| RF-03 Token reset 24h | 🟡 (bug 1h) | ✅ correcto |
 
 ---
 

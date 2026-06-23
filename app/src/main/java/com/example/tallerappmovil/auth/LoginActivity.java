@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +35,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextInputLayout tilCorreo, tilContrasena;
     private TextInputEditText etCorreo, etContrasena;
+    private CheckBox cbRecordarme;
     private Button btnIngresar;
     private ProgressBar progressBar;
     private TextView tvOlvideContrasena, tvRegistrarse;
@@ -55,6 +57,7 @@ public class LoginActivity extends AppCompatActivity {
         tilContrasena    = findViewById(R.id.tilContrasena);
         etCorreo         = findViewById(R.id.etCorreo);
         etContrasena     = findViewById(R.id.etContrasena);
+        cbRecordarme     = findViewById(R.id.cbRecordarme);
         btnIngresar      = findViewById(R.id.btnIngresar);
         progressBar      = findViewById(R.id.progressBar);
         tvOlvideContrasena = findViewById(R.id.tvOlvideContrasena);
@@ -92,8 +95,9 @@ public class LoginActivity extends AppCompatActivity {
 
         setLoading(true);
 
+        boolean recordarme = cbRecordarme != null && cbRecordarme.isChecked();
         ApiClient.getAuthService()
-                .login(new LoginRequest(correo, contrasena))
+                .login(new LoginRequest(correo, contrasena, recordarme))
                 .enqueue(new Callback<TokenResponse>() {
                     @Override
                     public void onResponse(Call<TokenResponse> call, Response<TokenResponse> response) {

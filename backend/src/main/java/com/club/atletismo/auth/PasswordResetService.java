@@ -32,7 +32,7 @@ public class PasswordResetService {
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .token(token)
                 .usuario(usuario)
-                .expiraEn(LocalDateTime.now().plusHours(1))
+                .expiraEn(LocalDateTime.now().plusHours(24))
                 .build();
 
         tokenRepository.save(resetToken);

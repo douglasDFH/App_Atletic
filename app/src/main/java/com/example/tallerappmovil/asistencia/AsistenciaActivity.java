@@ -146,8 +146,10 @@ public class AsistenciaActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
                             finish();
                         } else {
+                            String msg = extractErrorMessage(response);
                             Toast.makeText(AsistenciaActivity.this,
-                                    getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                                    msg != null ? msg : getString(R.string.err_conexion),
+                                    Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -168,6 +170,21 @@ public class AsistenciaActivity extends AppCompatActivity {
         } catch (Exception e) {
             return iso;
         }
+    }
+
+    private String extractErrorMessage(retrofit2.Response<?> response) {
+        try {
+            if (response.errorBody() != null) {
+                String body = response.errorBody().string();
+                int idx = body.indexOf("\"message\":");
+                if (idx >= 0) {
+                    int start = body.indexOf('"', idx + 10) + 1;
+                    int end   = body.indexOf('"', start);
+                    if (start > 0 && end > start) return body.substring(start, end);
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     @Override

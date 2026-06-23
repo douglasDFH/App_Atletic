@@ -8,6 +8,7 @@ import com.club.atletismo.usuario.Usuario;
 import com.club.atletismo.usuario.UsuarioRepository;
 import com.club.atletismo.usuario.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +56,8 @@ public class AsistenciaService {
         SesionEntrenamiento sesion = sesionRepository.findById(sesionId)
                 .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada"));
 
+        verificarPermisosAsistencia(sesionId, sesion.getHoraFin());
+
         for (AsistenciaItemRequest item : lista) {
             Usuario atleta = usuarioRepository.findById(item.getAtletaId())
                     .orElseThrow(() -> new IllegalArgumentException("Atleta no encontrado: " + item.getAtletaId()));
@@ -65,6 +68,23 @@ public class AsistenciaService {
             a.setAtleta(atleta);
             a.setEstado(EstadoAsistencia.valueOf(item.getEstado()));
             asistenciaRepository.save(a);
+        }
+    }
+
+    private void verificarPermisosAsistencia(Long sesionId, LocalDateTime horaFin) {
+        if (horaFin.plusHours(2).isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException(
+                    "El plazo para registrar asistencia ha vencido (máximo 2 horas tras la sesión)");
+        }
+        boolean yaGuardada = !asistenciaRepository.findBySesionId(sesionId).isEmpty();
+        if (yaGuardada) {
+            boolean esAdmin = SecurityContextHolder.getContext().getAuthentication()
+                    .getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            if (!esAdmin) {
+                throw new IllegalArgumentException(
+                        "La asistencia ya fue guardada. Solo el Administrador puede modificarla.");
+            }
         }
     }
 
