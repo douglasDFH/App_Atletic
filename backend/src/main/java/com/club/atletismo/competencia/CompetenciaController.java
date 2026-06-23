@@ -2,6 +2,8 @@ package com.club.atletismo.competencia;
 
 import com.club.atletismo.competencia.dto.CompetenciaRequest;
 import com.club.atletismo.competencia.dto.CompetenciaResponse;
+import com.club.atletismo.competencia.dto.ResultadoRequest;
+import com.club.atletismo.competencia.dto.ResultadoResponse;
 import com.club.atletismo.shared.ApiResponse;
 import com.club.atletismo.usuario.dto.AtletaInfoDto;
 import jakarta.validation.Valid;
@@ -66,5 +68,20 @@ public class CompetenciaController {
     @GetMapping("/{id}/inscritos")
     public ResponseEntity<List<AtletaInfoDto>> getInscritos(@PathVariable Long id) {
         return ResponseEntity.ok(competenciaService.getInscritos(id));
+    }
+
+    // ---- Resultados (RF-15, HU-10) ----
+
+    @GetMapping("/{id}/resultados")
+    public ResponseEntity<List<ResultadoResponse>> getResultados(@PathVariable Long id) {
+        return ResponseEntity.ok(competenciaService.getResultados(id));
+    }
+
+    @PostMapping("/{id}/resultados")
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
+    public ResponseEntity<ResultadoResponse> registrarResultado(@PathVariable Long id,
+                                                                @Valid @RequestBody ResultadoRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(competenciaService.registrarResultado(id, req));
     }
 }

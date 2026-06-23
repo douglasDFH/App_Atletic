@@ -2,6 +2,11 @@ package com.club.atletismo.competencia;
 
 import com.club.atletismo.competencia.dto.CompetenciaRequest;
 import com.club.atletismo.competencia.dto.CompetenciaResponse;
+import com.club.atletismo.competencia.dto.ResultadoRequest;
+import com.club.atletismo.competencia.dto.ResultadoResponse;
+import com.club.atletismo.marca.MarcaService;
+import com.club.atletismo.marca.dto.MarcaRequest;
+import com.club.atletismo.marca.dto.MarcaResponse;
 import com.club.atletismo.notificacion.NotificacionService;
 import com.club.atletismo.usuario.Rol;
 import com.club.atletismo.usuario.Usuario;
@@ -14,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +30,8 @@ public class CompetenciaService {
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
     private final NotificacionService notificacionService;
+    private final ResultadoRepository resultadoRepository;
+    private final MarcaService marcaService;
 
     @Transactional(readOnly = true)
     public List<CompetenciaResponse> listar(String estado) {
@@ -103,6 +111,69 @@ public class CompetenciaService {
         return c.getInscritos().stream()
                 .map(u -> new AtletaInfoDto(u.getId(), u.getNombreCompleto(), u.getDisciplina()))
                 .collect(Collectors.toList());
+    }
+
+    // ---- Resultados de competencia (RF-15, HU-10) ----
+
+    /** El entrenador registra el resultado de un atleta y lo asocia al historial de rendimiento. */
+    @Transactional
+    public ResultadoResponse registrarResultado(Long competenciaId, ResultadoRequest req) {
+        Competencia c = competenciaRepository.findById(competenciaId)
+                .orElseThrow(() -> new IllegalArgumentException("Competencia no encontrada"));
+        Usuario atleta = usuarioRepository.findById(req.getAtletaId())
+                .orElseThrow(() -> new IllegalArgumentException("Atleta no encontrado"));
+
+        Optional<ResultadoCompetencia> existente =
+                resultadoRepository.findByCompetenciaIdAndAtletaId(competenciaId, req.getAtletaId());
+        boolean esNuevo = existente.isEmpty();
+        ResultadoCompetencia r = existente.orElseGet(ResultadoCompetencia::new);
+        r.setCompetencia(c);
+        r.setAtleta(atleta);
+        r.setPosicion(req.getPosicion());
+        r.setMarca(req.getMarca());
+        r.setObservaciones(req.getObservaciones());
+
+        // Solo al registrar por primera vez: crear la marca en el historial de rendimiento
+        // (asociación al rendimiento + detección automática de récord — HU-10)
+        if (esNuevo && c.getDisciplina() != null && !c.getDisciplina().isBlank()
+                && req.getMarca() != null && !req.getMarca().isBlank()) {
+            MarcaRequest mr = new MarcaRequest();
+            mr.setAtletaId(req.getAtletaId());
+            mr.setDisciplina(c.getDisciplina());
+            mr.setResultado(req.getMarca());
+            mr.setFecha(c.getFechaEvento().toString());
+            mr.setObservaciones("Competencia: " + c.getNombre());
+            MarcaResponse marca = marcaService.registrar(mr);
+            r.setEsMarcaPersonal(marca.isEsMejorMarca());
+        }
+
+        ResultadoCompetencia guardado = resultadoRepository.save(r);
+
+        // Una competencia con resultados se considera finalizada
+        if (c.getEstado() != EstadoCompetencia.FINALIZADO) {
+            c.setEstado(EstadoCompetencia.FINALIZADO);
+            competenciaRepository.save(c);
+        }
+        return toResultadoResponse(guardado);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResultadoResponse> getResultados(Long competenciaId) {
+        return resultadoRepository.findByCompetenciaIdOrderByPosicionAsc(competenciaId).stream()
+                .map(this::toResultadoResponse)
+                .collect(Collectors.toList());
+    }
+
+    private ResultadoResponse toResultadoResponse(ResultadoCompetencia r) {
+        return ResultadoResponse.builder()
+                .id(r.getId())
+                .atletaId(r.getAtleta().getId())
+                .atletaNombre(r.getAtleta().getNombreCompleto())
+                .posicion(r.getPosicion())
+                .marca(r.getMarca())
+                .observaciones(r.getObservaciones())
+                .esMarcaPersonal(r.isEsMarcaPersonal())
+                .build();
     }
 
     private CompetenciaResponse toResponse(Competencia c, Usuario actual) {

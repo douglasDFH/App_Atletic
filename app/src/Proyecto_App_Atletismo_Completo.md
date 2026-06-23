@@ -1968,6 +1968,21 @@ Implementa RF-04 y HU-12 (el entrenador antes solo podía consultar atletas).
 
 ---
 
+### 9.19 Registrar resultados de competencia (RF-15, HU-10) — 2026-06-22
+
+El entrenador puede registrar el resultado de cada atleta en una competencia (posición, marca, observaciones) y se **asocia automáticamente al historial de rendimiento** con detección de récord.
+
+**BACKEND:**
+- Entidad `ResultadoCompetencia` (competencia, atleta, posición, marca, observaciones, esMarcaPersonal); restricción única (competencia, atleta).
+- `ResultadoRepository`; DTOs `ResultadoRequest`/`ResultadoResponse`.
+- `CompetenciaService.registrarResultado()`: crea/actualiza el resultado; al registrarlo **por primera vez** crea una `MarcaPersonal` (disciplina de la competencia, fecha del evento) reutilizando `MarcaService.registrar` → aparece en marcas/evolución del atleta y detecta si es **récord**. La competencia pasa a estado `FINALIZADO`.
+- `getResultados()` ordena por posición.
+- Endpoints: `GET /competencias/{id}/resultados` (público autenticado), `POST /competencias/{id}/resultados` (ENTRENADOR/ADMIN).
+
+**Pendiente — APP:** pantalla de resultados en el detalle de competencia (listar + registrar por atleta inscrito).
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**
