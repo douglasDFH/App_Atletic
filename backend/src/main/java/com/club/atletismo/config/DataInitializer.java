@@ -20,9 +20,6 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Siembra el entrenador admin si no existe (independiente de si hay otros usuarios)
-        if (usuarioRepository.existsByCorreo("entrenador@atletismo.com")) return;
-
         Grupo grupo = grupoRepository.findAll().stream()
                 .filter(g -> "Velocidad Elite".equals(g.getNombre()))
                 .findFirst()
@@ -32,14 +29,24 @@ public class DataInitializer implements CommandLineRunner {
                         .descripcion("Grupo principal de velocistas")
                         .build()));
 
-        usuarioRepository.save(Usuario.builder()
+        // Siempre sincroniza el entrenador admin (crea o restablece contraseña)
+        usuarioRepository.findByCorreo("entrenador@atletismo.com").ifPresentOrElse(
+            u -> {
+                u.setContrasenaHash(passwordEncoder.encode("admin123"));
+                u.setActivo(true);
+                u.setBloqueadoHasta(null);
+                u.setIntentosFallidos(0);
+                usuarioRepository.save(u);
+            },
+            () -> usuarioRepository.save(Usuario.builder()
                 .nombreCompleto("Admin Entrenador")
                 .correo("entrenador@atletismo.com")
                 .contrasenaHash(passwordEncoder.encode("admin123"))
                 .rol(Rol.ENTRENADOR)
                 .disciplina("Velocidad")
                 .activo(true)
-                .build());
+                .build())
+        );
 
         if (!usuarioRepository.existsByCorreo("atleta@atletismo.com")) {
             usuarioRepository.save(Usuario.builder()
