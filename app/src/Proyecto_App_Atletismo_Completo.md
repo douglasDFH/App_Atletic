@@ -2298,13 +2298,351 @@ private Integer intentosFallidos = 0;
 
 ---
 
-## Pendiente (Capítulo 6 + Secciones Finales)
+---
 
-- **6.1 Conclusiones y logros del proyecto**
-- **6.2 Trabajo futuro** (funcionalidades a agregar en versiones posteriores)
-- **Referencias bibliográficas** en formato APA
-- **Anexo B:** Código fuente seleccionado
-- **Anexo E:** Glosario de términos
+## 6. Conclusiones y Trabajo Futuro
+
+### 6.1 Conclusiones y Logros del Proyecto
+
+El presente proyecto demostró que es posible desarrollar, desplegar y operar una aplicación móvil funcional de gestión deportiva en un contexto académico, utilizando tecnologías de nivel profesional y siguiendo un proceso iterativo basado en Scrum. A continuación se detallan los principales logros y aprendizajes.
+
+---
+
+#### 6.1.1 Logros técnicos
+
+**Arquitectura full-stack integrada**
+
+Se diseñó e implementó una arquitectura de tres capas (presentación → lógica de negocio → persistencia) tanto en el backend como en la aplicación móvil:
+
+- **Backend:** Spring Boot 3.3.6 con Java 21, API REST protegida con Spring Security 6 y JWT sin estado. Cada endpoint está protegido por rol (`@PreAuthorize`) y las entidades nunca se exponen directamente — toda comunicación usa DTOs validados con Jakarta Bean Validation.
+- **Base de datos:** PostgreSQL 16 gestionado por Hibernate ORM mediante `ddl-auto: update`, que permite evolucionar el esquema de forma incremental sin migraciones manuales.
+- **App Android:** Java nativo (Android SDK), arquitectura de actividades + servicios Retrofit, gestión de sesión con `SharedPreferences` encriptadas, carga asíncrona de imágenes con Glide y gráficas con MPAndroidChart.
+
+**Trece historias de usuario implementadas**
+
+| Área | Historias completadas |
+|---|---|
+| Autenticación y seguridad | HU-01, HU-02 |
+| Agenda y asistencia | HU-03, HU-04, HU-05 |
+| Rendimiento deportivo | HU-06, HU-07, HU-08 |
+| Competencias | HU-09, HU-10 |
+| Notificaciones y perfil | HU-11, HU-12, HU-13 |
+
+El sistema atiende tres perfiles de usuario — entrenador, atleta y padre/tutor — con pantallas y permisos diferenciados por rol.
+
+**Notificaciones push en tiempo real**
+
+La integración con Firebase Cloud Messaging (FCM) permite enviar notificaciones instantáneas al registrar una sesión, publicar una competencia, anotar un resultado o cuando el sistema actualiza automáticamente la categoría de un atleta (scheduler diario a la 1:00 am). El atleta puede configurar qué tipos de notificaciones desea recibir desde su perfil.
+
+**Despliegue continuo en producción**
+
+El backend se despliega automáticamente en Coolify (servidor VPS propio) mediante un pipeline CI/CD que detecta cada `push` a `master`, construye el contenedor Docker y ejecuta un healthcheck antes de enrutar el tráfico. La app Android genera un APK firmado de forma automática mediante GitHub Actions en cada versión etiquetada.
+
+**Seguridad aplicada**
+
+- Contraseñas almacenadas con BCrypt (factor de coste 10).
+- Tokens JWT con expiración configurable (24 h o 30 días con "Recordarme").
+- Bloqueo temporal de cuenta tras 5 intentos fallidos (15 minutos).
+- Verificación de correo electrónico al registrarse (token UUID de un solo uso).
+- Recuperación de contraseña por SMTP con token de 24 h.
+- Datos de menores (tutor, parentesco, teléfono) restringidos a rol ENTRENADOR/ADMIN.
+
+**Exportación y visualización**
+
+El módulo de rendimiento ofrece gráficas de evolución individual (líneas de tendencia) y comparativa grupal multi-línea (MPAndroidChart), con exportación a PDF compartible via `FileProvider` e `Intent.ACTION_SEND`.
+
+---
+
+#### 6.1.2 Aprendizajes clave del desarrollo
+
+**Gestión de esquema en producción con datos existentes**
+
+El incidente de la columna `intentos_fallidos` ilustró un error común al usar `ddl-auto: update` de Hibernate: agregar un campo primitivo (`int`) — que Hibernate mapea como `NOT NULL` — a una tabla con filas existentes provoca que PostgreSQL rechace el `ALTER TABLE`. La solución fue combinar el tipo wrapper Java (`Integer`) con `@Column(columnDefinition = "integer not null default 0")`, de modo que PostgreSQL pueda asignar el valor por defecto a las filas ya existentes. Esta lección es extrapolable a cualquier proyecto que evolucione el esquema en producción sin herramientas de migración versionadas (Flyway/Liquibase).
+
+**Diferencia entre error de DDL y error de consulta**
+
+El mismo incidente dejó otra enseñanza: cuando `ddl-auto: update` falla al agregar una columna, Hibernate no revierte los cambios pendientes ni detiene la aplicación con un mensaje claro. La app puede arrancar (el contexto se inicializa), pero la primera consulta que incluya la columna faltante genera un `SQLGrammarException` — un error de runtime que puede confundirse con un bug de lógica. Monitorear los logs de startup completos, no solo el healthcheck HTTP, es esencial.
+
+**CI/CD como red de seguridad**
+
+Contar con un pipeline de GitHub Actions que compila la app Android en cada push permitió detectar rápidamente errores de compilación (tipo incorrecto en `LineData`, color inexistente, string duplicado) antes de distribuir el APK a los testers. Sin este paso automático, esos errores se habrían descubierto solo al construir manualmente.
+
+**Arquitectura en capas como facilitador del cambio**
+
+La separación estricta Controller → Service → Repository hizo que añadir nuevos endpoints (configuración de notificaciones, vínculo padre-hijo, resultados de competencia) fuera un proceso predecible: nuevo DTO de entrada, método en el servicio, call en el repositorio si era necesario, endpoint en el controlador. Ningún cambio en la lógica de negocio afectó la capa de persistencia, y viceversa.
+
+---
+
+#### 6.1.3 Cobertura final de requisitos
+
+| Categoría | Total | Implementado ✅ | Parcial 🟡 | No impl. ❌ |
+|---|---|---|---|---|
+| Historias de Usuario | 13 | 10 | 3 | 0 |
+| Requisitos Funcionales | 18 | 12 | 4 | 2 |
+| Requisitos No Funcionales | 6 | 1 | 3 | 2 |
+| Casos de Uso | 6 | 3 | 3 | 0 |
+
+Los requisitos parciales (🟡) corresponden en su mayoría a restricciones de infraestructura (ausencia de HTTPS propio, sin modo offline) o a funcionalidades secundarias no priorizadas en el alcance del taller (validación de fechas pasadas en agenda, historial de notificaciones de 30 días exactos). Los dos requisitos funcionales no implementados (RF-04 CRUD atletas por entrenador en la primera versión; RF-15 resultados de competencia en la primera versión) fueron posteriormente completados en las iteraciones 9.18 y 9.19 del registro de cambios.
+
+---
+
+#### 6.1.4 Reflexión académica
+
+El proyecto confirmó que el modelo Scrum — incluso adaptado a un equipo de una persona y con sprints de dos semanas — aporta valor real: las historias de usuario como unidad de trabajo permiten priorizar con criterio de usuario final, las retrospectivas informales al final de cada sprint visibilizaron cuellos de botella (principalmente en la integración FCM y en la configuración del despliegue en Coolify), y el backlog priorizado evitó dispersarse en funcionalidades de bajo impacto.
+
+La decisión de implementar el frontend en Android nativo Java — en lugar de React Native como indicaba el diseño original — se tomó para reducir la fricción de configuración del entorno y aprovechar el conocimiento existente del equipo. Esta adaptación pragmática del plan es coherente con los principios ágiles: responder al cambio por encima de seguir un plan.
+
+---
+
+### 6.2 Trabajo Futuro
+
+Las funcionalidades descritas a continuación representan la hoja de ruta natural de la aplicación para versiones posteriores, ordenadas por impacto estimado.
+
+---
+
+#### Prioridad Alta
+
+**1. HTTPS / TLS en el backend (RNF-02)**
+El backend actualmente opera sobre HTTP plano. La habilitación de HTTPS requiere un dominio propio (ej. `api.clubatletismo.bo`) y un certificado TLS gestionado por Let's Encrypt — ambos configurables desde Coolify sin cambios en el código. Esta mejora es prerequisito para publicar la app en Google Play, que desde 2024 exige tráfico cifrado para endpoints en producción.
+
+**2. Modo offline con sincronización (RNF-04)**
+Implementar una caché local con Room Database (SQLite) para que el atleta pueda consultar su agenda y marcas sin conexión. Al recuperar la red, los datos se sincronizan con el backend usando una cola de operaciones pendientes (`WorkManager`). El entrenador también se beneficia: podría registrar asistencia sin señal y sincronizar al salir del recinto.
+
+**3. Publicación en Google Play Store (RNF-06)**
+El APK ya se genera automáticamente en GitHub Actions con firma. El paso siguiente es crear una cuenta de desarrollador en Google Play Console, subir el AAB firmado, completar el formulario de contenido (clasificación de edad, política de privacidad) y pasar la revisión inicial. El tiempo estimado es de 3 a 7 días hábiles.
+
+**4. Pruebas automatizadas (RNF-05)**
+El proyecto no cuenta con pruebas unitarias ni de integración. Como trabajo futuro se propone:
+- Backend: pruebas unitarias de servicios con JUnit 5 + Mockito (meta: 70% de cobertura en `AuthService`, `MarcaService`, `CompetenciaService`); pruebas de integración con `@SpringBootTest` y base de datos H2 en memoria.
+- App Android: pruebas de UI con Espresso para los flujos críticos (login, registro de marca, asistencia).
+
+---
+
+#### Prioridad Media
+
+**5. Reintentos automáticos para notificaciones push (HU-11)**
+Implementar lógica de reintento en `FcmService`: si el token FCM del usuario está caducado o el envío falla, reintentar hasta 3 veces con backoff exponencial (1s, 2s, 4s). Los tokens caducados deben eliminarse de la base de datos para evitar intentos innecesarios.
+
+**6. Historial de notificaciones con límite de 30 días (HU-11 / RF-18)**
+Agregar un job programado (similar a `CategoriaSchedulerService`) que elimine notificaciones con más de 30 días de antigüedad. Esto controla el crecimiento de la tabla `notificacion` y mejora el rendimiento de las consultas de historial.
+
+**7. Validación de fechas pasadas al crear sesiones (HU-04)**
+En `SesionService.crear()`, verificar que `horaInicio` sea posterior a `LocalDateTime.now()`. En la app, deshabilitar fechas anteriores en el DateTimePicker. Actualmente solo se valida el conflicto de horario entre sesiones del mismo grupo, pero no se impide crear sesiones en el pasado.
+
+**8. Exportación a Excel (RNF-06)**
+Complementar la exportación a PDF con un formato Excel (`.xlsx`) para marcas y asistencias, usando la librería Apache POI en el backend. El entrenador podría descargar un reporte completo del grupo con un endpoint `GET /api/v1/marcas/grupo/{id}/export?formato=xlsx`.
+
+---
+
+#### Prioridad Baja / Mejoras de Experiencia
+
+**9. Confirmación de asistencia antes de la sesión**
+Permitir que los atletas confirmen o declinen su asistencia a una sesión con anticipación (similar a la confirmación de competencias), de modo que el entrenador pueda anticipar cuántos asistirán.
+
+**10. Disciplinas y categorías configurables desde el backend**
+Actualmente las listas de disciplinas están hardcodeadas en la app (`String[]`). Moverlas a una tabla `disciplina` en la BD y exponerlas via `GET /api/v1/disciplinas` permite al entrenador administrarlas sin actualizar la app.
+
+**11. Versión iOS**
+Reescribir la app en React Native o Flutter para distribuirla también en el App Store de Apple, aprovechando la API REST existente sin cambios en el backend.
+
+**12. Panel web para el entrenador**
+Desarrollar un frontend web (React o Vue.js) para que el entrenador acceda desde un navegador de escritorio a los módulos de mayor volumen de datos: gestión de atletas, exportación de informes, estadísticas del club.
+
+---
+
+### Referencias Bibliográficas
+
+Beck, K., Beedle, M., van Bennekum, A., Cockburn, A., Cunningham, W., Fowler, M., Grenning, J., Highsmith, J., Hunt, A., Jeffries, R., Kern, J., Marick, B., Martin, R. C., Mellor, S., Schwaber, K., Sutherland, J., & Thomas, D. (2001). *Manifiesto por el Desarrollo Ágil de Software*. https://agilemanifesto.org/iso/es/manifesto.html
+
+Evans, E. (2003). *Domain-driven design: Tackling complexity in the heart of software*. Addison-Wesley Professional.
+
+Fielding, R. T. (2000). *Architectural styles and the design of network-based software architectures* [Tesis doctoral, University of California]. https://roy.gbiv.com/pubs/dissertation/top.htm
+
+Firebase. (2024). *Firebase Cloud Messaging documentation*. Google LLC. https://firebase.google.com/docs/cloud-messaging
+
+Fowler, M. (2002). *Patterns of enterprise application architecture*. Addison-Wesley Professional.
+
+Google. (2024). *Android developer documentation*. https://developer.android.com/docs
+
+Google. (2024). *Material Design 3 guidelines*. https://m3.material.io/
+
+Hibernate. (2024). *Hibernate ORM 6 user guide*. Red Hat. https://docs.jboss.org/hibernate/orm/6.4/userguide/html_single/Hibernate_User_Guide.html
+
+Horstmann, C. S. (2019). *Core Java, Volume I: Fundamentals* (11.ª ed.). Pearson Education.
+
+Martin, R. C. (2008). *Clean code: A handbook of agile software craftsmanship*. Prentice Hall.
+
+OWASP Foundation. (2021). *OWASP Top Ten 2021*. https://owasp.org/Top10/
+
+PostgreSQL Global Development Group. (2024). *PostgreSQL 16 documentation*. https://www.postgresql.org/docs/16/
+
+Pressman, R. S., & Maxim, B. R. (2021). *Ingeniería del software: Un enfoque práctico* (9.ª ed.). McGraw-Hill Education.
+
+Schwaber, K., & Sutherland, J. (2020). *The Scrum Guide: The definitive guide to Scrum — The rules of the game*. https://scrumguides.org/scrum-guide.html
+
+Spring. (2024). *Spring Boot reference documentation (v3.3)*. VMware. https://docs.spring.io/spring-boot/docs/3.3.x/reference/html/
+
+Spring. (2024). *Spring Security reference documentation (v6)*. VMware. https://docs.spring.io/spring-security/reference/
+
+Square, Inc. (2024). *Retrofit 2 documentation*. https://square.github.io/retrofit/
+
+---
+
+## Anexo B — Fragmentos de Código Fuente Representativos
+
+### B.1 Entidad `Usuario` — mapeo JPA con roles y seguridad
+
+```java
+@Entity @Table(name = "usuario")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+public class Usuario implements UserDetails {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String correo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Rol rol;  // ENTRENADOR | ATLETA | PADRE
+
+    // Columna agregada a tabla existente: DEFAULT 0 evita error NOT NULL en PostgreSQL
+    @Builder.Default
+    @Column(columnDefinition = "integer not null default 0")
+    private Integer intentosFallidos = 0;
+
+    private LocalDateTime bloqueadoHasta;
+    private Boolean emailVerificado;   // null = cuenta legacy sin restricción
+    private Boolean notifSesiones;     // null = recibe por defecto
+    private Boolean notifCompetencias;
+    private Boolean notifResultados;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
+    }
+}
+```
+
+### B.2 Servicio de autenticación — bloqueo por intentos fallidos (HU-02)
+
+```java
+if (!passwordEncoder.matches(request.getContrasena(), usuario.getContrasenaHash())) {
+    int fallos = (usuario.getIntentosFallidos() != null
+            ? usuario.getIntentosFallidos() : 0) + 1;
+    usuario.setIntentosFallidos(fallos);
+    if (fallos >= MAX_INTENTOS) {                   // MAX_INTENTOS = 5
+        usuario.setBloqueadoHasta(
+                LocalDateTime.now().plusMinutes(BLOQUEO_MIN));   // 15 min
+        usuario.setIntentosFallidos(0);
+    }
+    usuarioRepository.save(usuario);
+    throw new BadCredentialsException("Credenciales incorrectas");
+}
+```
+
+### B.3 Verificación de preferencias antes de enviar push FCM (HU-11)
+
+```java
+private boolean debeRecibirPush(Usuario u, String tipo) {
+    return switch (tipo) {
+        case "SESION"      -> !Boolean.FALSE.equals(u.getNotifSesiones());
+        case "COMPETENCIA" -> !Boolean.FALSE.equals(u.getNotifCompetencias());
+        case "RESULTADO"   -> !Boolean.FALSE.equals(u.getNotifResultados());
+        default            -> true;   // CATEGORIA y otros siempre se envían
+    };
+}
+```
+
+### B.4 Gráfica multi-línea de evolución grupal — Android (HU-08)
+
+```java
+List<ILineDataSet> dataSets = new ArrayList<>();
+
+for (int i = 0; i < datos.size(); i++) {
+    GrupoEvolucionDto atleta = datos.get(i);
+    int color = COLORES[i % COLORES.length];   // paleta de 8 colores
+
+    List<Entry> entries = new ArrayList<>();
+    for (MarcaPersonal m : atleta.getMarcas()) {
+        int xIdx = todasFechas.indexOf(m.getFecha());
+        float valor = Float.parseFloat(m.getResultado().replace(",", "."));
+        entries.add(new Entry(xIdx, valor));
+    }
+
+    LineDataSet ds = new LineDataSet(entries, atleta.getAtletaNombre());
+    ds.setColor(color);
+    ds.setLineWidth(2f);
+    ds.setCircleRadius(4f);
+    ds.setDrawValues(false);
+    dataSets.add(ds);   // List<ILineDataSet>, no List<LineDataSet>
+}
+lineChart.setData(new LineData(dataSets));
+lineChart.animateX(500);
+```
+
+### B.5 Pipeline CI/CD — GitHub Actions (fragmento)
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { java-version: '17', distribution: 'temurin' }
+      - name: Build release APK
+        run: ./gradlew assembleRelease
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.KEY_ALIAS }}
+      - name: Upload APK to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/release/app-release-signed.apk
+```
+
+---
+
+## Anexo E — Glosario de Términos
+
+**API REST** (*Representational State Transfer Application Programming Interface*): interfaz de comunicación entre sistemas basada en el protocolo HTTP. Define recursos accesibles mediante URLs y operaciones estándar (GET, POST, PUT, DELETE). En este proyecto, el backend expone una API REST que la app Android consume.
+
+**APK** (*Android Package Kit*): formato de archivo usado para distribuir e instalar aplicaciones en dispositivos Android. Equivalente al `.exe` en Windows.
+
+**BCrypt**: función de hash criptográfica diseñada para contraseñas. Incorpora un factor de coste ajustable y un valor de sal aleatorio, lo que la hace resistente a ataques de fuerza bruta y tablas arco iris.
+
+**CI/CD** (*Continuous Integration / Continuous Delivery*): práctica de automatizar la compilación, prueba y despliegue del software en cada cambio de código. En este proyecto se implementa con GitHub Actions (compilación del APK) y Coolify (despliegue del backend).
+
+**Coolify**: plataforma open source de despliegue y orquestación de contenedores (similar a Heroku) autoalojada en un servidor VPS. Permite desplegar aplicaciones Docker con HTTPS, variables de entorno y rollback automático.
+
+**DTO** (*Data Transfer Object*): objeto Java sin lógica de negocio cuyo único propósito es transportar datos entre capas (controller ↔ service, o servicio ↔ app Android). Evita exponer directamente las entidades JPA en los endpoints.
+
+**FCM** (*Firebase Cloud Messaging*): servicio de Google para el envío de notificaciones push a dispositivos Android e iOS. El backend llama a la API de FCM con el token del dispositivo; FCM se encarga de la entrega.
+
+**Hibernate ORM**: implementación de referencia de la especificación JPA (Jakarta Persistence API). Mapea automáticamente clases Java (entidades) a tablas de base de datos y genera el SQL necesario para las operaciones CRUD.
+
+**JWT** (*JSON Web Token*): estándar para transmitir información de autenticación de forma compacta y firmada digitalmente. En este proyecto el backend emite un JWT al hacer login; la app lo incluye en el header `Authorization: Bearer <token>` en cada petición posterior.
+
+**JPA** (*Jakarta Persistence API*, antes Java Persistence API): especificación Java estándar para mapear objetos a bases de datos relacionales. Spring Data JPA y Hibernate son, respectivamente, la capa de abstracción y la implementación usadas en este proyecto.
+
+**MPAndroidChart**: librería Android open source para visualización de datos. Usada en este proyecto para las gráficas de evolución de marcas (líneas) y el comparativo grupal multi-línea.
+
+**PostgreSQL**: sistema de gestión de bases de datos relacional open source, reconocido por su cumplimiento del estándar SQL y su robustez en entornos de producción. Versión 16 usada en este proyecto.
+
+**Retrofit 2**: cliente HTTP para Android que convierte interfaces Java anotadas en llamadas HTTP. Simplifica la comunicación con la API REST del backend y la deserialización automática de JSON a objetos Java mediante Gson o Moshi.
+
+**Scrum**: marco de trabajo ágil para el desarrollo iterativo de software. Organiza el trabajo en sprints de duración fija, con roles definidos (Product Owner, Scrum Master, equipo de desarrollo) y eventos periódicos (planificación, revisión, retrospectiva).
+
+**Spring Boot**: extensión de Spring Framework que elimina la configuración boilerplate mediante autoconfiguración. Incluye un servidor Tomcat embebido, de modo que el backend se ejecuta como un jar ejecutable sin necesidad de un servidor de aplicaciones externo.
+
+**Spring Security**: módulo de Spring para autenticación y autorización. En este proyecto gestiona el filtro JWT (verifica el token en cada petición), la carga del usuario desde la BD y el control de acceso por roles (`@PreAuthorize`).
+
+**VPS** (*Virtual Private Server*): servidor virtual alojado en infraestructura cloud que otorga acceso root completo al sistema operativo. En este proyecto se usa un VPS para alojar Coolify, PostgreSQL y el contenedor Docker del backend.
 
 ---
 
