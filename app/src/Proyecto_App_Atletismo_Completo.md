@@ -1817,9 +1817,9 @@ Auditoría exhaustiva de TODOS los requisitos (HU, RF, RNF, CU) contra el códig
 | HU-05 | Registro de asistencia (entrenador) | ✅ | ✅ P/A/J + % resumen. ✅ **plazo máx. 2h post-sesión** (backend `verificarPermisosAsistencia`). ✅ **solo Admin puede modificar asistencia ya guardada** |
 | HU-06 | Registro de marcas (entrenador) | ✅ | ✅ atleta/disciplina/fecha/resultado, marca personal automática, atleta no puede modificar. 🟡 disciplinas hardcodeadas; asociar a competencia no (solo a sesión) |
 | HU-07 | Historial de rendimiento propio (atleta) | ✅ | ✅ historial ordenado, filtro disciplina, gráfica evolución, mejor marca destacada, no ve otros (corregido en 9.14) |
-| HU-08 | Ver evolución del grupo (entrenador) | 🟡 | ✅ evolución individual por atleta con tendencia. ❌ comparativa de grupo. ❌ **exportar PDF/Excel** |
+| HU-08 | Ver evolución del grupo (entrenador) | ✅ | ✅ evolución individual por atleta con tendencia. ✅ **comparativa grupal multi-línea** (`EvolucionGrupoActivity` desde menú de grupo). ✅ **exportar PDF** (gráfica + tabla mejores marcas, share sheet). |
 | HU-09 | Publicar convocatoria (entrenador) | ✅ | ✅ crear competencia + push. ✅ **grupo específico** (spinner opcional; null = todos). ✅ atletas confirman/declinan; ve confirmados |
-| HU-10 | Registrar resultados de competencia | ❌ | ❌ No existe registro de posición/marca/observaciones por atleta en competencia, ni asociación al historial |
+| HU-10 | Registrar resultados de competencia | ✅ | ✅ registro posición/marca/observaciones por atleta en competencia (sección 9.19). ✅ push notificación al atleta al registrar resultado (HU-11). |
 | HU-11 | Recibir notificaciones push (atleta/padre) | 🟡 | ✅ push sesión/competencia/resultado. ✅ **notificación push al atleta al registrar resultado**. ❌ configurar qué notif recibir. ❌ reintentos 3x. 🟡 historial sin límite de 30 días |
 | HU-12 | Gestionar perfil del atleta (entrenador) | 🟡 | ✅ crear/editar/desactivar atleta (9.18). ✅ fecha nac + datos tutor (9.17). ✅ **foto atleta por el entrenador** (menú "Cambiar foto"). ✅ **auto-categoría diaria** (`CategoriaSchedulerService @Scheduled`). ❌ notificar al atleta del cambio de categoría |
 | HU-13 | Consultar/editar datos propios (atleta) | 🟡 | ✅ edita correo, foto. ✅ **nombre bloqueado** (read-only). ✅ **teléfono opcional**. ✅ **confirmación por contraseña actual** (backend valida). 🟡 contrasena no muestra error específico en campo al fallar |
@@ -2169,6 +2169,48 @@ Implementación del batch HU-01→HU-05 (excluyendo HU-03/06/07 que ya estaban a
 | HU-11 Push resultado | 🟡 ~65% | 🟡 ~85% (falta configurar notif) |
 | HU-12 Scheduler + foto | 🟡 ~60% | 🟡 ~90% (falta notif cambio categoría) |
 | HU-13 Perfil seguro | 🟡 ~65% | 🟡 ~90% (campo pwd no resalta rojo en el TIL) |
+
+---
+
+### 9.23 HU-08 — Comparativa grupal multi-línea + Exportar PDF — 2026-06-23
+
+---
+
+#### Descripción
+
+Implementación completa de la comparativa de evolución del grupo entero en una sola pantalla, con exportación a PDF compartible.
+
+**BACKEND:**
+- `MarcaRepository`: dos nuevas queries JPQL — `findByGrupoIdAndDisciplina(grupoId, disciplina)` y `findByGrupoId(grupoId)`, ordenadas por `atleta.id ASC, fecha ASC`.
+- `GrupoEvolucionResponse` DTO (nuevo): `{ atletaId, atletaNombre, List<MarcaResponse> marcas }`.
+- `MarcaService.getMarcasGrupo(Long grupoId, String disciplina)`: agrupa las marcas por atleta usando `LinkedHashMap` (preserva orden de inserción → orden por `atleta.id`) y devuelve `List<GrupoEvolucionResponse>`.
+- `MarcaController`: `GET /api/v1/marcas/grupo/{grupoId}?disciplina=X` — restringido a `ENTRENADOR/ADMIN`.
+
+**APP:**
+- `GrupoEvolucionDto` model: `{ Long atletaId, String atletaNombre, List<MarcaPersonal> marcas }`.
+- `MarcasApiService`: `getMarcasGrupo(@Path Long grupoId, @Query String disciplina)`.
+- `EvolucionGrupoActivity` (nueva): spinner disciplina (pre-selecciona la disciplina del grupo), `LineChart` con paleta de 8 colores (uno por atleta), eje X unificado con todas las fechas únicas, `RecyclerView` de leyenda con nombre y mejor marca de cada atleta. Menú "Exportar PDF".
+- `LeyendaAtletaAdapter` (nuevo): muestra pastilla de color + nombre + mejor marca.
+- `activity_evolucion_grupo.xml` (nuevo): toolbar + spinner + LineChart 280dp + RecyclerView leyenda.
+- `item_leyenda_atleta.xml` (nuevo): fila color/nombre/mejor-marca.
+- `menu_evolucion_grupo.xml` (nuevo): ítem "Exportar PDF".
+- `menu_grupo_detalle.xml`: añadido ítem "Ver evolución del grupo".
+- `GrupoDetalleActivity`: maneja `action_evolucion_grupo` → abre `EvolucionGrupoActivity` pasando `grupoId`, `grupoNombre`, y `disciplina` del grupo.
+- `AndroidManifest.xml`: declara `EvolucionGrupoActivity` + `FileProvider` (para compartir PDF).
+- `res/xml/file_paths.xml` (nuevo): `<external-cache-path>` para el FileProvider.
+
+**PDF Export:**
+- `exportarPdf()`: captura `lineChart.getChartBitmap()`, crea `PdfDocument` A4, dibuja título, gráfica escalada (547×220), tabla de atletas con pastilla de color y mejor marca.
+- Guarda en `getExternalCacheDir()` → comparte via `Intent.ACTION_SEND` tipo `application/pdf` con URI de FileProvider.
+
+---
+
+**Estado tras este commit:**
+
+| HU | Antes | Ahora |
+|---|---|---|
+| HU-08 Ver evolución grupal | 🟡 ~55% | ✅ ~100% |
+| HU-10 Resultados competencia | ❌ | ✅ (confirmado que funciona - sección 9.19) |
 
 ---
 

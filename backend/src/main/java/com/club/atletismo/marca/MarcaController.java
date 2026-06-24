@@ -1,5 +1,6 @@
 package com.club.atletismo.marca;
 
+import com.club.atletismo.marca.dto.GrupoEvolucionResponse;
 import com.club.atletismo.marca.dto.MarcaRequest;
 import com.club.atletismo.marca.dto.MarcaResponse;
 import com.club.atletismo.shared.ApiResponse;
@@ -30,6 +31,14 @@ public class MarcaController {
     public ResponseEntity<List<MarcaResponse>> getRanking(
             @RequestParam(required = false) String disciplina) {
         return ResponseEntity.ok(marcaService.getRanking(disciplina));
+    }
+
+    @GetMapping("/grupo/{grupoId}")
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
+    public ResponseEntity<List<GrupoEvolucionResponse>> getMarcasGrupo(
+            @PathVariable Long grupoId,
+            @RequestParam(required = false) String disciplina) {
+        return ResponseEntity.ok(marcaService.getMarcasGrupo(grupoId, disciplina));
     }
 
     @PostMapping

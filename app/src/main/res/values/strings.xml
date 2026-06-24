@@ -319,4 +319,10 @@
     <!-- Asistencia (HU-05) -->
     <string name="err_asistencia_fuera_plazo">El plazo para registrar asistencia ha vencido (máx. 2 h tras la sesión)</string>
     <string name="err_asistencia_bloqueada">La asistencia ya fue guardada. Solo el Administrador puede modificarla.</string>
+
+    <!-- Evolución grupal (HU-08) -->
+    <string name="lbl_evolucion_grupo">Ver evolución del grupo</string>
+    <string name="lbl_exportar_pdf">Exportar PDF</string>
+    <string name="msg_sin_datos_grupo">Sin datos de marcas para este grupo y disciplina</string>
+    <string name="lbl_atletas">Atletas</string>
 </resources>

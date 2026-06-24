@@ -1,5 +1,6 @@
 package com.club.atletismo.marca;
 
+import com.club.atletismo.marca.dto.GrupoEvolucionResponse;
 import com.club.atletismo.marca.dto.MarcaRequest;
 import com.club.atletismo.marca.dto.MarcaResponse;
 import com.club.atletismo.sesion.SesionEntrenamiento;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -94,6 +97,26 @@ public class MarcaService {
                 .build();
 
         return toResponse(marcaRepository.save(marca));
+    }
+
+    @Transactional(readOnly = true)
+    public List<GrupoEvolucionResponse> getMarcasGrupo(Long grupoId, String disciplina) {
+        List<MarcaPersonal> todas = (disciplina != null && !disciplina.isBlank())
+                ? marcaRepository.findByGrupoIdAndDisciplina(grupoId, disciplina)
+                : marcaRepository.findByGrupoId(grupoId);
+
+        Map<Long, List<MarcaPersonal>> porAtleta = todas.stream()
+                .collect(Collectors.groupingBy(m -> m.getAtleta().getId(), LinkedHashMap::new, Collectors.toList()));
+
+        return porAtleta.entrySet().stream().map(e -> {
+            String nombre = e.getValue().get(0).getAtleta().getNombreCompleto();
+            List<MarcaResponse> marcas = e.getValue().stream().map(this::toResponse).collect(Collectors.toList());
+            return GrupoEvolucionResponse.builder()
+                    .atletaId(e.getKey())
+                    .atletaNombre(nombre)
+                    .marcas(marcas)
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     @Transactional

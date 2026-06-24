@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.asistencia.ReporteAsistenciaActivity;
+import com.example.tallerappmovil.marcas.EvolucionGrupoActivity;
 import com.example.tallerappmovil.atletas.AtletaPerfilActivity;
 import com.example.tallerappmovil.atletas.AtletasActivity;
 import com.example.tallerappmovil.atletas.AtletasAdapter;
@@ -207,6 +208,15 @@ public class GrupoDetalleActivity extends AppCompatActivity {
                 intent.putExtra(ReporteAsistenciaActivity.EXTRA_GRUPO_ID, grupoId);
                 intent.putExtra(ReporteAsistenciaActivity.EXTRA_GRUPO_NOMBRE, grupoNombreActual);
             }
+            startActivity(intent);
+            return true;
+        }
+        if (id == R.id.action_evolucion_grupo) {
+            Intent intent = new Intent(this, EvolucionGrupoActivity.class);
+            if (grupoId != null) intent.putExtra(EvolucionGrupoActivity.EXTRA_GRUPO_ID, (long) grupoId);
+            intent.putExtra(EvolucionGrupoActivity.EXTRA_GRUPO_NOMBRE, grupoNombreActual);
+            if (grupoDisciplinaActual != null)
+                intent.putExtra(EvolucionGrupoActivity.EXTRA_DISCIPLINA, grupoDisciplinaActual);
             startActivity(intent);
             return true;
         }

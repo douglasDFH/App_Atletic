@@ -1,6 +1,7 @@
 package com.example.tallerappmovil.api;
 
 import com.example.tallerappmovil.model.AtletaInfo;
+import com.example.tallerappmovil.model.GrupoEvolucionDto;
 import com.example.tallerappmovil.model.MarcaPersonal;
 import com.example.tallerappmovil.model.MarcaRequest;
 
@@ -29,6 +30,11 @@ public interface MarcasApiService {
 
     @DELETE("marcas/{id}")
     Call<Void> eliminarMarca(@Path("id") Long id);
+
+    @GET("marcas/grupo/{grupoId}")
+    Call<List<GrupoEvolucionDto>> getMarcasGrupo(
+            @Path("grupoId") Long grupoId,
+            @Query("disciplina") String disciplina);
 
     // Ranking / leaderboard: todas las marcas (por disciplina si se indica)
     @GET("marcas/ranking")

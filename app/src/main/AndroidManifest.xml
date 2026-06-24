@@ -67,6 +67,7 @@
         <activity android:name=".marcas.MarcasActivity"            android:exported="false" />
         <activity android:name=".marcas.RegistrarMarcaActivity"  android:exported="false" />
         <activity android:name=".marcas.EvolucionMarcasActivity" android:exported="false" />
+        <activity android:name=".marcas.EvolucionGrupoActivity"  android:exported="false" />
         <activity android:name=".eventos.EventosActivity"              android:exported="false" />
         <activity android:name=".eventos.CrearCompetenciaActivity"   android:exported="false" />
         <activity android:name=".eventos.CompetenciaDetalleActivity" android:exported="false" />
@@ -82,6 +83,16 @@
         <activity android:name=".perfil.PerfilActivity"   android:exported="false" />
 
         <activity android:name=".MainActivity" android:exported="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <service
             android:name=".notificaciones.PushNotificationService"
