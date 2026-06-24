@@ -57,7 +57,7 @@ public class AuthService {
 
         // Verificar contraseña
         if (!passwordEncoder.matches(request.getContrasena(), usuario.getContrasenaHash())) {
-            int fallos = usuario.getIntentosFallidos() + 1;
+            int fallos = (usuario.getIntentosFallidos() != null ? usuario.getIntentosFallidos() : 0) + 1;
             usuario.setIntentosFallidos(fallos);
             if (fallos >= MAX_INTENTOS) {
                 usuario.setBloqueadoHasta(LocalDateTime.now().plusMinutes(BLOQUEO_MIN));
@@ -68,7 +68,8 @@ public class AuthService {
         }
 
         // Login exitoso: limpiar contadores
-        if (usuario.getIntentosFallidos() > 0 || usuario.getBloqueadoHasta() != null) {
+        if ((usuario.getIntentosFallidos() != null && usuario.getIntentosFallidos() > 0)
+                || usuario.getBloqueadoHasta() != null) {
             usuario.setIntentosFallidos(0);
             usuario.setBloqueadoHasta(null);
             usuarioRepository.save(usuario);

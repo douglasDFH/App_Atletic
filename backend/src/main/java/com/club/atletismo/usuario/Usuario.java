@@ -59,8 +59,11 @@ public class Usuario implements UserDetails {
     private Usuario atletaVinculado;
 
     // Bloqueo de cuenta tras intentos fallidos (HU-02)
+    // Integer (nullable wrapper) + columnDefinition con DEFAULT 0 para que PostgreSQL
+    // pueda ADD COLUMN en tablas con datos existentes sin violar NOT NULL.
     @Builder.Default
-    private int intentosFallidos = 0;
+    @Column(columnDefinition = "integer not null default 0")
+    private Integer intentosFallidos = 0;
     private LocalDateTime bloqueadoHasta;
 
     // Verificación de correo al registrar (HU-01). null = cuenta legacy (sin restricción).

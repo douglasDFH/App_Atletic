@@ -2214,6 +2214,37 @@ Implementación completa de la comparativa de evolución del grupo entero en una
 
 ---
 
+### 9.24 Fix crítico: columna `intentos_fallidos` no se podía agregar en PostgreSQL — 2026-06-24
+
+**Problema:** el backend crasheaba al arrancar; todos los intentos de login fallaban con error 500.
+
+**Causa raíz:** `private int intentosFallidos` en `Usuario.java` es un primitivo Java (`int`), que Hibernate mapea como `INTEGER NOT NULL`. Al hacer `ddl-auto: update` sobre una tabla de producción con datos existentes, PostgreSQL rechaza `ALTER TABLE usuario ADD COLUMN intentos_fallidos INTEGER NOT NULL` porque las filas existentes tendrían `NULL` en esa columna. La columna nunca se creó, y cualquier SELECT que tocara `usuario` fallaba con `column u1_0.intentos_fallidos does not exist`.
+
+**Fix aplicado:**
+
+`Usuario.java`:
+```java
+// Antes
+@Builder.Default
+private int intentosFallidos = 0;
+
+// Después
+@Builder.Default
+@Column(columnDefinition = "integer not null default 0")
+private Integer intentosFallidos = 0;
+```
+`columnDefinition = "integer not null default 0"` hace que PostgreSQL genere `ALTER TABLE usuario ADD COLUMN intentos_fallidos integer not null default 0`, lo que funciona porque las filas existentes reciben el valor por defecto `0`.
+
+`AuthService.java`: los dos puntos donde se usa `getIntentosFallidos()` ahora manejan `null` con `!= null ? ... : 0` para evitar NPE en filas legacy que pudieran tener NULL.
+
+**Estado tras este fix:**
+
+| HU | Antes | Ahora |
+|---|---|---|
+| HU-02 Login + bloqueo intentos | ❌ crash (columna faltante) | ✅ backend arranca, login restaurado |
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**
