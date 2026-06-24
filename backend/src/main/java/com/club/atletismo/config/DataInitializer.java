@@ -20,13 +20,17 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (usuarioRepository.count() > 0) return;
+        // Siembra el entrenador admin si no existe (independiente de si hay otros usuarios)
+        if (usuarioRepository.existsByCorreo("entrenador@atletismo.com")) return;
 
-        Grupo grupo = grupoRepository.save(Grupo.builder()
-                .nombre("Velocidad Elite")
-                .disciplina("100m / 200m")
-                .descripcion("Grupo principal de velocistas")
-                .build());
+        Grupo grupo = grupoRepository.findAll().stream()
+                .filter(g -> "Velocidad Elite".equals(g.getNombre()))
+                .findFirst()
+                .orElseGet(() -> grupoRepository.save(Grupo.builder()
+                        .nombre("Velocidad Elite")
+                        .disciplina("100m / 200m")
+                        .descripcion("Grupo principal de velocistas")
+                        .build()));
 
         usuarioRepository.save(Usuario.builder()
                 .nombreCompleto("Admin Entrenador")
@@ -37,26 +41,30 @@ public class DataInitializer implements CommandLineRunner {
                 .activo(true)
                 .build());
 
-        usuarioRepository.save(Usuario.builder()
-                .nombreCompleto("Carlos Mamani")
-                .correo("atleta@atletismo.com")
-                .contrasenaHash(passwordEncoder.encode("atleta123"))
-                .rol(Rol.ATLETA)
-                .disciplina("100m")
-                .categoria("Senior")
-                .grupo(grupo)
-                .activo(true)
-                .build());
+        if (!usuarioRepository.existsByCorreo("atleta@atletismo.com")) {
+            usuarioRepository.save(Usuario.builder()
+                    .nombreCompleto("Carlos Mamani")
+                    .correo("atleta@atletismo.com")
+                    .contrasenaHash(passwordEncoder.encode("atleta123"))
+                    .rol(Rol.ATLETA)
+                    .disciplina("100m")
+                    .categoria("Senior")
+                    .grupo(grupo)
+                    .activo(true)
+                    .build());
+        }
 
-        usuarioRepository.save(Usuario.builder()
-                .nombreCompleto("María Flores")
-                .correo("atleta2@atletismo.com")
-                .contrasenaHash(passwordEncoder.encode("atleta123"))
-                .rol(Rol.ATLETA)
-                .disciplina("200m")
-                .categoria("Junior")
-                .grupo(grupo)
-                .activo(true)
-                .build());
+        if (!usuarioRepository.existsByCorreo("atleta2@atletismo.com")) {
+            usuarioRepository.save(Usuario.builder()
+                    .nombreCompleto("María Flores")
+                    .correo("atleta2@atletismo.com")
+                    .contrasenaHash(passwordEncoder.encode("atleta123"))
+                    .rol(Rol.ATLETA)
+                    .disciplina("200m")
+                    .categoria("Junior")
+                    .grupo(grupo)
+                    .activo(true)
+                    .build());
+        }
     }
 }
