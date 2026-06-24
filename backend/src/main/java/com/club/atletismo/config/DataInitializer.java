@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public void run(String... args) {
         Grupo grupo = grupoRepository.findAll().stream()
                 .filter(g -> "Velocidad Elite".equals(g.getNombre()))
@@ -29,49 +31,50 @@ public class DataInitializer implements CommandLineRunner {
                         .descripcion("Grupo principal de velocistas")
                         .build()));
 
-        // Siempre sincroniza el entrenador admin (crea o restablece contraseña)
-        usuarioRepository.findByCorreo("entrenador@atletismo.com").ifPresentOrElse(
-            u -> {
-                u.setContrasenaHash(passwordEncoder.encode("admin123"));
-                u.setActivo(true);
-                u.setBloqueadoHasta(null);
-                u.setIntentosFallidos(0);
-                usuarioRepository.save(u);
-            },
-            () -> usuarioRepository.save(Usuario.builder()
-                .nombreCompleto("Admin Entrenador")
-                .correo("entrenador@atletismo.com")
-                .contrasenaHash(passwordEncoder.encode("admin123"))
-                .rol(Rol.ENTRENADOR)
-                .disciplina("Velocidad")
-                .activo(true)
-                .build())
-        );
+        // Siempre garantiza el entrenador admin con credenciales correctas
+        Usuario entrenador = usuarioRepository.findByCorreo("entrenador@atletismo.com")
+                .orElseGet(() -> {
+                    Usuario u = new Usuario();
+                    u.setCorreo("entrenador@atletismo.com");
+                    u.setNombreCompleto("Admin Entrenador");
+                    u.setRol(Rol.ENTRENADOR);
+                    u.setDisciplina("Velocidad");
+                    return u;
+                });
+
+        entrenador.setContrasenaHash(passwordEncoder.encode("Admin123"));
+        entrenador.setActivo(true);
+        entrenador.setEmailVerificado(null); // null = cuenta legacy, sin restriccion de verificacion
+        entrenador.setBloqueadoHasta(null);
+        entrenador.setIntentosFallidos(0);
+        usuarioRepository.save(entrenador);
 
         if (!usuarioRepository.existsByCorreo("atleta@atletismo.com")) {
-            usuarioRepository.save(Usuario.builder()
-                    .nombreCompleto("Carlos Mamani")
-                    .correo("atleta@atletismo.com")
-                    .contrasenaHash(passwordEncoder.encode("atleta123"))
-                    .rol(Rol.ATLETA)
-                    .disciplina("100m")
-                    .categoria("Senior")
-                    .grupo(grupo)
-                    .activo(true)
-                    .build());
+            Usuario atleta1 = new Usuario();
+            atleta1.setCorreo("atleta@atletismo.com");
+            atleta1.setNombreCompleto("Carlos Mamani");
+            atleta1.setContrasenaHash(passwordEncoder.encode("Atleta123"));
+            atleta1.setRol(Rol.ATLETA);
+            atleta1.setDisciplina("100m");
+            atleta1.setCategoria("Senior");
+            atleta1.setGrupo(grupo);
+            atleta1.setActivo(true);
+            atleta1.setEmailVerificado(null);
+            usuarioRepository.save(atleta1);
         }
 
         if (!usuarioRepository.existsByCorreo("atleta2@atletismo.com")) {
-            usuarioRepository.save(Usuario.builder()
-                    .nombreCompleto("María Flores")
-                    .correo("atleta2@atletismo.com")
-                    .contrasenaHash(passwordEncoder.encode("atleta123"))
-                    .rol(Rol.ATLETA)
-                    .disciplina("200m")
-                    .categoria("Junior")
-                    .grupo(grupo)
-                    .activo(true)
-                    .build());
+            Usuario atleta2 = new Usuario();
+            atleta2.setCorreo("atleta2@atletismo.com");
+            atleta2.setNombreCompleto("María Flores");
+            atleta2.setContrasenaHash(passwordEncoder.encode("Atleta123"));
+            atleta2.setRol(Rol.ATLETA);
+            atleta2.setDisciplina("200m");
+            atleta2.setCategoria("Junior");
+            atleta2.setGrupo(grupo);
+            atleta2.setActivo(true);
+            atleta2.setEmailVerificado(null);
+            usuarioRepository.save(atleta2);
         }
     }
 }
