@@ -34,6 +34,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -201,7 +202,7 @@ public class EvolucionGrupoActivity extends AppCompatActivity {
 
     private void poblarGrafica(List<GrupoEvolucionDto> datos) {
         etiquetasX.clear();
-        List<LineDataSet> dataSets = new ArrayList<>();
+        List<ILineDataSet> dataSets = new ArrayList<>();
         List<LeyendaAtletaAdapter.Item> leyendaItems = new ArrayList<>();
         int[] coloresUsados = new int[datos.size()];
 
