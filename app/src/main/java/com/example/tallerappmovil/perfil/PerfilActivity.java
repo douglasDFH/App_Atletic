@@ -71,6 +71,9 @@ public class PerfilActivity extends AppCompatActivity {
         findViewById(R.id.cardCambiarContrasena).setOnClickListener(v ->
                 startActivity(new Intent(this, CambiarContrasenaActivity.class)));
 
+        findViewById(R.id.cardNotifPreferencias).setOnClickListener(v ->
+                startActivity(new Intent(this, NotifPreferenciasActivity.class)));
+
         MaterialButton btnLogout = findViewById(R.id.btnCerrarSesion);
         btnLogout.setOnClickListener(v -> {
             session.clearSession();

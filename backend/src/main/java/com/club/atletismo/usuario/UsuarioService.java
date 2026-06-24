@@ -257,6 +257,16 @@ public class UsuarioService {
         usuarioRepository.save(padre);
     }
 
+    /** Actualiza las preferencias de notificaciones push del usuario autenticado (HU-11). */
+    @Transactional
+    public void actualizarPreferenciasNotif(NotifPreferenciasRequest req) {
+        Usuario u = getUsuarioActual();
+        if (req.getSesiones() != null)     u.setNotifSesiones(req.getSesiones());
+        if (req.getCompetencias() != null) u.setNotifCompetencias(req.getCompetencias());
+        if (req.getResultados() != null)   u.setNotifResultados(req.getResultados());
+        usuarioRepository.save(u);
+    }
+
     private PerfilResponse toPerfilResponse(Usuario u) {
         // Para un PADRE, el grupo/contexto mostrado es el de su hijo vinculado
         Usuario hijo = u.getRol() == Rol.PADRE ? u.getAtletaVinculado() : null;
@@ -273,6 +283,9 @@ public class UsuarioService {
                 .telefono(u.getTelefono())
                 .atletaVinculadoId(hijo != null ? hijo.getId() : null)
                 .atletaVinculadoNombre(hijo != null ? hijo.getNombreCompleto() : null)
+                .notifSesiones(u.getNotifSesiones() != null ? u.getNotifSesiones() : true)
+                .notifCompetencias(u.getNotifCompetencias() != null ? u.getNotifCompetencias() : true)
+                .notifResultados(u.getNotifResultados() != null ? u.getNotifResultados() : true)
                 .build();
     }
 }

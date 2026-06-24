@@ -70,6 +70,11 @@ public class Usuario implements UserDetails {
     private Boolean emailVerificado;
     private String tokenVerificacion;
 
+    // Preferencias de notificaciones push (HU-11). null = true (recibe por defecto).
+    private Boolean notifSesiones;
+    private Boolean notifCompetencias;
+    private Boolean notifResultados;
+
     /** Edad en años a partir de la fecha de nacimiento (null si no hay fecha). */
     @Transient
     public Integer getEdad() {

@@ -2,6 +2,7 @@ package com.example.tallerappmovil.api;
 
 import com.example.tallerappmovil.model.CambiarContrasenaRequest;
 import com.example.tallerappmovil.model.EditarPerfilRequest;
+import com.example.tallerappmovil.model.NotifPreferenciasRequest;
 import com.example.tallerappmovil.model.PadreInfo;
 import com.example.tallerappmovil.model.PerfilUsuario;
 
@@ -31,6 +32,9 @@ public interface UsuariosApiService {
 
     @PUT("usuarios/fcm-token")
     Call<Void> registrarFcmToken(@Body Map<String, String> body);
+
+    @PUT("usuarios/notificaciones")
+    Call<Void> actualizarNotifPreferencias(@Body NotifPreferenciasRequest req);
 
     @Multipart
     @PUT("usuarios/foto-perfil")

@@ -57,7 +57,20 @@ public class NotificacionService {
                 .mensaje(mensaje)
                 .build();
         notificacionRepository.save(n);
-        fcmService.sendToToken(usuario.getFcmToken(), titulo, mensaje);
+        // Solo envía push FCM si el usuario tiene habilitado ese tipo de notificación.
+        // null = no configurado → activo por defecto.
+        if (debeRecibirPush(usuario, tipo)) {
+            fcmService.sendToToken(usuario.getFcmToken(), titulo, mensaje);
+        }
+    }
+
+    private boolean debeRecibirPush(Usuario u, String tipo) {
+        return switch (tipo) {
+            case "SESION"      -> !Boolean.FALSE.equals(u.getNotifSesiones());
+            case "COMPETENCIA" -> !Boolean.FALSE.equals(u.getNotifCompetencias());
+            case "RESULTADO"   -> !Boolean.FALSE.equals(u.getNotifResultados());
+            default            -> true; // CATEGORIA y otros siempre se envían
+        };
     }
 
     private NotificacionDto toDto(Notificacion n) {

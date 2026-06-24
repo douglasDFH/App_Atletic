@@ -1,5 +1,6 @@
 package com.club.atletismo.usuario;
 
+import com.club.atletismo.notificacion.NotificacionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,6 +21,7 @@ import java.util.List;
 public class CategoriaSchedulerService {
 
     private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
     @Scheduled(cron = "0 0 1 * * *")
     @Transactional
@@ -31,11 +33,16 @@ public class CategoriaSchedulerService {
             int edad = Period.between(u.getFechaNacimiento(), LocalDate.now()).getYears();
             String categoriaCalculada = categoriaPorEdad(edad);
             if (!categoriaCalculada.equals(u.getCategoria())) {
+                String categoriaAnterior = u.getCategoria();
                 u.setCategoria(categoriaCalculada);
                 usuarioRepository.save(u);
                 actualizados++;
                 log.info("Categoría actualizada: {} ({} años) → {}",
                         u.getNombreCompleto(), edad, categoriaCalculada);
+                notificacionService.crear(u, "CATEGORIA",
+                        "Categoría actualizada",
+                        "Tu categoría ha cambiado de " + (categoriaAnterior != null ? categoriaAnterior : "—")
+                                + " a " + categoriaCalculada + ".");
             }
         }
         if (actualizados > 0) {

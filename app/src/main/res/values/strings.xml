@@ -244,6 +244,13 @@
     <string name="lbl_sin_notificaciones">Sin notificaciones por el momento</string>
     <string name="lbl_marcar_todas_leidas">Marcar todo como leído</string>
     <string name="lbl_notif_no_leidas">%1$d sin leer</string>
+    <string name="lbl_notif_preferencias">Preferencias de notificaciones</string>
+    <string name="lbl_notif_preferencias_desc">Elige qué tipos de notificaciones push deseas recibir.</string>
+    <string name="lbl_notif_sesiones">Sesiones de entrenamiento</string>
+    <string name="lbl_notif_competencias">Convocatorias y competencias</string>
+    <string name="lbl_notif_resultados">Resultados de competencia</string>
+    <string name="btn_guardar_preferencias">Guardar preferencias</string>
+    <string name="msg_preferencias_guardadas">Preferencias guardadas</string>
 
     <!-- Filtros Eventos -->
     <string name="hint_buscar_evento">Buscar competencia…</string>

@@ -22,4 +22,9 @@ public class PerfilResponse {
     // Solo para rol PADRE: atleta (hijo) vinculado que observa
     private Long atletaVinculadoId;
     private String atletaVinculadoNombre;
+
+    // Preferencias de notificaciones push (HU-11)
+    private Boolean notifSesiones;
+    private Boolean notifCompetencias;
+    private Boolean notifResultados;
 }

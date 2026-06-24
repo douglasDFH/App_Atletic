@@ -2245,6 +2245,59 @@ private Integer intentosFallidos = 0;
 
 ---
 
+### 9.25 HU-11/12/13 — Preferencias de notificaciones, push cambio categoría, error TIL contraseña — 2026-06-24
+
+---
+
+#### HU-12 — Push al atleta cuando cambia su categoría (completado)
+
+**BACKEND (`CategoriaSchedulerService`):**
+- Inyecta `NotificacionService`.
+- Después de actualizar y guardar la categoría del atleta, llama `notificacionService.crear(u, "CATEGORIA", "Categoría actualizada", "Tu categoría ha cambiado de X a Y")`.
+- Notificación de tipo "CATEGORIA" siempre se envía (no se puede desactivar en preferencias).
+
+---
+
+#### HU-11 — Configurar qué notificaciones push recibir (completado)
+
+**BACKEND:**
+- `Usuario`: 3 nuevos campos nullable `Boolean notifSesiones`, `notifCompetencias`, `notifResultados`. Nullable (sin NOT NULL) → PostgreSQL puede addColumn sin issue; null = activo por defecto.
+- `PerfilResponse`: expone los 3 campos (null resuelto a true en `toPerfilResponse()`).
+- `NotifPreferenciasRequest` DTO (nuevo): `{ sesiones, competencias, resultados }`.
+- `UsuarioService.actualizarPreferenciasNotif()`: actualiza solo los campos no null del request.
+- `UsuarioController`: `PUT /api/v1/usuarios/notificaciones` (cualquier rol autenticado).
+- `NotificacionService.crear()`: antes de llamar `fcmService.sendToToken()`, llama nuevo método privado `debeRecibirPush(usuario, tipo)` — devuelve false si el usuario desactivó ese tipo. Los tipos "SESION"/"COMPETENCIA"/"RESULTADO" son configurables; "CATEGORIA" y otros siempre se envían.
+
+**APP:**
+- `PerfilUsuario` model: 3 nuevos campos `Boolean notifSesiones/Competencias/Resultados` + getters.
+- `NotifPreferenciasRequest` model (nuevo): `{ sesiones, competencias, resultados }` + constructor.
+- `UsuariosApiService`: nuevo `@PUT("usuarios/notificaciones") Call<Void> actualizarNotifPreferencias()`.
+- `NotifPreferenciasActivity` (nueva): carga preferencias actuales del backend (`getPerfil()`), muestra 3 `SwitchMaterial` con sus valores, botón "Guardar preferencias" → `PUT /api/v1/usuarios/notificaciones`.
+- `activity_notif_preferencias.xml` (nuevo): toolbar + 3 switches en card + botón guardar.
+- `activity_perfil.xml`: nuevo card "Preferencias de notificaciones ›" entre "Cambiar contraseña" y el botón de logout.
+- `PerfilActivity`: click en el nuevo card → abre `NotifPreferenciasActivity`.
+- `AndroidManifest.xml`: declara `NotifPreferenciasActivity`.
+
+---
+
+#### HU-13 — Campo contraseña resalta en rojo al fallar (completado)
+
+**APP (`EditarPerfilActivity.guardarCambios`):**
+- En el callback de error, si el mensaje contiene "contraseña" → `tilContrasenaActual.setError(msg)` (error inline en el campo) en lugar de solo un Toast.
+- Errores de otro tipo (ej. "correo ya en uso") siguen mostrando Toast.
+
+---
+
+**Estado tras este commit:**
+
+| HU | Antes | Ahora |
+|---|---|---|
+| HU-11 Configurar notificaciones | ❌ | ✅ ~95% (3 tipos configurables + guardado) |
+| HU-12 Push cambio categoría | ❌ | ✅ ~100% |
+| HU-13 Error TIL contraseña | 🟡 solo Toast | ✅ TIL inline rojo |
+
+---
+
 ## Pendiente (Capítulo 6 + Secciones Finales)
 
 - **6.1 Conclusiones y logros del proyecto**

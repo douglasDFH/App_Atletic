@@ -152,9 +152,13 @@ public class EditarPerfilActivity extends AppCompatActivity {
                             finish();
                         } else {
                             String msg = extractErrorMessage(response);
-                            Toast.makeText(EditarPerfilActivity.this,
-                                    msg != null ? msg : getString(R.string.err_conexion),
-                                    Toast.LENGTH_LONG).show();
+                            if (msg != null && msg.toLowerCase().contains("contraseña")) {
+                                tilContrasenaActual.setError(msg);
+                            } else {
+                                Toast.makeText(EditarPerfilActivity.this,
+                                        msg != null ? msg : getString(R.string.err_conexion),
+                                        Toast.LENGTH_LONG).show();
+                            }
                             btnGuardar.setText(R.string.btn_guardar_perfil);
                         }
                     }

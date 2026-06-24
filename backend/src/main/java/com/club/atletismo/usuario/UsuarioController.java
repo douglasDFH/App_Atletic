@@ -48,6 +48,13 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.subirFoto(foto));
     }
 
+    @PutMapping("/api/v1/usuarios/notificaciones")
+    public ResponseEntity<ApiResponse<Void>> actualizarPreferenciasNotif(
+            @RequestBody NotifPreferenciasRequest req) {
+        usuarioService.actualizarPreferenciasNotif(req);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
     @GetMapping("/api/v1/atletas")
     public ResponseEntity<List<AtletaInfoDto>> getAtletas() {
         return ResponseEntity.ok(usuarioService.getAtletas());

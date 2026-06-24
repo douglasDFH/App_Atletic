@@ -14,6 +14,11 @@ public class PerfilUsuario {
     private Long atletaVinculadoId;
     private String atletaVinculadoNombre;
 
+    // Preferencias de notificaciones push (HU-11)
+    private Boolean notifSesiones;
+    private Boolean notifCompetencias;
+    private Boolean notifResultados;
+
     public Long getId()               { return id; }
     public String getNombreCompleto() { return nombreCompleto; }
     public String getEmail()          { return email; }
@@ -23,6 +28,9 @@ public class PerfilUsuario {
     public String getGrupoNombre()    { return grupoNombre; }
     public String getFotoUrl()        { return fotoUrl; }
     public String getTelefono()       { return telefono; }
-    public Long getAtletaVinculadoId()      { return atletaVinculadoId; }
-    public String getAtletaVinculadoNombre(){ return atletaVinculadoNombre; }
+    public Long getAtletaVinculadoId()       { return atletaVinculadoId; }
+    public String getAtletaVinculadoNombre() { return atletaVinculadoNombre; }
+    public Boolean getNotifSesiones()        { return notifSesiones; }
+    public Boolean getNotifCompetencias()    { return notifCompetencias; }
+    public Boolean getNotifResultados()      { return notifResultados; }
 }

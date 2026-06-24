@@ -75,6 +75,7 @@
         <activity android:name=".notificaciones.NotificacionesActivity"   android:exported="false" />
         <activity android:name=".perfil.CambiarContrasenaActivity"         android:exported="false" />
         <activity android:name=".perfil.EditarPerfilActivity"            android:exported="false" />
+        <activity android:name=".perfil.NotifPreferenciasActivity"       android:exported="false" />
         <activity android:name=".asistencia.ReporteAsistenciaActivity"     android:exported="false" />
         <activity android:name=".grupos.SeleccionarAtletasActivity"       android:exported="false" />
 
