@@ -842,7 +842,7 @@ El sistema se diseñó bajo una **arquitectura de 3 capas** que separa las respo
 │                  CAPA SERVIDOR (Capa 2)                          │
 │            Java 21 + Spring Boot 3.3.6 + Gradle                 │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
-│  │   Auth   │ │  Sesion  │ │  Marca   │ │Competen. │           │
+│  │   Auth   │ │  Agenda  │ │Rendimien.│ │Competen. │           │
 │  │  Module  │ │  Module  │ │  Module  │ │  Module  │           │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
 │                    ┌──────────────┐                              │
@@ -852,8 +852,8 @@ El sistema se diseñó bajo una **arquitectura de 3 capas** que separa las respo
 ├─────────────────────────────────────────────────────────────────┤
 │                   CAPA DE DATOS (Capa 3)                         │
 │  ┌──────────────┐  ┌──────────────────┐  ┌─────────────────┐   │
-│  │ PostgreSQL 16│  │ Firebase Storage  │  │   Docker VPS    │   │
-│  │ (Coolify)    │  │ (fotos atletas)   │  │   Coolify 4.x   │   │
+│  │ PostgreSQL 16│  │ Archivos VPS     │  │   Docker VPS    │   │
+│  │ (Hibernate)  │  │ (fotos atletas)  │  │   Coolify 4.x   │   │
 │  └──────────────┘  └──────────────────┘  └─────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ```
