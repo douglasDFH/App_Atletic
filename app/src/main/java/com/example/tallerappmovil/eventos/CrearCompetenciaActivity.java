@@ -15,6 +15,7 @@ import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.model.Competencia;
 import com.example.tallerappmovil.model.CompetenciaRequest;
+import com.example.tallerappmovil.model.Disciplina;
 import com.example.tallerappmovil.model.GrupoEntrenamiento;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -48,10 +49,8 @@ public class CrearCompetenciaActivity extends AppCompatActivity {
     private int anio, mes, dia;
     private Long competenciaId = null;
     private List<GrupoEntrenamiento> grupos = new ArrayList<>();
+    private final List<Disciplina> disciplinasList = new ArrayList<>();
 
-    private static final String[] DISCIPLINAS = {
-            "100m", "200m", "400m", "Salto Largo", "Lanzamiento de Bala", "Gimnasia", "Múltiples"
-    };
     private static final String[] CATEGORIAS = {
             "Juvenil A", "Juvenil B", "Sub-18", "Sub-20", "Senior", "Máster", "Abierta"
     };
@@ -79,10 +78,6 @@ public class CrearCompetenciaActivity extends AppCompatActivity {
         btnGuardar     = findViewById(R.id.btnGuardar);
         progressBar    = findViewById(R.id.progressBar);
 
-        ArrayAdapter<String> discAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line, DISCIPLINAS);
-        spinnerDisciplina.setAdapter(discAdapter);
-
         ArrayAdapter<String> catAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, CATEGORIAS);
         spinnerCategoria.setAdapter(catAdapter);
@@ -101,7 +96,6 @@ public class CrearCompetenciaActivity extends AppCompatActivity {
             if (getSupportActionBar() != null)
                 getSupportActionBar().setTitle(getString(R.string.lbl_editar_competencia));
             btnGuardar.setText(getString(R.string.btn_guardar_competencia));
-            precargarCampos();
         } else {
             if (getSupportActionBar() != null)
                 getSupportActionBar().setTitle(getString(R.string.lbl_crear_competencia));
@@ -110,9 +104,42 @@ public class CrearCompetenciaActivity extends AppCompatActivity {
             mes  = hoy.get(Calendar.MONTH);
             dia  = hoy.get(Calendar.DAY_OF_MONTH);
             actualizarFechaDisplay();
-            spinnerDisciplina.setText(DISCIPLINAS[0], false);
             spinnerCategoria.setText(CATEGORIAS[0], false);
         }
+
+        cargarDisciplinas();
+    }
+
+    private void cargarDisciplinas() {
+        ApiClient.getDisciplinasService().listar().enqueue(new Callback<List<Disciplina>>() {
+            @Override
+            public void onResponse(Call<List<Disciplina>> c, Response<List<Disciplina>> r) {
+                if (r.isSuccessful() && r.body() != null) {
+                    disciplinasList.clear();
+                    disciplinasList.addAll(r.body());
+                    List<String> nombres = new ArrayList<>();
+                    for (Disciplina d : disciplinasList) nombres.add(d.getNombre());
+                    ArrayAdapter<String> discAdapter = new ArrayAdapter<>(
+                            CrearCompetenciaActivity.this,
+                            android.R.layout.simple_dropdown_item_1line, nombres);
+                    spinnerDisciplina.setAdapter(discAdapter);
+
+                    if (competenciaId != null) {
+                        precargarCampos();
+                    } else if (!disciplinasList.isEmpty()) {
+                        spinnerDisciplina.setText(disciplinasList.get(0).getNombre(), false);
+                    }
+                } else {
+                    Toast.makeText(CrearCompetenciaActivity.this,
+                            "No se pudieron cargar las disciplinas", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Disciplina>> c, Throwable t) {
+                Toast.makeText(CrearCompetenciaActivity.this,
+                        "No se pudieron cargar las disciplinas", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void precargarCampos() {

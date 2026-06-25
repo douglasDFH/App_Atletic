@@ -1329,6 +1329,7 @@ El proyecto se ejecutó en **8 sprints de 2 semanas** entre enero y junio de 202
 - **`ddl-auto: update` en producción:** Para este proyecto académico de escala reducida, Hibernate actualiza el esquema automáticamente al detectar nuevas columnas. En un entorno de producción de mayor escala se utilizarían migraciones Flyway.
 - **Firebase Storage para fotos:** Las fotos de perfil se almacenan en el sistema de archivos del VPS mediante `MultipartFile` de Spring. Firebase Storage se evaluó pero se descartó para simplificar la integración.
 - **Schema único en PostgreSQL:** Todas las entidades comparten el schema `public`. La tabla `usuario` consolidó los atributos de `Atleta` para evitar un JOIN adicional en cada autenticación.
+- **Eliminación de arrays hardcodeados de disciplinas:** Los arrays `DISCIPLINAS[]` duplicados en 5 Activities fueron reemplazados por llamadas al endpoint `GET /disciplinas`, garantizando que cualquier disciplina creada por el entrenador aparezca inmediatamente en todos los selectores sin cambios en el cliente.
 
 ---
 

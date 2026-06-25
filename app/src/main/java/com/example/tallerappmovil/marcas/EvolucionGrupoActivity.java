@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
+import com.example.tallerappmovil.model.Disciplina;
 import com.example.tallerappmovil.model.GrupoEvolucionDto;
 import com.example.tallerappmovil.model.MarcaPersonal;
 import com.github.mikephil.charting.charts.LineChart;
@@ -55,10 +56,6 @@ public class EvolucionGrupoActivity extends AppCompatActivity {
     public static final String EXTRA_GRUPO_NOMBRE = "grupoNombre";
     public static final String EXTRA_DISCIPLINA   = "disciplina";
 
-    private static final String[] DISCIPLINAS = {
-            "100m", "200m", "400m", "Salto Largo", "Lanzamiento de Bala", "Gimnasia"
-    };
-
     private static final int[] COLORES = {
             0xFF26C6DA, 0xFFFF7043, 0xFF66BB6A, 0xFFAB47BC,
             0xFFFFCA28, 0xFF42A5F5, 0xFFEF5350, 0xFF26A69A
@@ -77,6 +74,7 @@ public class EvolucionGrupoActivity extends AppCompatActivity {
     private RecyclerView recyclerLeyenda;
     private LeyendaAtletaAdapter leyendaAdapter;
     private List<GrupoEvolucionDto> datosActuales = new ArrayList<>();
+    private final List<Disciplina> disciplinasList = new ArrayList<>();
     private boolean spinnerReady = false;
     private final List<String> etiquetasX = new ArrayList<>();
 
@@ -108,26 +106,49 @@ public class EvolucionGrupoActivity extends AppCompatActivity {
         recyclerLeyenda.setAdapter(leyendaAdapter);
 
         configurarGrafica();
+        cargarDisciplinas(disciplinaInicial);
+    }
 
-        ArrayAdapter<String> discAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, DISCIPLINAS);
-        spinnerDisciplina.setAdapter(discAdapter);
+    private void cargarDisciplinas(String disciplinaInicial) {
+        ApiClient.getDisciplinasService().listar().enqueue(new Callback<List<Disciplina>>() {
+            @Override
+            public void onResponse(Call<List<Disciplina>> c, Response<List<Disciplina>> r) {
+                if (r.isSuccessful() && r.body() != null) {
+                    disciplinasList.clear();
+                    disciplinasList.addAll(r.body());
+                    List<String> nombres = new ArrayList<>();
+                    for (Disciplina d : disciplinasList) nombres.add(d.getNombre());
 
-        int selIdx = 0;
-        if (disciplinaInicial != null) {
-            for (int i = 0; i < DISCIPLINAS.length; i++) {
-                if (DISCIPLINAS[i].equals(disciplinaInicial)) { selIdx = i; break; }
+                    ArrayAdapter<String> discAdapter = new ArrayAdapter<>(
+                            EvolucionGrupoActivity.this,
+                            android.R.layout.simple_dropdown_item_1line, nombres);
+                    spinnerDisciplina.setAdapter(discAdapter);
+
+                    int selIdx = 0;
+                    if (disciplinaInicial != null) {
+                        for (int i = 0; i < nombres.size(); i++) {
+                            if (nombres.get(i).equals(disciplinaInicial)) { selIdx = i; break; }
+                        }
+                    }
+                    final String selNombre = disciplinasList.isEmpty()
+                            ? "" : disciplinasList.get(selIdx).getNombre();
+                    spinnerDisciplina.setText(selNombre, false);
+                    spinnerReady = true;
+
+                    spinnerDisciplina.setOnItemClickListener((parent, view, position, id) -> {
+                        if (spinnerReady && position < disciplinasList.size())
+                            cargarDatos(disciplinasList.get(position).getNombre());
+                    });
+
+                    if (!disciplinasList.isEmpty()) cargarDatos(selNombre);
+                }
             }
-        }
-        final int idx = selIdx;
-        spinnerDisciplina.setText(DISCIPLINAS[selIdx], false);
-        spinnerReady = true;
-
-        spinnerDisciplina.setOnItemClickListener((parent, view, position, id) -> {
-            if (spinnerReady) cargarDatos(DISCIPLINAS[position]);
+            @Override
+            public void onFailure(Call<List<Disciplina>> c, Throwable t) {
+                Toast.makeText(EvolucionGrupoActivity.this,
+                        "No se pudieron cargar las disciplinas", Toast.LENGTH_SHORT).show();
+            }
         });
-
-        cargarDatos(DISCIPLINAS[idx]);
     }
 
     private void configurarGrafica() {

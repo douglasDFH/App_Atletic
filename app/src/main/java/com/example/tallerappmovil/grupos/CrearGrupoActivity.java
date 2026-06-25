@@ -12,11 +12,15 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
+import com.example.tallerappmovil.model.Disciplina;
 import com.example.tallerappmovil.model.GrupoEntrenamiento;
 import com.example.tallerappmovil.model.GrupoRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,10 +40,7 @@ public class CrearGrupoActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     private Long grupoId = null;
-
-    private static final String[] DISCIPLINAS = {
-            "100m", "200m", "400m", "Salto Largo", "Lanzamiento de Bala", "Gimnasia", "Múltiples"
-    };
+    private final List<Disciplina> disciplinasList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +58,6 @@ public class CrearGrupoActivity extends AppCompatActivity {
         btnGuardar        = findViewById(R.id.btnGuardar);
         progressBar       = findViewById(R.id.progressBar);
 
-        ArrayAdapter<String> discAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line, DISCIPLINAS);
-        spinnerDisciplina.setAdapter(discAdapter);
-
         btnGuardar.setOnClickListener(v -> guardar());
 
         // Modo edición si viene con id
@@ -73,12 +70,44 @@ public class CrearGrupoActivity extends AppCompatActivity {
             if (getSupportActionBar() != null)
                 getSupportActionBar().setTitle("Editar grupo");
             btnGuardar.setText("Guardar cambios");
-            precargarCampos();
         } else {
             if (getSupportActionBar() != null)
                 getSupportActionBar().setTitle(getString(R.string.lbl_crear_grupo));
-            spinnerDisciplina.setText(DISCIPLINAS[0], false);
         }
+
+        cargarDisciplinas();
+    }
+
+    private void cargarDisciplinas() {
+        ApiClient.getDisciplinasService().listar().enqueue(new Callback<List<Disciplina>>() {
+            @Override
+            public void onResponse(Call<List<Disciplina>> c, Response<List<Disciplina>> r) {
+                if (r.isSuccessful() && r.body() != null) {
+                    disciplinasList.clear();
+                    disciplinasList.addAll(r.body());
+                    List<String> nombres = new ArrayList<>();
+                    for (Disciplina d : disciplinasList) nombres.add(d.getNombre());
+                    ArrayAdapter<String> discAdapter = new ArrayAdapter<>(
+                            CrearGrupoActivity.this,
+                            android.R.layout.simple_dropdown_item_1line, nombres);
+                    spinnerDisciplina.setAdapter(discAdapter);
+
+                    if (grupoId != null) {
+                        precargarCampos();
+                    } else if (!disciplinasList.isEmpty()) {
+                        spinnerDisciplina.setText(disciplinasList.get(0).getNombre(), false);
+                    }
+                } else {
+                    Toast.makeText(CrearGrupoActivity.this,
+                            "No se pudieron cargar las disciplinas", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Disciplina>> c, Throwable t) {
+                Toast.makeText(CrearGrupoActivity.this,
+                        "No se pudieron cargar las disciplinas", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void precargarCampos() {
@@ -88,7 +117,9 @@ public class CrearGrupoActivity extends AppCompatActivity {
 
         if (nombre != null)     etNombre.setText(nombre);
         if (descripcion != null) etDescripcion.setText(descripcion);
-        spinnerDisciplina.setText(disciplina != null ? disciplina : DISCIPLINAS[0], false);
+        String seleccion = disciplina != null ? disciplina
+                : (disciplinasList.isEmpty() ? "" : disciplinasList.get(0).getNombre());
+        spinnerDisciplina.setText(seleccion, false);
     }
 
     private void guardar() {

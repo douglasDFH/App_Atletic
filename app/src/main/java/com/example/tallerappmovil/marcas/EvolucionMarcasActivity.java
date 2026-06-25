@@ -8,6 +8,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
+import com.example.tallerappmovil.model.Disciplina;
 import com.example.tallerappmovil.model.MarcaPersonal;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -42,10 +44,6 @@ public class EvolucionMarcasActivity extends AppCompatActivity {
     public static final String EXTRA_DISCIPLINA = "disciplina";
     public static final String EXTRA_ATLETA_ID  = "atleta_id";
 
-    private static final String[] DISCIPLINAS = {
-            "100m", "200m", "400m", "Salto Largo", "Lanzamiento de Bala", "Gimnasia"
-    };
-
     private static final SimpleDateFormat ISO   = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     private static final SimpleDateFormat LABEL = new SimpleDateFormat("dd/MM", Locale.getDefault());
 
@@ -56,6 +54,7 @@ public class EvolucionMarcasActivity extends AppCompatActivity {
     private LineChart lineChart;
 
     private final List<MarcaPersonal> lista = new ArrayList<>();
+    private final List<Disciplina> disciplinasList = new ArrayList<>();
     private EvolucionMarcasAdapter adapter;
     private Long atletaId = null;
     private boolean spinnerReady = false;
@@ -94,30 +93,54 @@ public class EvolucionMarcasActivity extends AppCompatActivity {
         recycler.setAdapter(adapter);
 
         configurarGrafica();
+        cargarDisciplinas(disciplinaInicial);
+    }
 
-        ArrayAdapter<String> adapterSpinner = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, DISCIPLINAS);
-        adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerDisciplina.setAdapter(adapterSpinner);
-
-        int selIdx = 0;
-        if (disciplinaInicial != null) {
-            for (int i = 0; i < DISCIPLINAS.length; i++) {
-                if (DISCIPLINAS[i].equals(disciplinaInicial)) { selIdx = i; break; }
-            }
-        }
-        spinnerDisciplina.setSelection(selIdx, false);
-        spinnerReady = true;
-
-        spinnerDisciplina.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    private void cargarDisciplinas(String disciplinaInicial) {
+        ApiClient.getDisciplinasService().listar().enqueue(new Callback<List<Disciplina>>() {
             @Override
-            public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
-                if (spinnerReady) cargarMarcas(DISCIPLINAS[pos]);
-            }
-            @Override public void onNothingSelected(AdapterView<?> p) {}
-        });
+            public void onResponse(Call<List<Disciplina>> c, Response<List<Disciplina>> r) {
+                if (r.isSuccessful() && r.body() != null) {
+                    disciplinasList.clear();
+                    disciplinasList.addAll(r.body());
+                    List<String> nombres = new ArrayList<>();
+                    for (Disciplina d : disciplinasList) nombres.add(d.getNombre());
 
-        cargarMarcas(DISCIPLINAS[selIdx]);
+                    ArrayAdapter<String> adapterSpinner = new ArrayAdapter<>(
+                            EvolucionMarcasActivity.this,
+                            android.R.layout.simple_spinner_item, nombres);
+                    adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerDisciplina.setAdapter(adapterSpinner);
+
+                    int selIdx = 0;
+                    if (disciplinaInicial != null) {
+                        for (int i = 0; i < nombres.size(); i++) {
+                            if (nombres.get(i).equals(disciplinaInicial)) { selIdx = i; break; }
+                        }
+                    }
+                    spinnerDisciplina.setSelection(selIdx, false);
+                    spinnerReady = true;
+
+                    final int idx = selIdx;
+                    spinnerDisciplina.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
+                            if (spinnerReady && pos < disciplinasList.size())
+                                cargarMarcas(disciplinasList.get(pos).getNombre());
+                        }
+                        @Override public void onNothingSelected(AdapterView<?> p) {}
+                    });
+
+                    if (!disciplinasList.isEmpty())
+                        cargarMarcas(disciplinasList.get(idx).getNombre());
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Disciplina>> c, Throwable t) {
+                Toast.makeText(EvolucionMarcasActivity.this,
+                        "No se pudieron cargar las disciplinas", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void configurarGrafica() {

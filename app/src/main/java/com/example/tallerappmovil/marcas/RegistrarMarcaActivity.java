@@ -14,6 +14,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.model.AtletaInfo;
+import com.example.tallerappmovil.model.Disciplina;
 import com.example.tallerappmovil.model.MarcaPersonal;
 import com.example.tallerappmovil.model.MarcaRequest;
 import com.google.android.material.button.MaterialButton;
@@ -38,13 +39,11 @@ public class RegistrarMarcaActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     private List<AtletaInfo> atletasList = new ArrayList<>();
+    private List<Disciplina> disciplinasList = new ArrayList<>();
     private Long atletaSeleccionadoId = null;
 
     private int anio, mes, dia;
 
-    private static final String[] DISCIPLINAS = {
-            "100m", "200m", "400m", "Salto Largo", "Lanzamiento de Bala", "Gimnasia"
-    };
     private static final String[] UNIDADES = {"s", "m", "pts"};
 
     @Override
@@ -78,15 +77,7 @@ public class RegistrarMarcaActivity extends AppCompatActivity {
 
         etFecha.setOnClickListener(v -> mostrarDatePicker());
 
-        // Spinner disciplinas
-        ArrayAdapter<String> discAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line, DISCIPLINAS);
-        spinnerDisciplina.setAdapter(discAdapter);
-        spinnerDisciplina.setText(DISCIPLINAS[0], false);
-        spinnerDisciplina.setOnItemClickListener((p, v, pos, id) ->
-                autoSelectUnidad(DISCIPLINAS[pos]));
-
-        // Spinner unidades
+        // Spinner unidades (fijo)
         ArrayAdapter<String> unidAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, UNIDADES);
         spinnerUnidad.setAdapter(unidAdapter);
@@ -94,6 +85,41 @@ public class RegistrarMarcaActivity extends AppCompatActivity {
 
         btnGuardar.setOnClickListener(v -> guardar());
         cargarAtletas();
+        cargarDisciplinas();
+    }
+
+    private void cargarDisciplinas() {
+        ApiClient.getDisciplinasService().listar().enqueue(new Callback<List<Disciplina>>() {
+            @Override
+            public void onResponse(Call<List<Disciplina>> c, Response<List<Disciplina>> r) {
+                if (r.isSuccessful() && r.body() != null) {
+                    disciplinasList = r.body();
+                    List<String> nombres = new ArrayList<>();
+                    for (Disciplina d : disciplinasList) nombres.add(d.getNombre());
+                    ArrayAdapter<String> discAdapter = new ArrayAdapter<>(
+                            RegistrarMarcaActivity.this,
+                            android.R.layout.simple_dropdown_item_1line, nombres);
+                    spinnerDisciplina.setAdapter(discAdapter);
+                    if (!disciplinasList.isEmpty()) {
+                        spinnerDisciplina.setText(disciplinasList.get(0).getNombre(), false);
+                        spinnerUnidad.setText(disciplinasList.get(0).getUnidad(), false);
+                    }
+                    spinnerDisciplina.setOnItemClickListener((p, v, pos, id) -> {
+                        if (pos < disciplinasList.size()) {
+                            spinnerUnidad.setText(disciplinasList.get(pos).getUnidad(), false);
+                        }
+                    });
+                } else {
+                    Toast.makeText(RegistrarMarcaActivity.this,
+                            "No se pudieron cargar las disciplinas", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Disciplina>> c, Throwable t) {
+                Toast.makeText(RegistrarMarcaActivity.this,
+                        "No se pudieron cargar las disciplinas", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void cargarAtletas() {
@@ -122,15 +148,6 @@ public class RegistrarMarcaActivity extends AppCompatActivity {
                         getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void autoSelectUnidad(String disciplina) {
-        if (disciplina.endsWith("m") || disciplina.equals("Salto Largo")
-                || disciplina.equals("Lanzamiento de Bala")) {
-            spinnerUnidad.setText(disciplina.endsWith("m") ? "s" : "m", false);
-        } else if (disciplina.equals("Gimnasia")) {
-            spinnerUnidad.setText("pts", false);
-        }
     }
 
     private void mostrarDatePicker() {
