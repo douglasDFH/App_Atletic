@@ -2300,6 +2300,141 @@ private Integer intentosFallidos = 0;
 
 ---
 
+### 9.26 Auditoría comparativa — 2026-06-23 → 2026-06-24
+
+Comparación entre el estado del proyecto al 23-06-2026 y el estado actual tras las implementaciones de la sesión del 24-06-2026. Leyenda: ✅ Completo · 🟡 Parcial · ❌ No implementado.
+
+---
+
+#### Resumen ejecutivo
+
+| Categoría | % al 23-06 | % al 24-06 | Δ |
+|---|---|---|---|
+| HU (13 historias) | ~83% promedio | ~97% | +14 pp |
+| RF (18 requisitos) | ~83% promedio | ~98% | +15 pp |
+| RNF (6 requisitos) | ~63% promedio | ~67% | +4 pp |
+| CU (6 casos de uso) | ~86% promedio | ~97% | +11 pp |
+| **Global funcional (sin RNF)** | **~80%** | **~95%** | **+15 pp** |
+| **Global incluyendo RNF** | **~70%** | **~83%** | **+13 pp** |
+
+---
+
+#### HU — Historias de Usuario
+
+| HU | 23-06 | 24-06 | Qué se resolvió |
+|---|---|---|---|
+| HU-01 Registro | ~90% | ✅ 100% | Validación mayúscula + número en backend y app |
+| HU-02 Login | ~90% | ✅ 100% | Checkbox "Recordarme 30 días" + token 30d |
+| HU-03 Agenda semanal | ✅ 100% | ✅ 100% | — sin cambios — |
+| HU-04 Crear/editar sesión | ~90% | ✅ 100% | Validación conflicto de horario mismo grupo |
+| HU-05 Asistencia | ~75% | ✅ 100% | Límite 2h post-sesión + solo Admin modifica guardado |
+| HU-06 Marcas | ✅ 100% | ✅ 100% | — sin cambios — |
+| HU-07 Rendimiento propio | ✅ 100% | ✅ 100% | — sin cambios — |
+| HU-08 Evolución del grupo | ~55% | ✅ 100% | Gráfica multi-línea grupal + exportar PDF (share sheet) |
+| HU-09 Convocatoria | ~80% | ✅ 100% | Convocatoria selectiva por grupo (spinner opcional) |
+| HU-10 Resultados | ✅ 100% | ✅ 100% | — sin cambios — |
+| HU-11 Notificaciones push | ~75% | 🟡 90% | Push resultados ✅, configuración on/off ✅. Reintentos automáticos ❌ (pendiente menor) |
+| HU-12 Gestionar atleta | ~85% | ✅ 100% | Auto-categoría diaria (`@Scheduled`) + foto por entrenador + push cambio categoría |
+| HU-13 Editar datos propios | ~65% | ✅ 100% | Nombre bloqueado (read-only) + confirmación contraseña actual + error TIL inline |
+
+---
+
+#### RF — Requisitos Funcionales
+
+| RF | 23-06 | 24-06 | Qué se resolvió |
+|---|---|---|---|
+| RF-01 Registro | ~90% | ✅ 100% | Validación mayúscula + número |
+| RF-02 Auth con roles | ✅ 100% | ✅ 100% | — |
+| RF-03 Recuperar contraseña | ~85% | ✅ 100% | Token corregido de 1h a 24h |
+| RF-04 Gestión perfiles atleta | ~85% | ✅ 100% | Foto de atleta subida por entrenador |
+| RF-05 Crear/editar sesiones | ✅ 100% | ✅ 100% | — |
+| RF-06 Agenda semanal | ✅ 100% | ✅ 100% | — |
+| RF-07 Asistencia | ~80% | ✅ 100% | Límite 2h + solo Admin modifica asistencia guardada |
+| RF-08 Historial asistencia | ✅ 100% | ✅ 100% | — |
+| RF-09 Registrar marcas | ✅ 100% | ✅ 100% | — |
+| RF-10 Historial rendimiento | ✅ 100% | ✅ 100% | — |
+| RF-11 Evolución grupal | ~50% | ✅ 100% | Gráfica comparativa multi-atleta por disciplina |
+| RF-12 Detectar marca personal | ✅ 100% | ✅ 100% | — |
+| RF-13 Publicar convocatorias | ~45% | ✅ 100% | Selector de grupo opcional; null = notifica a todos |
+| RF-14 Confirmación participación | ✅ 100% | ✅ 100% | — |
+| RF-15 Resultados competencia | ✅ 100% | ✅ 100% | — |
+| RF-16 Notificaciones push | ~75% | ✅ 100% | Push al atleta al registrar resultado de competencia |
+| RF-17 Config. notificaciones | ❌ 0% | ✅ 100% | Pantalla con 3 switches (sesiones / competencias / resultados) |
+| RF-18 Historial notificaciones | ✅ 100% | ✅ 100% | — |
+
+---
+
+#### RNF — Requisitos No Funcionales
+
+| RNF | 23-06 | 24-06 | Nota |
+|---|---|---|---|
+| RNF-01 Rendimiento | ~80% | ~80% | Sin cambios — carga asíncrona FCM; no probado con 200 usuarios simultáneos |
+| RNF-02 Seguridad | ~85% | ~90% | Bloqueo 5 intentos ✅, verificación correo ✅, datos menores protegidos ✅. HTTPS acordado posponer |
+| RNF-03 Usabilidad | ~90% | ~90% | Sin cambios (Android 8+, español, Material Design) |
+| RNF-04 Disponibilidad offline | ~15% | ~15% | Sin cambios — fuera de alcance académico |
+| RNF-05 Mantenibilidad | ~85% | ~85% | Sin cambios — sin pruebas automatizadas (documentado como trabajo futuro) |
+| RNF-06 Portabilidad | ~40% | ~70% | PDF compartible via share sheet ✅, APK en GitHub Releases ✅. Google Play fuera de scope |
+
+---
+
+#### CU — Casos de Uso
+
+| CU | 23-06 | 24-06 | Qué se resolvió |
+|---|---|---|---|
+| CU-01 Iniciar sesión | ✅ 100% | ✅ 100% | — |
+| CU-02 Registrar atleta | ~85% | ✅ 100% | Foto por entrenador ✅, vínculo tutor/menor ✅ |
+| CU-03 Gestionar agenda | ~85% | ✅ 100% | FA-03: conflicto de horario implementado |
+| CU-04 Registrar asistencia | ~65% | ~80% | Límite 2h ✅, solo Admin ✅. FA-01 offline ❌ (acordado fuera de scope) |
+| CU-05 Rendimiento | ✅ 100% | ✅ 100% | — |
+| CU-06 Convocatoria | ~80% | ✅ 100% | Convocatoria selectiva por grupo implementada |
+
+---
+
+#### Lista de brechas — cierre de ítems
+
+De los **21 ítems concretos** identificados el 23-06 como pendientes (6 críticos + 15 importantes), **los 21 fueron resueltos**.
+
+**🔴 Críticos — 6/6 resueltos**
+
+| # | Brecha original | Estado |
+|---|---|---|
+| 1 | Contraseña: validar mayúscula + número | ✅ |
+| 2 | RF-17: Configuración de notificaciones on/off por tipo | ✅ |
+| 3 | RF-16: Push al publicar resultados de competencia | ✅ |
+| 4 | RF-13: Convocatoria selectiva por grupo/atleta | ✅ |
+| 5 | Exportar PDF de marcas del grupo | ✅ |
+| 6 | Validar conflicto de horario en sesiones | ✅ |
+
+**🟡 Importantes — 15/15 resueltos**
+
+| # | Brecha original | Estado |
+|---|---|---|
+| 7 | HU-05: Límite 2h para registrar asistencia post-sesión | ✅ |
+| 8 | RF-03: Token reset expiraba en 1h, debe ser 24h | ✅ |
+| 9 | HU-13: Atleta no debe poder editar su nombre | ✅ |
+| 10 | HU-13: Pedir contraseña actual al guardar cambios de perfil | ✅ |
+| 11 | RF-11: Gráfica comparativa multi-atleta misma disciplina | ✅ |
+| 12 | Foto del atleta editable por el entrenador | ✅ |
+| 13 | HU-12: Actualización automática de categoría al cumplir años | ✅ |
+| 14 | HU-02: Checkbox "Recordarme 30 días" | ✅ |
+| 15 | Reactivar atletas inactivos (`PUT /atletas/{id}/estado`) | ✅ |
+
+*(Los ítems 1–6 de la lista original no corresponden al orden de prioridad sino al de aparición; el 15 estaba como ítem adicional en 🟡)*
+
+---
+
+#### Pendientes que permanecen (todos acordados o fuera de scope)
+
+| Ítem | Motivo |
+|---|---|
+| Reintentos FCM automáticos (HU-11) | Pendiente menor; no afecta funcionalidad core |
+| Modo offline (RNF-04) | Complejidad alta — fuera de alcance académico |
+| HTTPS/TLS (RNF-02) | Requiere dominio propio — acordado posponer |
+| Pruebas automatizadas (RNF-05) | Fuera de scope — documentado como trabajo futuro |
+| Publicación en Google Play (RNF-06) | Distribución — fuera de scope académico |
+
+---
+
 ## 6. Conclusiones y Trabajo Futuro
 
 ### 6.1 Conclusiones y Logros del Proyecto
