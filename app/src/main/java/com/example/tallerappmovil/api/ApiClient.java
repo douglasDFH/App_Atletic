@@ -128,4 +128,8 @@ public class ApiClient {
     public static UsuariosApiService getUsuariosService() {
         return getRetrofit().create(UsuariosApiService.class);
     }
+
+    public static DisciplinasApiService getDisciplinasService() {
+        return getRetrofit().create(DisciplinasApiService.class);
+    }
 }

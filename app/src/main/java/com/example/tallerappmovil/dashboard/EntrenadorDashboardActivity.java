@@ -11,7 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.agenda.AgendaActivity;
 import com.example.tallerappmovil.api.ApiClient;
+import com.example.tallerappmovil.asistencia.AsistenciaActivity;
+import com.example.tallerappmovil.atletas.AtletasActivity;
 import com.example.tallerappmovil.auth.LoginActivity;
+import com.example.tallerappmovil.disciplinas.DisciplinasActivity;
+import com.example.tallerappmovil.marcas.MarcasActivity;
 import com.example.tallerappmovil.session.SessionManager;
 
 public class EntrenadorDashboardActivity extends AppCompatActivity {
@@ -36,16 +40,25 @@ public class EntrenadorDashboardActivity extends AppCompatActivity {
         findViewById(R.id.cardAgenda).setOnClickListener(v ->
                 startActivity(new Intent(this, AgendaActivity.class)));
 
-        int[] proximamente = {R.id.cardAsistencia, R.id.cardRendimiento,
-                              R.id.cardCompetencias, R.id.cardAtletas};
-        for (int id : proximamente) {
-            findViewById(id).setOnClickListener(v ->
-                    new AlertDialog.Builder(this)
-                            .setTitle("Próximamente")
-                            .setMessage(getString(R.string.lbl_proximo_sprint))
-                            .setPositiveButton("OK", null)
-                            .show());
-        }
+        findViewById(R.id.cardAsistencia).setOnClickListener(v ->
+                startActivity(new Intent(this, AsistenciaActivity.class)));
+
+        findViewById(R.id.cardRendimiento).setOnClickListener(v ->
+                startActivity(new Intent(this, MarcasActivity.class)));
+
+        findViewById(R.id.cardAtletas).setOnClickListener(v ->
+                startActivity(new Intent(this, AtletasActivity.class)));
+
+        findViewById(R.id.cardDisciplinas).setOnClickListener(v ->
+                startActivity(new Intent(this, DisciplinasActivity.class)));
+
+        // Competencias aún sin pantalla propia
+        findViewById(R.id.cardCompetencias).setOnClickListener(v ->
+                new AlertDialog.Builder(this)
+                        .setTitle("Próximamente")
+                        .setMessage(getString(R.string.lbl_proximo_sprint))
+                        .setPositiveButton("OK", null)
+                        .show());
     }
 
     private void confirmarCerrarSesion(SessionManager session) {

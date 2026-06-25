@@ -1,5 +1,7 @@
 package com.club.atletismo.config;
 
+import com.club.atletismo.disciplina.Disciplina;
+import com.club.atletismo.disciplina.DisciplinaRepository;
 import com.club.atletismo.grupo.Grupo;
 import com.club.atletismo.grupo.GrupoRepository;
 import com.club.atletismo.usuario.Rol;
@@ -17,11 +19,14 @@ public class DataInitializer implements CommandLineRunner {
 
     private final UsuarioRepository usuarioRepository;
     private final GrupoRepository grupoRepository;
+    private final DisciplinaRepository disciplinaRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(String... args) {
+        seedDisciplinas();
+
         Grupo grupo = grupoRepository.findAll().stream()
                 .filter(g -> "Velocidad Elite".equals(g.getNombre()))
                 .findFirst()
@@ -63,7 +68,7 @@ public class DataInitializer implements CommandLineRunner {
             usuarioRepository.save(atleta1);
         }
 
-        if (!usuarioRepository.existsByCorreo("atleta2@atletismo.com")) {
+       if (!usuarioRepository.existsByCorreo("atleta2@atletismo.com")) {
             Usuario atleta2 = new Usuario();
             atleta2.setCorreo("atleta2@atletismo.com");
             atleta2.setNombreCompleto("María Flores");
@@ -77,4 +82,39 @@ public class DataInitializer implements CommandLineRunner {
             usuarioRepository.save(atleta2);
         }
     }
+
+    private void seedDisciplinas() {
+        if (disciplinaRepository.count() > 0) return;
+
+        Object[][] data = {
+            // nombre,   descripcion,                              unidad, esTiempo, pesoMin, pesoMax, altMin, imcMin, imcMax, muscMin, grasaMax
+            {"100m",    "Velocidad corta distancia",              "s",    true,  null,  null,  null,   null,  null,  null,  null  },
+            {"200m",    "Velocidad media distancia",              "s",    true,  null,  null,  null,   null,  null,  null,  null  },
+            {"400m",    "Velocidad larga distancia",              "s",    true,  null,  null,  null,   null,  27.0,  null,  22.0  },
+            {"5k",      "Carrera de 5 kilómetros",               "s",    true,  null,  null,  null,   null,  28.0,  null,  25.0  },
+            {"10k",     "Carrera de 10 kilómetros",              "s",    true,  null,  null,  null,   null,  27.0,  25.0,  22.0  },
+            {"Salto Largo",         "Salto de longitud",         "m",    false, null,  null,  155.0,  null,  27.0,  null,  20.0  },
+            {"Lanzamiento de Bala", "Lanzamiento de peso",       "m",    false, 55.0,  null,  null,   null,  null,  30.0,  null  },
+            {"Gimnasia",            "Gimnasia artística",        "pts",  false, null,  65.0,  null,   null,  23.0,  null,  18.0  },
+        };
+
+        for (Object[] row : data) {
+            Disciplina d = Disciplina.builder()
+                    .nombre((String) row[0])
+                    .descripcion((String) row[1])
+                    .unidad((String) row[2])
+                    .esTiempo((Boolean) row[3])
+                    .pesoMinKg((Double) row[4])
+                    .pesoMaxKg((Double) row[5])
+                    .alturaMinCm((Double) row[6])
+                    .imcMin((Double) row[7])
+                    .imcMax((Double) row[8])
+                    .masaMuscularMinKg((Double) row[9])
+                    .porcentajeGrasaMax((Double) row[10])
+                    .activa(true)
+                    .build();
+            disciplinaRepository.save(d);
+        }
+    }
+}
 }

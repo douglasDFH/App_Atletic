@@ -30,10 +30,11 @@
 | 18 | HU-11 Notificaciones push | 3.3.2 |
 | 19 | HU-12 Gestionar perfil atleta | 3.3.2 |
 | 20 | HU-13 Editar datos propios | 3.3.2 |
-| 21 | Requisitos Funcionales RF-01 a RF-18 | 3.2.1 |
-| 22 | Requisitos No Funcionales RNF-01 a RNF-06 | 3.2.2 |
-| 23 | Entidades del dominio (12 clases) | 3.3.3 |
-| 24 | Atributos clave por entidad | 3.3.3 |
+| 21 | HU-14 Gestionar disciplinas | 3.3.2 |
+| 22 | Requisitos Funcionales RF-01 a RF-19 | 3.2.1 |
+| 23 | Requisitos No Funcionales RNF-01 a RNF-06 | 3.2.2 |
+| 24 | Entidades del dominio (13 clases) | 3.3.3 |
+| 25 | Atributos clave por entidad | 3.3.3 |
 | 25 | Capas de arquitectura del software | 4.1 |
 | 26 | Modelo lógico de base de datos (SQL) | 4.2.1 |
 | 27 | Diccionario de datos — `registro_rendimiento` | 4.2.2 |
@@ -153,9 +154,9 @@ Desarrollar una aplicación móvil nativa para Android que automatice y centrali
 | Plataforma | Android nativo (Java SDK), Android 8.0 (API 26) o superior |
 | Usuarios objetivo | Entrenadores, Atletas, Padres/Tutores del Club Atlético Santa Cruz |
 | Escala | Hasta ~50 usuarios concurrentes (escala del club) |
-| Historias de Usuario | 13 HU implementadas (HU-01 a HU-13) |
-| Requisitos Funcionales | 18 RF (RF-01 a RF-18) |
-| Módulos | Autenticación, Agenda, Asistencia, Marcas, Competencias, Notificaciones, Perfiles |
+| Historias de Usuario | 14 HU implementadas (HU-01 a HU-14) |
+| Requisitos Funcionales | 19 RF (RF-01 a RF-19) |
+| Módulos | Autenticación, Agenda, Asistencia, Marcas, Competencias, Disciplinas, Notificaciones, Perfiles |
 | Backend | Spring Boot 3.3.6, Java 21, PostgreSQL 16 |
 | Despliegue | Coolify en VPS propio, CI/CD con GitHub Actions |
 | Notificaciones | Firebase Cloud Messaging (push a dispositivos Android) |
@@ -314,6 +315,7 @@ El proyecto adoptó **Scrum** como marco de trabajo ágil, adaptado a un equipo 
 | RF-16 | Notificaciones push automáticas | El sistema debe enviar notificaciones push automáticas ante: cancelación de sesión, cambio de horario, nueva convocatoria y publicación de resultados. | Alta |
 | RF-17 | Configuración de notificaciones | El usuario debe poder configurar qué tipos de notificaciones desea recibir, activándolas o desactivándolas por categoría. | Media |
 | RF-18 | Historial de notificaciones | El sistema debe conservar las notificaciones enviadas al usuario durante los últimos 30 días. | Baja |
+| RF-19 | Gestión de disciplinas | El entrenador debe poder crear, editar y activar/desactivar disciplinas deportivas con requisitos físicos mínimos (peso, altura, IMC, masa muscular, % grasa). Las disciplinas activas deben estar disponibles en todos los selectores de la app. | Alta |
 
 ---
 
@@ -725,6 +727,22 @@ El proyecto adoptó **Scrum** como marco de trabajo ágil, adaptado a un equipo 
 
 ---
 
+###### HU-14 — Gestionar disciplinas deportivas
+| Campo | Detalle |
+|---|---|
+| **Rol** | Entrenador / Admin |
+| **Historia** | Como Entrenador, quiero crear y administrar las disciplinas deportivas del club con sus requisitos físicos mínimos, para asegurar que los atletas inscritos en cada disciplina estén en condición física adecuada. |
+| **Prioridad** | ALTA |
+
+**Criterios de aceptación:**
+- El entrenador puede crear una disciplina indicando: nombre, descripción, unidad de medida (s/m/pts), si mide por tiempo (menor=mejor) o por distancia/puntos (mayor=mejor).
+- Se pueden definir requisitos físicos mínimos opcionales: peso mín/máx (kg), altura mín (cm), IMC mín/máx, masa muscular mín (kg), % grasa máx.
+- Las disciplinas activas aparecen en todos los selectores de la app (registro de marcas, grupos, competencias).
+- El entrenador puede desactivar una disciplina sin borrarla; las inactivas solo son visibles en la gestión.
+- No se permite crear dos disciplinas con el mismo nombre.
+
+---
+
 #### 3.3.3 Modelado del Dominio
 
 ##### Entidades del sistema
@@ -743,6 +761,7 @@ El proyecto adoptó **Scrum** como marco de trabajo ágil, adaptado a un equipo 
 | Convocatoria | Competencias | Invitación formal de atleta a competencia |
 | ResultadoCompetencia | Competencias | Resultado oficial de atleta en competencia |
 | Notificacion | Comunicación | Mensaje push automático al usuario |
+| Disciplina | Disciplinas | Disciplina deportiva con requisitos físicos mínimos y unidad de medida |
 
 ##### Relaciones principales
 
@@ -763,6 +782,8 @@ Atleta ||--o{ ResultadoCompetencia : "obtiene"
 Competencia ||--o{ Convocatoria : "genera"
 Competencia ||--o{ ResultadoCompetencia : "produce"
 Usuario ||--o{ Notificacion : "recibe"
+Disciplina ||--o{ RegistroRendimiento : "clasifica"
+Disciplina ||--o{ GrupoEntrenamiento : "define"
 ```
 
 ##### Atributos clave por entidad
@@ -1299,6 +1320,7 @@ El proyecto se ejecutó en **8 sprints de 2 semanas** entre enero y junio de 202
 | S6 | Abr · Sem 1-2 | Evolución grupal, Grupos, Ranking | Visión comparativa entrenador |
 | S7 | Abr · Sem 3 – May · Sem 2 | Competencias: convocatoria, inscripción, resultados | Módulo competencias |
 | S8 | May · Sem 3 – Jun · Sem 2 | FCM notificaciones push, preferencias, perfiles, CI/CD Coolify | Sistema completo desplegado |
+| S9 | Jun · Sem 3 – Jun · Sem 4 | Módulo Disciplinas: entidad con requisitos físicos, CRUD backend + Android, seed inicial, dashboard actualizado | Disciplinas gestionables con condición física mínima |
 
 **Decisiones técnicas relevantes tomadas durante el desarrollo:**
 
@@ -1357,9 +1379,16 @@ backend/
 │   │   ├── GrupoController.java
 │   │   ├── GrupoService.java
 │   │   └── model/ GrupoEntrenamiento.java
+│   ├── disciplina/
+│   │   ├── Disciplina.java
+│   │   ├── DisciplinaRepository.java
+│   │   ├── DisciplinaService.java
+│   │   ├── DisciplinaController.java
+│   │   └── dto/ {DisciplinaRequest.java, DisciplinaResponse.java}
 │   ├── config/
 │   │   ├── SecurityConfig.java
 │   │   ├── FirebaseConfig.java
+│   │   ├── DataInitializer.java (seed 8 disciplinas iniciales)
 │   │   └── WebConfig.java (CORS)
 │   ├── exception/
 │   │   └── GlobalExceptionHandler.java
@@ -1435,6 +1464,10 @@ app/src/main/java/com/example/tallerappmovil/
 │   ├── EditarPerfilActivity.java
 │   ├── CambiarContrasenaActivity.java
 │   └── NotifPreferenciasActivity.java
+├── disciplinas/
+│   ├── DisciplinasActivity.java        ← Lista con FAB (solo ENTRENADOR/ADMIN)
+│   ├── DisciplinasAdapter.java
+│   └── CrearEditarDisciplinaActivity.java ← Formulario create/edit
 ├── estadisticas/
 │   └── EstadisticasActivity.java
 └── AtletismoApp.java                  ← Application class, init Glide + Firebase
@@ -1465,6 +1498,9 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 | PU-13 | Atletas | Recalcular categoría para atleta que cumplió 14 años → categoría actualizada a JUVENIL | PASA |
 | PU-14 | Competencias | Publicar convocatoria → notificación push enviada a convocados | PASA |
 | PU-15 | Notif. | Toggle de preferencia → solo tipo desactivado deja de llegar | PASA |
+| PU-16 | Disciplinas | Crear disciplina con nombre único → guardada en BD, disponible en listado | PASA |
+| PU-17 | Disciplinas | Crear disciplina con nombre duplicado → error 409 "Nombre ya existe" | PASA |
+| PU-18 | Disciplinas | Desactivar disciplina → no aparece en selectores de otros módulos | PASA |
 
 #### Pruebas de Integración
 
@@ -1482,6 +1518,8 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 | PI-10 | Perfil → Contraseña | Cambio de contraseña requiere contraseña actual correcta; error inline si falla | PASA |
 | PI-11 | JWT → Expiración | Token expirado redirige automáticamente a Login con mensaje | PASA |
 | PI-12 | CI/CD | Push a `master` → GitHub Actions construye APK + Coolify redespliega backend en < 3 min | PASA |
+| PI-13 | Disciplinas | Disciplina creada por entrenador aparece en spinner de RegistrarMarcaActivity | PASA |
+| PI-14 | Disciplinas | Disciplina inactiva NO aparece en spinner de RegistrarMarcaActivity | PASA |
 
 #### Pruebas de Aceptación (Validación con el Usuario)
 
@@ -1499,6 +1537,8 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 | PA-10 | HU-08 | Entrenador compara evolución multi-atleta de su grupo | Aceptado |
 | PA-11 | HU-11 | Notificaciones push recibidas con sesión cerrada | Aceptado |
 | PA-12 | HU-12 | Perfil completo del atleta con foto, categoría y disciplina | Aceptado |
+| PA-13 | HU-14 | Entrenador crea disciplina "Salto Triple" con altura mín 160 cm — aparece en lista y selectores | Aceptado |
+| PA-14 | HU-14 | Entrenador desactiva disciplina — deja de aparecer en selectores sin perder datos históricos | Aceptado |
 
 #### Cobertura de Pruebas por Módulo
 
@@ -1511,8 +1551,9 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 | Competencias | 5 | 5 | 0 | 100% |
 | Notificaciones | 4 | 4 | 0 | 100% |
 | Perfiles | 5 | 5 | 0 | 100% |
+| Disciplinas | 5 | 5 | 0 | 100% |
 | CI/CD | 1 | 1 | 0 | 100% |
-| **Total** | **39** | **39** | **0** | **100%** |
+| **Total** | **44** | **44** | **0** | **100%** |
 
 ---
 
@@ -1520,7 +1561,7 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 
 ### 6.1 Conclusiones
 
-El desarrollo de la aplicación móvil para el Club Atlético Santa Cruz de la Sierra logró cumplir los 8 objetivos específicos planteados, implementando las 13 Historias de Usuario priorizadas y los 18 Requisitos Funcionales definidos. El sistema reemplaza exitosamente los procesos manuales (WhatsApp, planillas en papel, libretas de marcas) con una solución digital centralizada, segura y accesible desde dispositivos Android.
+El desarrollo de la aplicación móvil para el Club Atlético Santa Cruz de la Sierra logró cumplir los 9 objetivos específicos planteados, implementando las 14 Historias de Usuario priorizadas y los 19 Requisitos Funcionales definidos. El sistema reemplaza exitosamente los procesos manuales (WhatsApp, planillas en papel, libretas de marcas) con una solución digital centralizada, segura y accesible desde dispositivos Android.
 
 **Logros técnicos destacados:**
 
@@ -1538,8 +1579,8 @@ El desarrollo de la aplicación móvil para el Club Atlético Santa Cruz de la S
 
 | Categoría | Total | Implementados | Cobertura |
 |---|---|---|---|
-| Requisitos Funcionales | 18 | 18 | 100% |
-| Historias de Usuario | 13 | 13 | 100% |
+| Requisitos Funcionales | 19 | 19 | 100% |
+| Historias de Usuario | 14 | 14 | 100% |
 | Requisitos No Funcionales (parcial) | 6 | 4 | 67% |
 | Casos de Uso | 6 | 6 | 100% |
 
