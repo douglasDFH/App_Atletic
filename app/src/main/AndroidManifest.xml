@@ -82,6 +82,9 @@
         <activity android:name=".disciplinas.DisciplinasActivity"          android:exported="false" />
         <activity android:name=".disciplinas.CrearEditarDisciplinaActivity" android:exported="false" />
 
+        <activity android:name=".datosfisicos.DatosFisicosActivity"           android:exported="false" />
+        <activity android:name=".datosfisicos.RegistrarDatosFisicosActivity"  android:exported="false" />
+
         <activity android:name=".estadisticas.EstadisticasActivity" android:exported="false" />
 
         <activity android:name=".perfil.PerfilActivity"   android:exported="false" />

@@ -132,4 +132,8 @@ public class ApiClient {
     public static DisciplinasApiService getDisciplinasService() {
         return getRetrofit().create(DisciplinasApiService.class);
     }
+
+    public static DatosFisicosApiService getDatosFisicosService() {
+        return getRetrofit().create(DatosFisicosApiService.class);
+    }
 }

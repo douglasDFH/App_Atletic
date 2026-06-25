@@ -29,6 +29,7 @@ import okhttp3.RequestBody;
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.asistencia.HistorialAsistenciaActivity;
+import com.example.tallerappmovil.datosfisicos.DatosFisicosActivity;
 import com.example.tallerappmovil.marcas.MarcasAdapter;
 import com.example.tallerappmovil.model.AtletaDetalle;
 import com.example.tallerappmovil.model.MarcaPersonal;
@@ -103,11 +104,19 @@ public class AtletaPerfilActivity extends AppCompatActivity {
 
         // Ver historial de asistencia de este atleta
         View cardVerAsistencia = findViewById(R.id.cardVerAsistencia);
+        View cardDatosFisicos  = findViewById(R.id.cardDatosFisicos);
         if (atletaId != -1L) {
             cardVerAsistencia.setOnClickListener(v -> {
                 Intent intent = new Intent(this, HistorialAsistenciaActivity.class);
                 intent.putExtra(HistorialAsistenciaActivity.EXTRA_ATLETA_ID, atletaId);
                 intent.putExtra(HistorialAsistenciaActivity.EXTRA_ATLETA_NOMBRE,
+                        tvNombreCompleto.getText().toString());
+                startActivity(intent);
+            });
+            cardDatosFisicos.setOnClickListener(v -> {
+                Intent intent = new Intent(this, DatosFisicosActivity.class);
+                intent.putExtra(DatosFisicosActivity.EXTRA_ATLETA_ID, atletaId);
+                intent.putExtra(DatosFisicosActivity.EXTRA_ATLETA_NOMBRE,
                         tvNombreCompleto.getText().toString());
                 startActivity(intent);
             });

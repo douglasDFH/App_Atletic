@@ -154,9 +154,9 @@ Desarrollar una aplicación móvil nativa para Android que automatice y centrali
 | Plataforma | Android nativo (Java SDK), Android 8.0 (API 26) o superior |
 | Usuarios objetivo | Entrenadores, Atletas, Padres/Tutores del Club Atlético Santa Cruz |
 | Escala | Hasta ~50 usuarios concurrentes (escala del club) |
-| Historias de Usuario | 14 HU implementadas (HU-01 a HU-14) |
-| Requisitos Funcionales | 19 RF (RF-01 a RF-19) |
-| Módulos | Autenticación, Agenda, Asistencia, Marcas, Competencias, Disciplinas, Notificaciones, Perfiles |
+| Historias de Usuario | 15 HU implementadas (HU-01 a HU-15) |
+| Requisitos Funcionales | 20 RF (RF-01 a RF-20) |
+| Módulos | Autenticación, Agenda, Asistencia, Marcas, Competencias, Disciplinas, Condición Física, Notificaciones, Perfiles |
 | Backend | Spring Boot 3.3.6, Java 21, PostgreSQL 16 |
 | Despliegue | Coolify en VPS propio, CI/CD con GitHub Actions |
 | Notificaciones | Firebase Cloud Messaging (push a dispositivos Android) |
@@ -316,6 +316,7 @@ El proyecto adoptó **Scrum** como marco de trabajo ágil, adaptado a un equipo 
 | RF-17 | Configuración de notificaciones | El usuario debe poder configurar qué tipos de notificaciones desea recibir, activándolas o desactivándolas por categoría. | Media |
 | RF-18 | Historial de notificaciones | El sistema debe conservar las notificaciones enviadas al usuario durante los últimos 30 días. | Baja |
 | RF-19 | Gestión de disciplinas | El entrenador debe poder crear, editar y activar/desactivar disciplinas deportivas con requisitos físicos mínimos (peso, altura, IMC, masa muscular, % grasa). Las disciplinas activas deben estar disponibles en todos los selectores de la app. | Alta |
+| RF-20 | Registro de condición física | El entrenador debe poder registrar mediciones físicas de cada atleta (peso, altura, masa muscular, % grasa). El IMC se calcula automáticamente. El atleta puede consultar su propio historial. | Alta |
 
 ---
 
