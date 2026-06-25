@@ -2485,6 +2485,62 @@ El repositorio queda limpio: solo contiene código fuente de Android (`app/`) y 
 
 ---
 
+### 9.28 Segunda limpieza del repositorio — artefactos y duplicados — 2026-06-25
+
+#### Contexto
+
+Tras la limpieza de `mobile/` e `.idea/` raíz (sección 9.27), se realizó una auditoría completa del árbol del proyecto para detectar archivos rastreados en git que no aportan valor al proyecto.
+
+#### Archivos eliminados del repositorio
+
+| Archivo | Tipo | Motivo de eliminación |
+|---|---|---|
+| `desktop.ini` | Metadato de carpeta de Windows | Generado automáticamente por el explorador de archivos de Windows; no tiene relación con el proyecto |
+| `ui.xml` | Dump de jerarquía UI de ADB | Generado por `adb shell uiautomator dump` durante depuración; instantánea de la pantalla de Login en un momento dado, sin valor de código |
+| `app/.idea/` (8 archivos) | Config duplicada del IDE | Creada cuando `app/` fue abierta como proyecto independiente en Android Studio; duplicado del `.idea/` raíz ya limpiado en 9.27 |
+
+#### Archivos locales que NO se rastrean (confirmado, sin acción requerida)
+
+| Carpeta | Motivo |
+|---|---|
+| `app/.gradle/` | Caché de Gradle del submódulo Android, se regenera automáticamente |
+| `app/local.properties` | Ruta local del SDK de Android, ya cubierta por `.gitignore` |
+| `backend/.gradle/` | Caché de Gradle del backend Spring Boot, se regenera automáticamente |
+| `.gradle/` raíz | Caché de Gradle raíz, en `.gitignore` desde el inicio |
+
+#### Archivo restaurado — `settings.gradle`
+
+El archivo `settings.gradle` raíz fue eliminado accidentalmente durante la limpieza manual de imágenes. Este archivo es **crítico** para el build de Android: define el nombre del proyecto raíz (`TallerAppMovil`) e incluye el módulo `:app`. Sin él, Gradle no puede ejecutar ninguna tarea. Fue restaurado con `git checkout HEAD -- settings.gradle`.
+
+#### Imágenes de capturas de pantalla eliminadas
+
+Durante la limpieza manual de imágenes se eliminaron también del disco (y del índice git) las siguientes capturas de pantalla que habían sido subidas al repositorio: `sc_login.png`, `sc_login2.png`, `sc_reg2.png`, `sc_reg3.png`, `sc_register.png`, `screenshot.png`, y 6 imágenes de WhatsApp.
+
+#### Resultado
+
+```
+tallerAppMovil/
+├── .github/workflows/build_apk.yml    ← CI/CD
+├── .gitignore
+├── app/
+│   ├── build.gradle
+│   ├── google-services.json           ← Firebase (necesario para CI)
+│   ├── proguard-rules.pro
+│   └── src/main/                      ← Código Android
+├── backend/
+│   ├── Dockerfile / .dockerignore
+│   ├── build.gradle / settings.gradle
+│   ├── gradle/wrapper/
+│   └── src/main/                      ← Código Spring Boot
+├── build.gradle
+├── gradle/wrapper/
+├── gradle.properties
+├── gradlew / gradlew.bat
+└── settings.gradle                    ← Crítico: define proyecto raíz
+```
+
+---
+
 ## 6. Conclusiones y Trabajo Futuro
 
 ### 6.1 Conclusiones y Logros del Proyecto
