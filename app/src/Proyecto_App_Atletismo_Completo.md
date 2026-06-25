@@ -2435,6 +2435,56 @@ De los **21 ítems concretos** identificados el 23-06 como pendientes (6 crític
 
 ---
 
+### 9.27 Limpieza del repositorio — eliminación de carpetas innecesarias — 2026-06-24
+
+#### Problema
+
+El repositorio contenía dos tipos de carpetas que no debían formar parte del control de versiones:
+
+1. **`mobile/`** — carpeta de prototipo React Native (nunca finalizado), registrada como *gitlink* (subrepositorio anidado) con estado `modified content` en `git status`. Código descartado; la versión final del proyecto es Android nativo Java.
+2. **`.idea/`** — carpeta de configuración de Android Studio parcialmente rastreada (11 archivos: `.name`, `AndroidProjectSystem.xml`, `compiler.xml`, `deploymentTargetSelector.xml`, `deviceManager.xml`, `gradle.xml`, `markdown.xml`, `migrations.xml`, `misc.xml`, `runConfigurations.xml`, `vcs.xml`). Estos son ajustes locales del IDE, no necesarios para compilar ni desplegar el proyecto.
+
+La carpeta **`.gradle/`** ya estaba correctamente excluida desde la línea 2 del `.gitignore`; no requirió acción.
+
+#### Solución aplicada
+
+**`mobile/`:**
+```bash
+git rm --cached mobile          # elimina el gitlink del índice
+rm -rf mobile/                  # elimina físicamente la carpeta
+```
+
+**`.idea/`:**
+```bash
+git rm -r --cached .idea        # desindexar todos los archivos rastreados de .idea
+```
+
+Luego se reemplazaron las entradas selectivas en `.gitignore`:
+```
+# Antes (entradas parciales):
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+
+# Después (exclusión total):
+/.idea/
+```
+
+#### Resultado
+
+| Carpeta | Antes | Después |
+|---|---|---|
+| `mobile/` | Gitlink `modified content` en índice | Eliminada del repositorio y del disco |
+| `.idea/` | 11 archivos rastreados en git | Completamente excluida, solo local |
+| `.gradle/` | Ya excluida (`.gitignore` línea 2) | Sin cambios necesarios |
+
+El repositorio queda limpio: solo contiene código fuente de Android (`app/`) y backend Spring Boot (`backend/`), junto con `.github/` (CI/CD), archivos Gradle de build y `.gitignore`.
+
+---
+
 ## 6. Conclusiones y Trabajo Futuro
 
 ### 6.1 Conclusiones y Logros del Proyecto
