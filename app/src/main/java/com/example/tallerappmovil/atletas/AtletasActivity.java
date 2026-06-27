@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.model.AtletaInfo;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class AtletasActivity extends AppCompatActivity {
     private AtletasAdapter adapter;
     private ProgressBar progressBar;
     private TextView tvVacio, tvContador;
+    private boolean mostrandoActivos = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +64,14 @@ public class AtletasActivity extends AppCompatActivity {
         findViewById(R.id.fabNuevoAtleta).setOnClickListener(v ->
                 startActivity(new Intent(this, EditarAtletaActivity.class)));
 
+        ChipGroup chipGroup = findViewById(R.id.chipGroup);
+        chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (!checkedIds.isEmpty()) {
+                mostrandoActivos = checkedIds.get(0) == R.id.chipActivos;
+                cargarAtletas();
+            }
+        });
+
         TextInputEditText etBusqueda = findViewById(R.id.etBusqueda);
         etBusqueda.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -79,14 +89,14 @@ public class AtletasActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        cargarAtletas(); // refrescar tras crear/editar un atleta
+        cargarAtletas();
     }
 
     private void cargarAtletas() {
         progressBar.setVisibility(View.VISIBLE);
         tvVacio.setVisibility(View.GONE);
 
-        ApiClient.getAtletasService().getAtletas().enqueue(new Callback<List<AtletaInfo>>() {
+        ApiClient.getAtletasService().getAtletas(mostrandoActivos).enqueue(new Callback<List<AtletaInfo>>() {
             @Override
             public void onResponse(Call<List<AtletaInfo>> call, Response<List<AtletaInfo>> response) {
                 progressBar.setVisibility(View.GONE);

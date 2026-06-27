@@ -37,6 +37,6 @@ public interface AgendaApiService {
     @DELETE("sesiones/{id}")
     Call<Void> eliminar(@Path("id") Long id);
 
-    @GET("grupos")
+    @GET("grupos-agenda")
     Call<List<GrupoEntrenamiento>> listarGrupos();
 }

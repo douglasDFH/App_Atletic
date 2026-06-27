@@ -14,8 +14,12 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface AtletasApiService {
+
+    @GET("atletas")
+    Call<List<AtletaInfo>> getAtletas(@Query("activo") boolean activo);
 
     @GET("atletas")
     Call<List<AtletaInfo>> getAtletas();

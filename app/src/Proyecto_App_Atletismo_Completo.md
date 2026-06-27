@@ -1349,6 +1349,7 @@ El proyecto se ejecutó en **8 sprints de 2 semanas** entre enero y junio de 202
 | S9 | Jun · Sem 3 | Módulo Disciplinas: entidad con requisitos físicos, CRUD backend + Android, seed inicial, reemplazo de arrays hardcodeados en 5 Activities | Disciplinas gestionables con condición física mínima |
 | S10 | Jun · Sem 3-4 | Módulo DatosFisicos: mediciones físicas del atleta, IMC auto-calculado, historial con resumen, cálculo en tiempo real con TextWatcher | Condición física registrable y consultable por atleta |
 | S11 | Jun · Sem 4 | EstadisticasActivity completa y conectada al dashboard; cardCompetencias del entrenador enrutado a EventosActivity | Panel de estadísticas del club operativo |
+| S12 | Jun · Sem 4 | Corrección endpoint Agenda (grupos-agenda), filtro Activos/Inactivos en AtletasActivity con ChipGroup | Bugs críticos resueltos; lista de atletas filtrable |
 
 **Decisiones técnicas relevantes tomadas durante el desarrollo:**
 
@@ -2049,6 +2050,21 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 - Entry point: `cardDatosFisicos` en `AtletaPerfilActivity`.
 
 **Resultado:** El entrenador registra mediciones físicas con IMC automático. El atleta consulta su historial de condición física. Los campos opcionales (masa muscular, % grasa) requieren báscula de bioimpedancia; si el club no la tiene, se registran solo peso + altura + IMC.
+
+---
+
+### Sesión 9.29 — Corrección de bugs: Agenda y filtro Activos/Inactivos en Atletas
+
+**Fecha:** 2026-06-27
+**Actividades:**
+- `AgendaApiService.java`: corregido endpoint incorrecto `@GET("grupos")` → `@GET("grupos-agenda")`. El endpoint `/api/v1/grupos` devuelve datos de otro tipo causando error de deserialización Gson que se manifestaba como "Error de conexión" al crear una sesión de entrenamiento.
+- `UsuarioController.java`: `GET /api/v1/atletas` ahora acepta `?activo=true|false` (defaultValue=true), permitiendo listar atletas activos e inactivos por separado.
+- `UsuarioService.java`: `getAtletas()` refactorizado a `getAtletas(boolean activo)` usando `findByRolAndActivo(Rol.ATLETA, activo)`.
+- `AtletasApiService.java`: añadida sobrecarga `getAtletas(@Query("activo") boolean activo)` y el import faltante `retrofit2.http.Query`.
+- `activity_atletas.xml`: `ChipGroup` (singleSelection + selectionRequired) con chips "Activos" (checked=true por defecto) e "Inactivos", insertado entre la barra de búsqueda y el contador.
+- `AtletasActivity.java`: campo `mostrandoActivos = true`; `setOnCheckedStateChangeListener` en ChipGroup actualiza el campo y recarga la lista; `cargarAtletas()` llama a `getAtletas(mostrandoActivos)`.
+
+**Resultado:** El entrenador puede alternar entre atletas activos e inactivos con un chip. "Crear Sesión" ya no muestra error de conexión. Desactivar un atleta lo mueve automáticamente a la pestaña Inactivos sin perder su historial.
 
 ---
 

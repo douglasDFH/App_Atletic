@@ -105,8 +105,8 @@ public class UsuarioService {
     }
 
     @Transactional(readOnly = true)
-    public List<AtletaInfoDto> getAtletas() {
-        return usuarioRepository.findByRolAndActivo(Rol.ATLETA, true).stream()
+    public List<AtletaInfoDto> getAtletas(boolean activo) {
+        return usuarioRepository.findByRolAndActivo(Rol.ATLETA, activo).stream()
                 .map(u -> new AtletaInfoDto(u.getId(), u.getNombreCompleto(), u.getDisciplina()))
                 .collect(Collectors.toList());
     }

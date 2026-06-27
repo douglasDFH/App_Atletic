@@ -56,8 +56,9 @@ public class UsuarioController {
     }
 
     @GetMapping("/api/v1/atletas")
-    public ResponseEntity<List<AtletaInfoDto>> getAtletas() {
-        return ResponseEntity.ok(usuarioService.getAtletas());
+    public ResponseEntity<List<AtletaInfoDto>> getAtletas(
+            @RequestParam(defaultValue = "true") boolean activo) {
+        return ResponseEntity.ok(usuarioService.getAtletas(activo));
     }
 
     @GetMapping("/api/v1/atletas/{id}")
