@@ -34,4 +34,7 @@ public class AtletaDetalle {
     public String getTutorTelefono()    { return tutorTelefono; }
     public Long getTutorVinculadoId()     { return tutorVinculadoId; }
     public String getTutorVinculadoNombre(){ return tutorVinculadoNombre; }
+
+    private String fotoUrl;
+    public String getFotoUrl() { return fotoUrl; }
 }

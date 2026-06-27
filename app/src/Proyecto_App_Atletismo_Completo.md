@@ -2098,6 +2098,25 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.32 — Fix persistencia de fotos de perfil
+
+**Fecha:** 2026-06-27
+**Diagnóstico:** Dos causas independientes:
+1. **Docker volume faltante:** Las fotos se guardan en `/app/uploads` dentro del contenedor. Sin volumen persistente, cada redeploy en Coolify destruye el contenedor y con él todas las fotos subidas. La BD seguía apuntando a URLs de archivos ya inexistentes.
+2. **`AtletaDetalleDto` sin `fotoUrl`:** `GET /atletas/{id}` nunca devolvía la URL de la foto del atleta, por lo que `AtletaPerfilActivity` nunca podía mostrarla (solo mostraba iniciales siempre).
+
+**Cambios:**
+- `backend/docker-compose.yml` (nuevo): volumen nombrado `uploads_data` montado en `/app/uploads`. Coolify debe cambiar su Build Pack de "Dockerfile" a "Docker Compose" para usar este archivo y garantizar que las fotos sobrevivan los redespliegues.
+- `AtletaDetalleDto.java`: campo `fotoUrl` añadido.
+- `UsuarioService.getAtleta()`: mapea `u.getFotoUrl()` al builder del DTO.
+- `AtletaDetalle.java` (Android): campo `fotoUrl` + getter.
+- `activity_atleta_perfil.xml`: `ImageView` (`ivAvatarGrande`, `visibility=gone`) superpuesto al `TextView` de iniciales dentro del `FrameLayout` del avatar.
+- `AtletaPerfilActivity.java`: importa Glide/CircleCrop; campo `ivAvatarGrande`; helper `mostrarFotoAvatar(url)` que oculta las iniciales y muestra la foto; se llama tras `cargarDetalle()` y tras `subirFotoAtleta()` exitoso.
+
+**Resultado:** Las fotos persisten entre redespliegues (volumen Docker). `AtletaPerfilActivity` muestra la foto real del atleta tanto cuando el entrenador la sube como cuando el atleta la sube desde su propio perfil.
+
+---
+
 ## Anexo B — Fragmentos de Código Fuente Representativos
 
 ### B.1 JwtService.java — Generación y validación de JWT

@@ -47,6 +47,13 @@
                         android:textSize="28sp"
                         android:textStyle="bold"
                         android:textColor="@color/colorOnPrimary" />
+                    <ImageView
+                        android:id="@+id/ivAvatarGrande"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        android:contentDescription="Foto de perfil" />
                 </FrameLayout>
 
                 <TextView

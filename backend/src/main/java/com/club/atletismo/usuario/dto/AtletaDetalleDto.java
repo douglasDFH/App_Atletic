@@ -26,4 +26,6 @@ public class AtletaDetalleDto {
     // Cuenta PADRE vinculada a este atleta (si existe)
     private Long tutorVinculadoId;
     private String tutorVinculadoNombre;
+
+    private String fotoUrl;
 }

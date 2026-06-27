@@ -132,6 +132,7 @@ public class UsuarioService {
                 .tutorTelefono(u.getTutorTelefono())
                 .tutorVinculadoId(padre != null ? padre.getId() : null)
                 .tutorVinculadoNombre(padre != null ? padre.getNombreCompleto() : null)
+                .fotoUrl(u.getFotoUrl())
                 .build();
     }
 

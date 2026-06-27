@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +19,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -46,6 +50,7 @@ import retrofit2.Response;
 public class AtletaPerfilActivity extends AppCompatActivity {
 
     private TextView tvAvatarGrande, tvNombreCompleto, tvDisciplinaPerfil;
+    private ImageView ivAvatarGrande;
     private TextView tvCategoriaPerfil, tvGrupoPerfil;
     private TextView tvTotalMarcas, tvTotalPRs, tvSinMarcas;
     private TextView tvTutorInfo, tvPadreVinculado;
@@ -71,6 +76,7 @@ public class AtletaPerfilActivity extends AppCompatActivity {
         String nombreExtra = getIntent().getStringExtra(AtletasActivity.EXTRA_ATLETA_NOMBRE);
 
         tvAvatarGrande    = findViewById(R.id.tvAvatarGrande);
+        ivAvatarGrande    = findViewById(R.id.ivAvatarGrande);
         tvNombreCompleto  = findViewById(R.id.tvNombreCompleto);
         tvDisciplinaPerfil = findViewById(R.id.tvDisciplinaPerfil);
         tvCategoriaPerfil = findViewById(R.id.tvCategoriaPerfil);
@@ -139,6 +145,7 @@ public class AtletaPerfilActivity extends AppCompatActivity {
                                 if (getSupportActionBar() != null)
                                     getSupportActionBar().setTitle(nombre);
                             }
+                            mostrarFotoAvatar(d.getFotoUrl());
                             if (d.getDisciplina() != null && !d.getDisciplina().isEmpty()) {
                                 tvDisciplinaPerfil.setText(d.getDisciplina());
                             }
@@ -348,6 +355,14 @@ public class AtletaPerfilActivity extends AppCompatActivity {
         });
     }
 
+    private void mostrarFotoAvatar(String url) {
+        String fullUrl = ApiClient.resolveUrl(url);
+        if (fullUrl == null) return;
+        ivAvatarGrande.setVisibility(View.VISIBLE);
+        tvAvatarGrande.setVisibility(View.GONE);
+        Glide.with(this).load(fullUrl).transform(new CircleCrop()).into(ivAvatarGrande);
+    }
+
     private void subirFotoAtleta(Uri uri) {
         try {
             ContentResolver cr = getContentResolver();
@@ -369,7 +384,8 @@ public class AtletaPerfilActivity extends AppCompatActivity {
                         public void onResponse(Call<com.example.tallerappmovil.model.PerfilUsuario> call,
                                                Response<com.example.tallerappmovil.model.PerfilUsuario> r) {
                             progressBar.setVisibility(View.GONE);
-                            if (r.isSuccessful()) {
+                            if (r.isSuccessful() && r.body() != null) {
+                                mostrarFotoAvatar(r.body().getFotoUrl());
                                 Toast.makeText(AtletaPerfilActivity.this,
                                         getString(R.string.msg_foto_actualizada), Toast.LENGTH_SHORT).show();
                             } else {
