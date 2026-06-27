@@ -2068,6 +2068,18 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.30 — Fix: cardDisciplinas faltante en DashboardActivity
+
+**Fecha:** 2026-06-27
+**Actividades:**
+- Diagnóstico: el login siempre redirige al entrenador a `DashboardActivity` (dashboard con bottom nav y estadísticas en tiempo real), no a `EntrenadorDashboardActivity`. El `cardDisciplinas` solo existía en `EntrenadorDashboardActivity`, que nunca se alcanza.
+- `activity_dashboard.xml`: agregado `cardDisciplinas` en el bloque `layoutAccesosEntrenador` (mismo estilo de fila con flecha `›` que `cardGrupos`, `cardReporte`, `cardEstadisticas`).
+- `DashboardActivity.java`: importado `DisciplinasActivity`; wire `cardDisciplinas → DisciplinasActivity` dentro del bloque `if (esEntrenador)`.
+
+**Resultado:** La tarjeta "Disciplinas" aparece en el dashboard del entrenador bajo la sección GESTIÓN, junto a Grupos, Reporte de Asistencia y Estadísticas.
+
+---
+
 ## Anexo B — Fragmentos de Código Fuente Representativos
 
 ### B.1 JwtService.java — Generación y validación de JWT
