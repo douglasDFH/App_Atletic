@@ -97,16 +97,32 @@ public class CompetenciaService {
     public void inscribirse(Long competenciaId) {
         Competencia c = competenciaRepository.findById(competenciaId)
                 .orElseThrow(() -> new IllegalArgumentException("Competencia no encontrada"));
-        c.getInscritos().add(usuarioService.getUsuarioActual());
+        Usuario atleta = usuarioService.getUsuarioActual();
+        c.getInscritos().add(atleta);
         competenciaRepository.save(c);
+
+        String titulo = atleta.getNombreCompleto() + " se inscribió";
+        String mensaje = atleta.getNombreCompleto() + " se inscribió en \"" + c.getNombre() + "\"";
+        notificarEntrenadores(titulo, mensaje);
     }
 
     @Transactional
     public void desinscribirse(Long competenciaId) {
         Competencia c = competenciaRepository.findById(competenciaId)
                 .orElseThrow(() -> new IllegalArgumentException("Competencia no encontrada"));
-        c.getInscritos().removeIf(u -> u.getId().equals(usuarioService.getUsuarioActual().getId()));
+        Usuario atleta = usuarioService.getUsuarioActual();
+        c.getInscritos().removeIf(u -> u.getId().equals(atleta.getId()));
         competenciaRepository.save(c);
+
+        String titulo = atleta.getNombreCompleto() + " canceló su inscripción";
+        String mensaje = atleta.getNombreCompleto() + " canceló su inscripción en \"" + c.getNombre() + "\"";
+        notificarEntrenadores(titulo, mensaje);
+    }
+
+    private void notificarEntrenadores(String titulo, String mensaje) {
+        List<Usuario> destinatarios = new java.util.ArrayList<>(usuarioRepository.findByRol(Rol.ENTRENADOR));
+        destinatarios.addAll(usuarioRepository.findByRol(Rol.ADMIN));
+        destinatarios.forEach(e -> notificacionService.crear(e, "INSCRIPCION", titulo, mensaje));
     }
 
     @Transactional(readOnly = true)

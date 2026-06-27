@@ -2080,6 +2080,24 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.31 — Notificación de inscripción/desinscripción al entrenador
+
+**Fecha:** 2026-06-27
+**Actividades:**
+- `CompetenciaService.java`: `inscribirse()` y `desinscribirse()` ahora capturan el atleta antes de modificar `inscritos`, luego llaman al nuevo helper `notificarEntrenadores()`.
+- `notificarEntrenadores(titulo, mensaje)`: busca todos los usuarios con rol ENTRENADOR y ADMIN y les crea una notificación de tipo `"INSCRIPCION"` con el nombre del atleta y el evento.
+- El tipo `"INSCRIPCION"` cae en el `default → true` de `debeRecibirPush()`, garantizando que siempre se envíe el push FCM al entrenador.
+
+**Flujo completo:**
+1. Entrenador crea evento → notificación push a todos los atletas del grupo (`COMPETENCIA`)
+2. Atleta se inscribe → notificación push al entrenador: `"Nombre se inscribió en 'Evento'"` (`INSCRIPCION`)
+3. Atleta cancela inscripción → notificación push al entrenador: `"Nombre canceló su inscripción en 'Evento'"` (`INSCRIPCION`)
+4. Entrenador registra resultado → notificación push al atleta con posición y marca (`RESULTADO`)
+
+**Resultado:** El flujo de notificaciones es ahora bidireccional. El entrenador siempre sabe en tiempo real quién se inscribió o retiró de cada competencia.
+
+---
+
 ## Anexo B — Fragmentos de Código Fuente Representativos
 
 ### B.1 JwtService.java — Generación y validación de JWT
