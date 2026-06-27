@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tallerappmovil.R;
@@ -15,6 +14,8 @@ import com.example.tallerappmovil.asistencia.AsistenciaActivity;
 import com.example.tallerappmovil.atletas.AtletasActivity;
 import com.example.tallerappmovil.auth.LoginActivity;
 import com.example.tallerappmovil.disciplinas.DisciplinasActivity;
+import com.example.tallerappmovil.estadisticas.EstadisticasActivity;
+import com.example.tallerappmovil.eventos.EventosActivity;
 import com.example.tallerappmovil.marcas.MarcasActivity;
 import com.example.tallerappmovil.session.SessionManager;
 
@@ -52,13 +53,11 @@ public class EntrenadorDashboardActivity extends AppCompatActivity {
         findViewById(R.id.cardDisciplinas).setOnClickListener(v ->
                 startActivity(new Intent(this, DisciplinasActivity.class)));
 
-        // Competencias aún sin pantalla propia
+        findViewById(R.id.cardEstadisticas).setOnClickListener(v ->
+                startActivity(new Intent(this, EstadisticasActivity.class)));
+
         findViewById(R.id.cardCompetencias).setOnClickListener(v ->
-                new AlertDialog.Builder(this)
-                        .setTitle("Próximamente")
-                        .setMessage(getString(R.string.lbl_proximo_sprint))
-                        .setPositiveButton("OK", null)
-                        .show());
+                startActivity(new Intent(this, EventosActivity.class)));
     }
 
     private void confirmarCerrarSesion(SessionManager session) {

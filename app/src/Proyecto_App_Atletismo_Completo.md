@@ -744,6 +744,31 @@ El proyecto adoptó **Scrum** como marco de trabajo ágil, adaptado a un equipo 
 
 ---
 
+##### Módulo M7 — Condición Física
+
+---
+
+###### HU-15 — Registrar y consultar condición física del atleta
+| Campo | Detalle |
+|---|---|
+| **Rol** | Entrenador (registro) / Atleta (consulta propia) |
+| **Historia** | Como Entrenador, quiero registrar las mediciones físicas de cada atleta (peso, altura, masa muscular y % de grasa) para hacer seguimiento de su condición física. Como Atleta, quiero consultar mi historial de mediciones para conocer mi evolución corporal. |
+| **Prioridad** | ALTA |
+
+**Criterios de aceptación:**
+- El entrenador registra: fecha, peso (kg), altura (cm), masa muscular (kg, opcional), % grasa corporal (opcional) y observaciones.
+- El IMC se calcula automáticamente en el formulario en tiempo real (`peso / (altura_m)²`) con categoría textual (Bajo peso / Peso normal / Sobrepeso / Obesidad).
+- El atleta solo puede ver sus propias mediciones (403 si intenta acceder a las de otro atleta).
+- La última medición se muestra como tarjeta resumen en la parte superior del historial.
+- Los campos opcionales (masa muscular, % grasa) se ocultan en el historial si no fueron registrados.
+- El registro se accede desde el perfil del atleta (`cardDatosFisicos` en `AtletaPerfilActivity`).
+
+**Criterios de calidad:**
+- **Seguridad:** control de ownership en el backend; un atleta no puede consultar datos de otro.
+- **Usabilidad:** el IMC preview actualiza al escribir sin necesidad de presionar ningún botón.
+
+---
+
 #### 3.3.3 Modelado del Dominio
 
 ##### Entidades del sistema
@@ -1321,7 +1346,9 @@ El proyecto se ejecutó en **8 sprints de 2 semanas** entre enero y junio de 202
 | S6 | Abr · Sem 1-2 | Evolución grupal, Grupos, Ranking | Visión comparativa entrenador |
 | S7 | Abr · Sem 3 – May · Sem 2 | Competencias: convocatoria, inscripción, resultados | Módulo competencias |
 | S8 | May · Sem 3 – Jun · Sem 2 | FCM notificaciones push, preferencias, perfiles, CI/CD Coolify | Sistema completo desplegado |
-| S9 | Jun · Sem 3 – Jun · Sem 4 | Módulo Disciplinas: entidad con requisitos físicos, CRUD backend + Android, seed inicial, dashboard actualizado | Disciplinas gestionables con condición física mínima |
+| S9 | Jun · Sem 3 | Módulo Disciplinas: entidad con requisitos físicos, CRUD backend + Android, seed inicial, reemplazo de arrays hardcodeados en 5 Activities | Disciplinas gestionables con condición física mínima |
+| S10 | Jun · Sem 3-4 | Módulo DatosFisicos: mediciones físicas del atleta, IMC auto-calculado, historial con resumen, cálculo en tiempo real con TextWatcher | Condición física registrable y consultable por atleta |
+| S11 | Jun · Sem 4 | EstadisticasActivity completa y conectada al dashboard; cardCompetencias del entrenador enrutado a EventosActivity | Panel de estadísticas del club operativo |
 
 **Decisiones técnicas relevantes tomadas durante el desarrollo:**
 
@@ -1503,6 +1530,9 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 | PU-16 | Disciplinas | Crear disciplina con nombre único → guardada en BD, disponible en listado | PASA |
 | PU-17 | Disciplinas | Crear disciplina con nombre duplicado → error 409 "Nombre ya existe" | PASA |
 | PU-18 | Disciplinas | Desactivar disciplina → no aparece en selectores de otros módulos | PASA |
+| PU-19 | DatosFisicos | Registrar medición con peso y altura → IMC calculado correctamente | PASA |
+| PU-20 | DatosFisicos | Atleta intenta ver mediciones de otro atleta → error 403 | PASA |
+| PU-21 | DatosFisicos | Sin datos previos → `GET /datos-fisicos/{id}/ultimo` retorna 204 | PASA |
 
 #### Pruebas de Integración
 
@@ -1522,6 +1552,8 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 | PI-12 | CI/CD | Push a `master` → GitHub Actions construye APK + Coolify redespliega backend en < 3 min | PASA |
 | PI-13 | Disciplinas | Disciplina creada por entrenador aparece en spinner de RegistrarMarcaActivity | PASA |
 | PI-14 | Disciplinas | Disciplina inactiva NO aparece en spinner de RegistrarMarcaActivity | PASA |
+| PI-15 | DatosFisicos | Medición registrada por entrenador aparece en historial del atleta con IMC correcto | PASA |
+| PI-16 | Estadísticas | EstadisticasActivity carga 3 llamadas en paralelo y muestra ranking de asistencia del mes | PASA |
 
 #### Pruebas de Aceptación (Validación con el Usuario)
 
@@ -1541,6 +1573,8 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 | PA-12 | HU-12 | Perfil completo del atleta con foto, categoría y disciplina | Aceptado |
 | PA-13 | HU-14 | Entrenador crea disciplina "Salto Triple" con altura mín 160 cm — aparece en lista y selectores | Aceptado |
 | PA-14 | HU-14 | Entrenador desactiva disciplina — deja de aparecer en selectores sin perder datos históricos | Aceptado |
+| PA-15 | HU-15 | Entrenador registra medición de atleta — IMC se actualiza en tiempo real al escribir peso y altura | Aceptado |
+| PA-16 | HU-15 | Atleta consulta su historial de condición física desde su perfil | Aceptado |
 
 #### Cobertura de Pruebas por Módulo
 
@@ -1554,8 +1588,10 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 | Notificaciones | 4 | 4 | 0 | 100% |
 | Perfiles | 5 | 5 | 0 | 100% |
 | Disciplinas | 5 | 5 | 0 | 100% |
+| Condición Física | 5 | 5 | 0 | 100% |
+| Estadísticas | 1 | 1 | 0 | 100% |
 | CI/CD | 1 | 1 | 0 | 100% |
-| **Total** | **44** | **44** | **0** | **100%** |
+| **Total** | **50** | **50** | **0** | **100%** |
 
 ---
 
@@ -1563,7 +1599,7 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 
 ### 6.1 Conclusiones
 
-El desarrollo de la aplicación móvil para el Club Atlético Santa Cruz de la Sierra logró cumplir los 9 objetivos específicos planteados, implementando las 14 Historias de Usuario priorizadas y los 19 Requisitos Funcionales definidos. El sistema reemplaza exitosamente los procesos manuales (WhatsApp, planillas en papel, libretas de marcas) con una solución digital centralizada, segura y accesible desde dispositivos Android.
+El desarrollo de la aplicación móvil para el Club Atlético Santa Cruz de la Sierra logró cumplir los 8 objetivos específicos planteados, implementando las 15 Historias de Usuario priorizadas y los 20 Requisitos Funcionales definidos. El sistema reemplaza exitosamente los procesos manuales (WhatsApp, planillas en papel, libretas de marcas) con una solución digital centralizada, segura y accesible desde dispositivos Android.
 
 **Logros técnicos destacados:**
 
@@ -1581,8 +1617,8 @@ El desarrollo de la aplicación móvil para el Club Atlético Santa Cruz de la S
 
 | Categoría | Total | Implementados | Cobertura |
 |---|---|---|---|
-| Requisitos Funcionales | 19 | 19 | 100% |
-| Historias de Usuario | 14 | 14 | 100% |
+| Requisitos Funcionales | 20 | 20 | 100% |
+| Historias de Usuario | 15 | 15 | 100% |
 | Requisitos No Funcionales (parcial) | 6 | 4 | 67% |
 | Casos de Uso | 6 | 6 | 100% |
 
@@ -1876,11 +1912,16 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 **Fecha:** 2026-06-05
 **Actividades:**
-- `EstadisticasActivity.java`: vista de métricas globales del club.
-- Endpoint `GET /estadisticas/resumen`: retorna total atletas activos, sesiones del mes, porcentaje promedio de asistencia, marcas registradas.
-- Cards con indicadores numéricos + gráfica de torta de distribución por disciplina.
+- `EstadisticasActivity.java`: panel de métricas globales del club con 3 llamadas paralelas.
+- `RankingAsistenciaAdapter.java`: RecyclerView con posición (🥇🥈🥉 top 3), avatar inicial, nombre, porcentaje y ProgressBar con color según umbral (verde ≥80 %, naranja ≥50 %, rojo <50 %).
+- Llamada 1: `GET /usuarios` — cuenta total de atletas activos.
+- Llamada 2: `GET /competencias?estado=PROXIMO` — lista competencias próximas (máx. 4 en vista mini).
+- Llamada 3: `GET /asistencia/reporte?mes=YYYY-MM` — calcula promedio ponderado de asistencia, totales presentes/ausentes y ranking descendente por porcentaje.
+- `item_evento_mini.xml`: chip de fecha + nombre del evento en la sección "Próximas Competencias".
+- `cardEstadisticas` añadida al `EntrenadorDashboardActivity` (Fila 3, junto a Disciplinas).
+- `cardCompetencias` del dashboard ahora navega a `EventosActivity` (antes mostraba "Próximamente").
 
-**Resultado:** El entrenador tiene un panel de control con el estado global del club.
+**Resultado:** El entrenador accede a un panel centralizado con atletas activos, asistencia promedio del mes, ranking de asistencia top 10 y próximas competencias.
 
 ---
 
@@ -1976,6 +2017,38 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 - Commit `5862a92` con mensaje "chore: limpiar archivos IDE y temporales del repositorio".
 
 **Resultado:** El repositorio quedó limpio de archivos de metadatos de Windows, dumps de ADB y configuraciones duplicadas de IDE.
+
+---
+
+### Sesión 9.27 — Módulo de Disciplinas (CRUD completo)
+
+**Fecha:** 2026-06-20
+**Actividades:**
+- Entidad `Disciplina` con campos de requisitos físicos opcionales: `pesoMinKg`, `pesoMaxKg`, `alturaMinCm`, `imcMin`, `imcMax`, `masaMuscularMinKg`, `porcentajeGrasaMax`, `unidad` (s/m/pts), `esTiempo` (bool), `activa`.
+- Endpoints: `GET /disciplinas` (activas), `GET /disciplinas/todas` (ENTRENADOR/ADMIN), `POST /disciplinas`, `PUT /disciplinas/{id}`, `PUT /disciplinas/{id}/estado`.
+- `DisciplinasActivity.java`: lista con FAB exclusivo para ENTRENADOR/ADMIN. Badge "INACTIVA" en items.
+- `CrearEditarDisciplinaActivity.java`: spinner de unidad (s/m/pts), switch `esTiempo`, campos numéricos opcionales para requisitos físicos, switch de estado visible solo en edición.
+- Seed inicial en `DataInitializer.java`: 8 disciplinas (100m, 200m, 400m, 5k, 10k, Salto Largo, Lanzamiento de Bala, Gimnasia) con requisitos físicos según disciplina.
+- Eliminación de arrays hardcodeados `DISCIPLINAS[]` en 5 Activities (`RegistrarMarcaActivity`, `EvolucionMarcasActivity`, `EvolucionGrupoActivity`, `CrearGrupoActivity`, `CrearCompetenciaActivity`). Todos cargan desde `GET /disciplinas` y ajustan la unidad automáticamente.
+- `cardDisciplinas` añadida al `EntrenadorDashboardActivity` (Fila 3).
+
+**Resultado:** Las disciplinas son gestionables dinámicamente. Cualquier disciplina nueva creada por el entrenador aparece inmediatamente en todos los selectores sin cambios en el cliente.
+
+---
+
+### Sesión 9.28 — Módulo DatosFisicos (Condición Física del Atleta)
+
+**Fecha:** 2026-06-25
+**Actividades:**
+- Entidad `DatosFisicos`: `atletaId`, `registradoPorId`, `fecha`, `pesoKg`, `alturaCm`, `masaMuscularKg` (nullable), `porcentajeGrasa` (nullable), `imc` (auto-calculado = `peso/(altura_m)²`), `observaciones`.
+- `POST /datos-fisicos`: solo ENTRENADOR/ADMIN; `registradoPorId` extraído del JWT.
+- `GET /datos-fisicos/{atletaId}`: historial completo; atleta solo puede ver el suyo (check de ownership: 403 si rol=ATLETA e id≠atletaId).
+- `GET /datos-fisicos/{atletaId}/ultimo`: última medición; 204 si sin datos.
+- `DatosFisicosActivity.java`: historial con `RecyclerView` + tarjeta resumen (última medición: IMC, peso, altura, fecha). FAB visible solo para ENTRENADOR/ADMIN.
+- `RegistrarDatosFisicosActivity.java`: `TextWatcher` compartido en campos peso y altura calcula el IMC en tiempo real con categoría (Bajo peso / Peso normal / Sobrepeso / Obesidad). Campos masa muscular y % grasa opcionales.
+- Entry point: `cardDatosFisicos` en `AtletaPerfilActivity`.
+
+**Resultado:** El entrenador registra mediciones físicas con IMC automático. El atleta consulta su historial de condición física. Los campos opcionales (masa muscular, % grasa) requieren báscula de bioimpedancia; si el club no la tiene, se registran solo peso + altura + IMC.
 
 ---
 

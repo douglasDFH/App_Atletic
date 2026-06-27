@@ -177,7 +177,7 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Fila 3: Disciplinas -->
+                <!-- Fila 3: Disciplinas + Estadísticas -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -189,6 +189,7 @@
                         android:layout_width="0dp"
                         android:layout_height="100dp"
                         android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
                         android:background="@drawable/bg_card_stat"
                         android:orientation="vertical"
                         android:gravity="center"
@@ -197,6 +198,21 @@
                         android:focusable="true">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🏃" android:textSize="28sp" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Disciplinas" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/cardEstadisticas"
+                        android:layout_width="0dp"
+                        android:layout_height="100dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_card_stat"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📈" android:textSize="28sp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Estadísticas" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/colorTextPrimary" android:layout_marginTop="6dp" />
                     </LinearLayout>
 
                 </LinearLayout>
