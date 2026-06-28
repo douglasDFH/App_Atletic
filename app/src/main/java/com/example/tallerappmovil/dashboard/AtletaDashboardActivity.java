@@ -39,11 +39,14 @@ import retrofit2.Response;
 public class AtletaDashboardActivity extends AppCompatActivity {
 
     private TextView tvSaludo;
+    private TextView tvSubtituloAtleta;
     private TextView tvAvatar;
     private ImageView ivAvatar;
     private TextView tvBadgeNotif;
     private TextView tvProxSesion;
     private TextView tvProxCompetencia;
+    private View bannerPadre;
+    private TextView tvHijoNombreBanner;
 
     private static final SimpleDateFormat DATE_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -55,14 +58,24 @@ public class AtletaDashboardActivity extends AppCompatActivity {
 
         SessionManager session = new SessionManager(this);
 
-        tvSaludo         = findViewById(R.id.tvSaludo);
-        tvAvatar         = findViewById(R.id.tvAvatar);
-        ivAvatar         = findViewById(R.id.ivAvatar);
-        tvBadgeNotif     = findViewById(R.id.tvBadgeNotif);
-        tvProxSesion     = findViewById(R.id.tvProxSesion);
-        tvProxCompetencia = findViewById(R.id.tvProxCompetencia);
+        tvSaludo            = findViewById(R.id.tvSaludo);
+        tvSubtituloAtleta   = findViewById(R.id.tvSubtituloAtleta);
+        tvAvatar            = findViewById(R.id.tvAvatar);
+        ivAvatar            = findViewById(R.id.ivAvatar);
+        tvBadgeNotif        = findViewById(R.id.tvBadgeNotif);
+        tvProxSesion        = findViewById(R.id.tvProxSesion);
+        tvProxCompetencia   = findViewById(R.id.tvProxCompetencia);
+        bannerPadre         = findViewById(R.id.bannerPadre);
+        tvHijoNombreBanner  = findViewById(R.id.tvHijoNombreBanner);
 
         actualizarSaludo(session.getUserName());
+
+        // Mostrar banner PADRE desde caché inmediatamente si aplica
+        if ("PADRE".equals(session.getUserRole())) {
+            String hijoCache = session.getHijoNombre();
+            if (hijoCache != null) mostrarBannerPadre(hijoCache);
+            else tvSubtituloAtleta.setText("Modo padre");
+        }
 
         // Foto desde caché inmediatamente
         String cachedFoto = session.getFotoUrl();
@@ -145,10 +158,10 @@ public class AtletaDashboardActivity extends AppCompatActivity {
                             // Cachear el grupo del atleta para que la Agenda pueda filtrar "Mi grupo"
                             // (para un PADRE, el backend devuelve el grupo del hijo vinculado)
                             sm.saveGrupo(p.getGrupoId(), p.getGrupoNombre());
-                            // Si es PADRE, mostrar a qué hijo está observando
+                            // Si es PADRE, guardar el hijo en caché y mostrar banner
                             if ("PADRE".equals(sm.getUserRole()) && p.getAtletaVinculadoNombre() != null) {
-                                TextView sub = findViewById(R.id.tvSubtituloAtleta);
-                                if (sub != null) sub.setText("Viendo a: " + p.getAtletaVinculadoNombre());
+                                sm.saveHijo(p.getAtletaVinculadoId(), p.getAtletaVinculadoNombre());
+                                mostrarBannerPadre(p.getAtletaVinculadoNombre());
                             }
                             if (p.getNombreCompleto() != null) {
                                 sm.saveUserName(p.getNombreCompleto());
@@ -159,6 +172,12 @@ public class AtletaDashboardActivity extends AppCompatActivity {
                     }
                     @Override public void onFailure(Call<PerfilUsuario> call, Throwable t) {}
                 });
+    }
+
+    private void mostrarBannerPadre(String hijoNombre) {
+        tvSubtituloAtleta.setText("Modo padre");
+        tvHijoNombreBanner.setText(hijoNombre);
+        bannerPadre.setVisibility(View.VISIBLE);
     }
 
     private void mostrarFotoAvatar(String url) {

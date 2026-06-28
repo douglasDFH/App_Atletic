@@ -13,6 +13,8 @@ public class SessionManager {
     private static final String KEY_GRUPO_ID  = "user_grupo_id";
     private static final String KEY_GRUPO_NOM = "user_grupo_nombre";
     private static final String KEY_FOTO_URL  = "user_foto_url";
+    private static final String KEY_HIJO_ID   = "hijo_id";
+    private static final String KEY_HIJO_NOM  = "hijo_nombre";
 
     private final SharedPreferences prefs;
 
@@ -72,6 +74,23 @@ public class SessionManager {
         } else {
             prefs.edit().remove(KEY_FOTO_URL).apply();
         }
+    }
+
+    public void saveHijo(Long id, String nombre) {
+        SharedPreferences.Editor ed = prefs.edit();
+        if (id != null) ed.putLong(KEY_HIJO_ID, id); else ed.remove(KEY_HIJO_ID);
+        ed.putString(KEY_HIJO_NOM, nombre != null ? nombre : "");
+        ed.apply();
+    }
+
+    public Long getHijoId() {
+        long id = prefs.getLong(KEY_HIJO_ID, -1L);
+        return id == -1L ? null : id;
+    }
+
+    public String getHijoNombre() {
+        String n = prefs.getString(KEY_HIJO_NOM, null);
+        return (n != null && !n.isEmpty()) ? n : null;
     }
 
     public void clearSession() {

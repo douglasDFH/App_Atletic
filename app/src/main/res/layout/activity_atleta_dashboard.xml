@@ -110,6 +110,36 @@
                 </FrameLayout>
             </LinearLayout>
 
+            <!-- Banner modo PADRE (solo visible para rol PADRE) -->
+            <LinearLayout
+                android:id="@+id/bannerPadre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@color/colorSurfaceVariant"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="10dp"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="👤  Siguiendo el progreso de  "
+                    android:textSize="13sp"
+                    android:textColor="@color/colorTextSecondary" />
+
+                <TextView
+                    android:id="@+id/tvHijoNombreBanner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimary" />
+
+            </LinearLayout>
+
             <!-- Stats: próxima sesión y competencia -->
             <LinearLayout
                 android:layout_width="match_parent"

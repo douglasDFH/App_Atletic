@@ -2117,6 +2117,37 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.33 — Rol PADRE diferenciado en AtletaDashboardActivity
+
+**Fecha:** 2026-06-27
+**Diagnóstico:** El PADRE entraba al mismo `AtletaDashboardActivity` que el ATLETA sin ninguna diferenciación visual. El backend ya resolvía correctamente todos los endpoints al hijo vinculado (marcas, asistencia, agenda, competencias). Solo faltaba la experiencia visual del padre.
+
+**Cambios:**
+- `SessionManager.java`: nuevos campos `KEY_HIJO_ID` / `KEY_HIJO_NOM` con métodos `saveHijo(id, nombre)`, `getHijoId()`, `getHijoNombre()`.
+- `activity_atleta_dashboard.xml`: `LinearLayout` `bannerPadre` (visibility=gone) insertado entre el header y las stat cards. Muestra "👤 Siguiendo el progreso de **[nombre hijo]**" con el nombre en color teal.
+- `AtletaDashboardActivity.java`:
+  - `onCreate`: si rol=PADRE y hay hijo cacheado → muestra el banner inmediatamente sin esperar la API. Si no hay cache → subtitle "Modo padre".
+  - `cargarFotoAvatar`: al recibir el perfil, llama `sm.saveHijo(...)` para persistir el nombre del hijo y llama `mostrarBannerPadre(nombre)`.
+  - Nuevo helper `mostrarBannerPadre(hijoNombre)`: activa el banner y actualiza subtitle.
+
+**Flujo completo PADRE:**
+1. Login → `AtletaDashboardActivity` (mismo que ATLETA)
+2. Banner teal inmediato: "Siguiendo el progreso de Carlos García"
+3. Subtitle: "Modo padre"
+4. Todas las cards funcionan sobre los datos del hijo (backend lo resuelve):
+   - Agenda → sesiones del grupo del hijo
+   - Marcas → marcas del hijo  
+   - Evolución → gráfica del hijo
+   - Competencias → lista sin botón inscribir (rol PADRE ≠ ATLETA)
+   - Ranking → ranking general (hijo visible entre los demás)
+   - Asistencia → historial de asistencia del hijo
+5. Avatar → perfil del padre (sus propios datos)
+6. Notificaciones → notificaciones del padre
+
+**Resultado:** El padre ve claramente que está observando a su hijo. El nombre del hijo aparece desde la primera pantalla sin latencia de red (cacheado en SharedPreferences). No fue necesario crear una Activity adicional porque el backend ya mapea correctamente todos los datos.
+
+---
+
 ## Anexo B — Fragmentos de Código Fuente Representativos
 
 ### B.1 JwtService.java — Generación y validación de JWT
