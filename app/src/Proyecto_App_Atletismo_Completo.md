@@ -31,22 +31,24 @@
 | 19 | HU-12 Gestionar perfil atleta | 3.3.2 |
 | 20 | HU-13 Editar datos propios | 3.3.2 |
 | 21 | HU-14 Gestionar disciplinas | 3.3.2 |
-| 22 | Requisitos Funcionales RF-01 a RF-19 | 3.2.1 |
-| 23 | Requisitos No Funcionales RNF-01 a RNF-06 | 3.2.2 |
-| 24 | Entidades del dominio (13 clases) | 3.3.3 |
-| 25 | Atributos clave por entidad | 3.3.3 |
-| 25 | Capas de arquitectura del software | 4.1 |
-| 26 | Modelo lógico de base de datos (SQL) | 4.2.1 |
-| 27 | Diccionario de datos — `registro_rendimiento` | 4.2.2 |
-| 28 | Módulos del sistema y componentes | 4.4 |
-| 29 | Stack tecnológico — Backend | 5.1 |
-| 30 | Stack tecnológico — Frontend Android | 5.1 |
-| 31 | Sprints de desarrollo Scrum | 5.2 |
-| 32 | Pruebas unitarias (PU-01 a PU-15) | 5.4 |
-| 33 | Pruebas de integración (PI-01 a PI-12) | 5.4 |
-| 34 | Pruebas de aceptación (PA-01 a PA-12) | 5.4 |
-| 35 | Cobertura de pruebas por módulo | 5.4 |
-| 36 | Cobertura final de requisitos | 6.1 |
+| 22 | HU-15 Registrar condición física | 3.3.2 |
+| 23 | HU-16 Vista diferenciada rol PADRE | 3.3.2 |
+| 24 | Requisitos Funcionales RF-01 a RF-20 | 3.2.1 |
+| 25 | Requisitos No Funcionales RNF-01 a RNF-06 | 3.2.2 |
+| 26 | Entidades del dominio (14 clases) | 3.3.3 |
+| 27 | Atributos clave por entidad | 3.3.3 |
+| 28 | Capas de arquitectura del software | 4.1 |
+| 29 | Modelo lógico de base de datos (SQL) | 4.2.1 |
+| 30 | Diccionario de datos — `registro_rendimiento` | 4.2.2 |
+| 31 | Módulos del sistema y componentes | 4.4 |
+| 32 | Stack tecnológico — Backend | 5.1 |
+| 33 | Stack tecnológico — Frontend Android | 5.1 |
+| 34 | Sprints de desarrollo Scrum | 5.2 |
+| 35 | Pruebas unitarias (PU-01 a PU-21) | 5.4 |
+| 36 | Pruebas de integración (PI-01 a PI-16) | 5.4 |
+| 37 | Pruebas de aceptación (PA-01 a PA-16) | 5.4 |
+| 38 | Cobertura de pruebas por módulo | 5.4 |
+| 39 | Cobertura final de requisitos | 6.1 |
 
 ---
 
@@ -769,6 +771,31 @@ El proyecto adoptó **Scrum** como marco de trabajo ágil, adaptado a un equipo 
 
 ---
 
+##### Módulo M8 — Rol PADRE
+
+---
+
+###### HU-16 — Vista diferenciada para el rol PADRE
+| Campo | Detalle |
+|---|---|
+| **Rol** | PADRE |
+| **Historia** | Como padre o tutor vinculado a un atleta, quiero ver los datos de mi hijo (agenda, marcas, evolución, asistencia, competencias) con una indicación clara de que estoy siguiendo su progreso, para mantenerme informado sin confundirme con la vista del atleta. |
+| **Prioridad** | ALTA |
+
+**Criterios de aceptación:**
+- Al ingresar, el dashboard muestra un banner teal con el texto "Siguiendo el progreso de [nombre del hijo]".
+- El subtítulo del saludo muestra "Modo padre".
+- El nombre del hijo se carga desde caché (SharedPreferences) para mostrarse inmediatamente sin esperar la API.
+- Todas las cards (Agenda, Marcas, Evolución, Asistencia, Competencias, Ranking) muestran los datos del hijo vinculado — el backend resuelve esto de forma transparente.
+- En Competencias, el botón "Inscribirse" no aparece (rol PADRE ≠ ATLETA).
+- El avatar y el perfil corresponden al PADRE, no al hijo.
+
+**Criterios de calidad:**
+- **Sin latencia:** el banner aparece antes de la respuesta del servidor gracias al caché en SessionManager.
+- **Sin Activity extra:** el mismo `AtletaDashboardActivity` sirve a ATLETA y PADRE; la diferenciación es solo visual.
+
+---
+
 #### 3.3.3 Modelado del Dominio
 
 ##### Entidades del sistema
@@ -788,6 +815,7 @@ El proyecto adoptó **Scrum** como marco de trabajo ágil, adaptado a un equipo 
 | ResultadoCompetencia | Competencias | Resultado oficial de atleta en competencia |
 | Notificacion | Comunicación | Mensaje push automático al usuario |
 | Disciplina | Disciplinas | Disciplina deportiva con requisitos físicos mínimos y unidad de medida |
+| DatosFisicos | Condición Física | Medición física de un atleta (peso, altura, masa muscular, % grasa, IMC calculado) |
 
 ##### Relaciones principales
 
@@ -1350,6 +1378,8 @@ El proyecto se ejecutó en **8 sprints de 2 semanas** entre enero y junio de 202
 | S10 | Jun · Sem 3-4 | Módulo DatosFisicos: mediciones físicas del atleta, IMC auto-calculado, historial con resumen, cálculo en tiempo real con TextWatcher | Condición física registrable y consultable por atleta |
 | S11 | Jun · Sem 4 | EstadisticasActivity completa y conectada al dashboard; cardCompetencias del entrenador enrutado a EventosActivity | Panel de estadísticas del club operativo |
 | S12 | Jun · Sem 4 | Corrección endpoint Agenda (grupos-agenda), filtro Activos/Inactivos en AtletasActivity con ChipGroup | Bugs críticos resueltos; lista de atletas filtrable |
+| S13 | Jun · Sem 4 | Notificaciones bidireccionales (atleta → entrenador en inscripción); persistencia de fotos con volumen Docker; rol PADRE diferenciado (banner, caché hijo en SessionManager) | PADRE ve datos del hijo; fotos persisten entre redespliegues |
+| S14 | Jun · Sem 4 | Fix email enumeration en forgot-password; mejora de correos (asunto, cuerpo, primer nombre); botón reenvío + pegar portapapeles en VerificarCorreoActivity; fix 500 en GET /sesiones (GlobalExceptionHandler + semana opcional) | Seguridad y UX de autenticación mejoradas; Agenda robusta |
 
 **Decisiones técnicas relevantes tomadas durante el desarrollo:**
 
@@ -1446,7 +1476,7 @@ app/src/main/java/com/example/tallerappmovil/
 │   ├── NotificacionesService.java
 │   └── UsuariosService.java
 ├── session/
-│   └── SessionManager.java          ← SharedPreferences: JWT, nombre, rol, fotoUrl
+│   └── SessionManager.java          ← SharedPreferences: JWT, nombre, rol, fotoUrl, hijoId/hijoNombre
 ├── model/                           ← DTOs espejo del backend (solo campos necesarios)
 ├── auth/
 │   ├── LoginActivity.java
@@ -1455,8 +1485,8 @@ app/src/main/java/com/example/tallerappmovil/
 │   ├── VerificarCorreoActivity.java
 │   └── ResetPasswordActivity.java
 ├── dashboard/
-│   ├── AtletaDashboardActivity.java
-│   └── EntrenadorDashboardActivity.java
+│   ├── AtletaDashboardActivity.java   ← ATLETA y PADRE (banner modo padre)
+│   └── DashboardActivity.java         ← ENTRENADOR y ADMIN
 ├── agenda/
 │   ├── AgendaActivity.java
 │   ├── CrearSesionActivity.java
@@ -1498,6 +1528,9 @@ app/src/main/java/com/example/tallerappmovil/
 │   ├── DisciplinasActivity.java        ← Lista con FAB (solo ENTRENADOR/ADMIN)
 │   ├── DisciplinasAdapter.java
 │   └── CrearEditarDisciplinaActivity.java ← Formulario create/edit
+├── datosfisicos/
+│   ├── DatosFisicosActivity.java      ← Historial de mediciones del atleta
+│   └── RegistrarMedicionActivity.java ← Formulario con IMC en tiempo real
 ├── estadisticas/
 │   └── EstadisticasActivity.java
 └── AtletismoApp.java                  ← Application class, init Glide + Firebase
@@ -1600,7 +1633,7 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 
 ### 6.1 Conclusiones
 
-El desarrollo de la aplicación móvil para el Club Atlético Santa Cruz de la Sierra logró cumplir los 8 objetivos específicos planteados, implementando las 15 Historias de Usuario priorizadas y los 20 Requisitos Funcionales definidos. El sistema reemplaza exitosamente los procesos manuales (WhatsApp, planillas en papel, libretas de marcas) con una solución digital centralizada, segura y accesible desde dispositivos Android.
+El desarrollo de la aplicación móvil para el Club Atlético Santa Cruz de la Sierra logró cumplir los 8 objetivos específicos planteados, implementando las 16 Historias de Usuario priorizadas y los 20 Requisitos Funcionales definidos. El sistema reemplaza exitosamente los procesos manuales (WhatsApp, planillas en papel, libretas de marcas) con una solución digital centralizada, segura y accesible desde dispositivos Android.
 
 **Logros técnicos destacados:**
 
@@ -1619,7 +1652,7 @@ El desarrollo de la aplicación móvil para el Club Atlético Santa Cruz de la S
 | Categoría | Total | Implementados | Cobertura |
 |---|---|---|---|
 | Requisitos Funcionales | 20 | 20 | 100% |
-| Historias de Usuario | 15 | 15 | 100% |
+| Historias de Usuario | 16 | 16 | 100% |
 | Requisitos No Funcionales (parcial) | 6 | 4 | 67% |
 | Casos de Uso | 6 | 6 | 100% |
 
