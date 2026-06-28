@@ -161,6 +161,18 @@ public class AuthService {
         return s == null || s.isBlank();
     }
 
+    @Transactional
+    public void resendVerification(String correo) {
+        java.util.Optional<Usuario> opt = usuarioRepository.findByCorreo(correo);
+        if (opt.isEmpty()) return;
+        Usuario usuario = opt.get();
+        if (Boolean.TRUE.equals(usuario.getEmailVerificado())) return;
+        String nuevoToken = UUID.randomUUID().toString();
+        usuario.setTokenVerificacion(nuevoToken);
+        usuarioRepository.save(usuario);
+        emailService.sendVerificationEmail(correo, usuario.getNombreCompleto(), nuevoToken);
+    }
+
     public void forgotPassword(String correo) {
         passwordResetService.solicitarReset(correo);
     }

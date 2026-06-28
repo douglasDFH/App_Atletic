@@ -28,4 +28,7 @@ public interface AuthApiService {
 
     @GET("auth/verify-email")
     Call<Void> verifyEmail(@Query("token") String token);
+
+    @POST("auth/resend-verification")
+    Call<Void> resendVerification(@Body Map<String, String> body);
 }

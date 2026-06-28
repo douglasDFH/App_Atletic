@@ -44,7 +44,7 @@
         android:hint="@string/hint_codigo_verificacion"
         app:boxStrokeColor="@color/colorPrimary"
         app:hintTextColor="@color/colorTextSecondary"
-        android:layout_marginBottom="20dp">
+        android:layout_marginBottom="8dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etCodigo"
@@ -54,6 +54,17 @@
             android:inputType="textNoSuggestions"
             android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPegar"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="📋  Pegar código del correo"
+        android:textSize="13sp"
+        android:textColor="@color/colorPrimary"
+        app:strokeColor="@color/colorPrimary"
+        android:layout_marginBottom="20dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnVerificar"
@@ -73,13 +84,22 @@
         android:visibility="gone" />
 
     <TextView
-        android:id="@+id/tvVolver"
+        android:id="@+id/tvReenviar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Volver al inicio de sesión"
+        android:text="¿No recibiste el correo? Reenviar"
         android:textColor="@color/colorPrimary"
         android:gravity="center"
         android:padding="8dp"
         android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/tvVolver"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Volver al inicio de sesión"
+        android:textColor="@color/colorTextSecondary"
+        android:gravity="center"
+        android:padding="8dp" />
 
 </LinearLayout>

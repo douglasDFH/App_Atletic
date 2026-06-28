@@ -2159,6 +2159,26 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.35 — Mejora de correos y reenvío de verificación
+
+**Fecha:** 2026-06-27
+**Diagnóstico:** El correo de verificación llegaba a spam porque Gmail clasifica los correos de bienvenida/activación como sospechosos cuando vienen de cuentas SMTP sin reputación de envío masivo. El correo de recuperación no caía en spam por ser transaccional explícito. Adicionalmente no había forma de reenviar el correo ni de pegar el código fácilmente.
+
+**Cambios backend:**
+- `EmailService.java`: rediseño de ambos correos — asunto menos genérico ("Tu codigo de acceso" / "Restablecer contrasena"), cuerpo más conciso y profesional, sin tildes en el asunto (evitan flags de encodig MIME), primer nombre en lugar de nombre completo, sin deep links en el cuerpo.
+- `AuthService.java`: nuevo método `resendVerification(correo)` — genera nuevo token, lo guarda y reenvía el correo. Si el correo no existe o ya está verificado, retorna silenciosamente.
+- `AuthController.java`: nuevo endpoint `POST /api/v1/auth/resend-verification`.
+
+**Cambios Android:**
+- `AuthApiService.java`: método `resendVerification(@Body Map<String, String>)`.
+- `RegisterActivity.java`: pasa `correo` como extra en el Intent hacia `VerificarCorreoActivity`.
+- `activity_verificar_correo.xml`: nuevo botón "📋 Pegar código del correo" (outlined) + nuevo TextView "¿No recibiste el correo? Reenviar".
+- `VerificarCorreoActivity.java`: lógica de portapapeles (`ClipboardManager`), lógica de reenvío llamando al nuevo endpoint, `setLoading()` deshabilita todos los botones durante requests.
+
+**Resultado:** El usuario puede pegar el código desde el portapapeles con un toque y reenviar el correo si no lo recibió o fue a spam.
+
+---
+
 ## Anexo B — Fragmentos de Código Fuente Representativos
 
 ### B.1 JwtService.java — Generación y validación de JWT

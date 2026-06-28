@@ -22,53 +22,51 @@ public class EmailService {
 
     public void sendVerificationEmail(String toEmail, String nombreCompleto, String token) {
         try {
+            String firstName = nombreCompleto != null && nombreCompleto.contains(" ")
+                    ? nombreCompleto.split(" ")[0] : nombreCompleto;
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromAddress);
             message.setTo(toEmail);
-            message.setSubject("AthleteSCZ — Verifica tu correo electrónico");
+            message.setSubject("Tu codigo de acceso — Club Atletico Santa Cruz");
             message.setText(
-                    "Hola " + nombreCompleto + ",\n\n" +
-                    "¡Bienvenido/a a AthleteSCZ! Para activar tu cuenta ingresa este código en la app:\n\n" +
-                    token + "\n\n" +
-                    "O toca este enlace desde tu teléfono:\n" +
-                    "atletismo://verify?token=" + token + "\n\n" +
+                    "Hola " + firstName + ",\n\n" +
+                    "Gracias por registrarte en AthleteSCZ.\n\n" +
+                    "Tu codigo de verificacion es:\n\n" +
+                    "    " + token + "\n\n" +
+                    "Abre la app, pega el codigo en el campo de verificacion y toca \"Verificar cuenta\".\n\n" +
                     "Si no creaste esta cuenta, ignora este mensaje.\n\n" +
-                    "— Club Atlético Santa Cruz de la Sierra"
+                    "Club Atletico Santa Cruz de la Sierra"
             );
             mailSender.send(message);
-            log.info("Correo de verificación enviado a {}", toEmail);
+            log.info("Correo de verificacion enviado a {}", toEmail);
         } catch (Exception e) {
-            log.error("Error al enviar correo de verificación a {}: {}", toEmail, e.getMessage());
-            // No relanzar: el usuario queda registrado; puede reenviar manualmente
+            log.error("Error al enviar correo de verificacion a {}: {}", toEmail, e.getMessage());
         }
     }
 
     public void sendPasswordResetEmail(String toEmail, String nombreCompleto, String token) {
         try {
-            String resetLink = resetUrlScheme + "?token=" + token;
-
+            String firstName = nombreCompleto != null && nombreCompleto.contains(" ")
+                    ? nombreCompleto.split(" ")[0] : nombreCompleto;
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromAddress);
             message.setTo(toEmail);
-            message.setSubject("AthleteSCZ — Recuperación de contraseña");
+            message.setSubject("Restablecer contrasena — Club Atletico Santa Cruz");
             message.setText(
-                    "Hola " + nombreCompleto + ",\n\n" +
-                    "Has solicitado restablecer tu contraseña en AthleteSCZ.\n\n" +
-                    "Toca el siguiente enlace desde tu teléfono:\n" +
-                    resetLink + "\n\n" +
-                    "O ingresa este código manualmente en la app:\n" +
-                    token + "\n\n" +
-                    "Este enlace expira en 1 hora.\n\n" +
-                    "Si no solicitaste esto, ignora este mensaje.\n\n" +
-                    "— Club Atlético Santa Cruz de la Sierra"
+                    "Hola " + firstName + ",\n\n" +
+                    "Recibimos una solicitud para restablecer la contrasena de tu cuenta en AthleteSCZ.\n\n" +
+                    "Tu codigo de restablecimiento es:\n\n" +
+                    "    " + token + "\n\n" +
+                    "Abre la app, ingresa el codigo anterior y elige una nueva contrasena.\n" +
+                    "Este codigo expira en 1 hora.\n\n" +
+                    "Si no solicitaste esto, tu contrasena no ha cambiado.\n\n" +
+                    "Club Atletico Santa Cruz de la Sierra"
             );
-
             mailSender.send(message);
-            log.info("Correo de recuperación enviado a {}", toEmail);
-
+            log.info("Correo de recuperacion enviado a {}", toEmail);
         } catch (Exception e) {
-            log.error("Error al enviar correo a {}: {}", toEmail, e.getMessage());
-            throw new RuntimeException("No se pudo enviar el correo de recuperación");
+            log.error("Error al enviar correo de recuperacion a {}: {}", toEmail, e.getMessage());
+            throw new RuntimeException("No se pudo enviar el correo de recuperacion");
         }
     }
 }

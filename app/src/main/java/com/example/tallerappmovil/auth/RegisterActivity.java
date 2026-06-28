@@ -202,8 +202,8 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         setLoading(false);
                         if (response.isSuccessful()) {
-                            // Navegar a pantalla de verificación de correo (HU-01)
                             Intent intent = new Intent(RegisterActivity.this, VerificarCorreoActivity.class);
+                            intent.putExtra("correo", correo);
                             startActivity(intent);
                             finish();
                         } else {

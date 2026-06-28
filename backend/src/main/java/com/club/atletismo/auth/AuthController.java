@@ -31,6 +31,12 @@ public class AuthController {
                 .body(ApiResponse.ok(null));
     }
 
+    @PostMapping("/resend-verification")
+    public ResponseEntity<ApiResponse<Void>> resendVerification(@RequestBody Map<String, String> body) {
+        authService.resendVerification(body.get("correo"));
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<Void>> forgotPassword(@RequestBody Map<String, String> body) {
         authService.forgotPassword(body.get("correo"));
