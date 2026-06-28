@@ -2179,6 +2179,19 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.36 — Fix 500 en GET /api/v1/sesiones (módulo Agenda)
+
+**Fecha:** 2026-06-27
+**Problema:** `GET /api/v1/sesiones` sin el parámetro `?semana=` lanzaba `MissingServletRequestParameterException`. El `GlobalExceptionHandler` no tenía handler específico para ese tipo, por lo que caía al handler genérico `Exception.class` que devuelve 500. El mismo problema ocurría con `DateTimeParseException` si el formato de fecha era inválido.
+
+**Fix:**
+- `GlobalExceptionHandler.java`: handlers específicos para `MissingServletRequestParameterException` (400 con nombre del parámetro faltante) y `DateTimeParseException` (400 con instrucción de formato).
+- `SesionController.java`: `semana` pasa a ser `required = false`. Si no se manda, se usa `LocalDate.now()` como default, devolviendo las sesiones de la semana actual en lugar de error.
+
+**Resultado:** `GET /api/v1/sesiones` sin `?semana=` devuelve las sesiones de la semana actual (200). Cualquier parámetro obligatorio faltante en cualquier endpoint del sistema ahora devuelve 400 con mensaje claro en lugar de 500.
+
+---
+
 ## Anexo B — Fragmentos de Código Fuente Representativos
 
 ### B.1 JwtService.java — Generación y validación de JWT

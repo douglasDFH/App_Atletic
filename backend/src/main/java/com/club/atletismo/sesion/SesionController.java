@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -24,9 +25,11 @@ public class SesionController {
 
     @GetMapping("/api/v1/sesiones")
     public ResponseEntity<List<SesionResponse>> listar(
-            @RequestParam String semana,
+            @RequestParam(required = false) String semana,
             @RequestParam(required = false) Long grupoId) {
-        return ResponseEntity.ok(sesionService.listarPorSemana(semana, grupoId));
+        String semanaEfectiva = (semana != null && !semana.isBlank())
+                ? semana : LocalDate.now().toString();
+        return ResponseEntity.ok(sesionService.listarPorSemana(semanaEfectiva, grupoId));
     }
 
     @PostMapping("/api/v1/sesiones")
