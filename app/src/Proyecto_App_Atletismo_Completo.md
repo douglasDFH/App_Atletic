@@ -2148,6 +2148,17 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.34 — Fix seguridad: email enumeration en forgot-password
+
+**Fecha:** 2026-06-27
+**Problema:** `PasswordResetService.solicitarReset()` lanzaba `IllegalArgumentException("Correo no encontrado")` cuando el email no existía en la BD, resultando en HTTP 400. Esto permitía a un atacante descubrir qué correos están registrados probando emails uno a uno (email enumeration).
+
+**Fix:** `PasswordResetService.java` — si el correo no existe, retornar silenciosamente sin error. La respuesta siempre es 200, sin revelar si el correo está registrado o no.
+
+**Resultado:** El endpoint `POST /auth/forgot-password` siempre responde exitosamente. Si el correo existe, envía el email; si no existe, no hace nada. El atacante no puede distinguir entre ambos casos.
+
+---
+
 ## Anexo B — Fragmentos de Código Fuente Representativos
 
 ### B.1 JwtService.java — Generación y validación de JWT

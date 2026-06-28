@@ -21,8 +21,9 @@ public class PasswordResetService {
 
     @Transactional
     public void solicitarReset(String correo) {
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new IllegalArgumentException("Correo no encontrado"));
+        java.util.Optional<Usuario> opt = usuarioRepository.findByCorreo(correo);
+        if (opt.isEmpty()) return; // no revelar si el correo existe o no
+        Usuario usuario = opt.get();
 
         // Eliminar tokens anteriores del usuario
         tokenRepository.deleteByUsuario(usuario);
