@@ -2231,6 +2231,38 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.41 — Fix: sesión no aparece en Agenda y edición no se refleja
+
+**Fecha:** 2026-06-29
+**Problemas reportados:**
+1. La sesión creada no aparece en el módulo Agenda.
+2. Al editar una sesión, los cambios no se reflejan.
+
+**Causa A — `MalformedJsonException` en GET /sesiones (mismo proxy Coolify):**
+El mismo problema del POST afectaba al GET de listado. Gson en modo estricto rechazaba la respuesta del proxy, lanzando `MalformedJsonException` en `onFailure` → la lista nunca cargaba → las sesiones no se veían.
+
+**Fix A — Gson leniente en `ApiClient.java`:**
+```java
+Gson gson = new GsonBuilder().setLenient().create();
+retrofit = new Retrofit.Builder()
+    ...
+    .addConverterFactory(GsonConverterFactory.create(gson))
+    .build();
+```
+Con `setLenient()`, Gson acepta JSON con contenido extra inyectado por el proxy. Aplica a TODOS los endpoints de la app.
+
+**Causa B — Flujo de navegación post-edición:**
+`SesionDetalleActivity` abría `CrearSesionActivity` con `startActivity()`. Al guardar, `finish()` regresaba a `SesionDetalleActivity` (mostrando datos viejos del Intent). El `AgendaActivity.onResume()` solo se llama cuando el usuario pulsa "Atrás" desde `SesionDetalleActivity` — el usuario no veía el resultado inmediato.
+
+**Fix B — `startActivityForResult` + propagación de resultado:**
+- `SesionDetalleActivity`: cambia `startActivity` a `startActivityForResult(intent, 1)`.
+- `SesionDetalleActivity.onActivityResult`: si requestCode=1 y resultCode=OK → `setResult(OK); finish()` → regresa al Agenda que recarga en `onResume`.
+- `CrearSesionActivity`: agrega `setResult(RESULT_OK)` antes de `finish()` al guardar exitosamente.
+
+**Resultado:** Al crear una sesión → regresa al Agenda con lista recargada. Al editar → regresa directo al Agenda (saltando el detalle con datos viejos) y la lista se actualiza.
+
+---
+
 ### Sesión 9.40 — Fix definitivo: MalformedJsonException al crear/editar sesión
 
 **Fecha:** 2026-06-29

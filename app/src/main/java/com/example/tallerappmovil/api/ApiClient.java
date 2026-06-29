@@ -6,6 +6,9 @@ import com.example.tallerappmovil.AtletismoApp;
 import com.example.tallerappmovil.auth.LoginActivity;
 import com.example.tallerappmovil.session.SessionManager;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -71,10 +74,12 @@ public class ApiClient {
                     })
                     .build();
 
+            Gson gson = new GsonBuilder().setLenient().create();
+
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .client(client)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
         }
         return retrofit;

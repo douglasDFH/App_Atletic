@@ -249,6 +249,7 @@ public class CrearSesionActivity extends AppCompatActivity {
                                     ? getString(R.string.msg_sesion_creada)
                                     : getString(R.string.msg_sesion_actualizada),
                             Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK);
                     finish();
                 } else {
                     String msg = extractErrorMessage(response);

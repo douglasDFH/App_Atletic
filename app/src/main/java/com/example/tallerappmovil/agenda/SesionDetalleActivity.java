@@ -138,7 +138,7 @@ public class SesionDetalleActivity extends AppCompatActivity {
             intent.putExtra(CrearSesionActivity.EXTRA_LUGAR, lugar);
             intent.putExtra(CrearSesionActivity.EXTRA_GRUPO_ID, grupoId);
             intent.putExtra(CrearSesionActivity.EXTRA_DESCRIPCION, getIntent().getStringExtra(EXTRA_DESCRIPCION));
-            startActivity(intent);
+            startActivityForResult(intent, 1);
         });
 
         MaterialButton btnEliminar = findViewById(R.id.btnEliminarSesion);
@@ -274,6 +274,15 @@ public class SesionDetalleActivity extends AppCompatActivity {
             return fecha.substring(0, 1).toUpperCase() + fecha.substring(1) + "  ·  " + horaI + " – " + horaF;
         } catch (ParseException e) {
             return inicio;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            setResult(RESULT_OK);
+            finish();
         }
     }
 
