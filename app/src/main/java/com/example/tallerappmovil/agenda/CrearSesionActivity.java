@@ -17,7 +17,6 @@ import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.model.GrupoEntrenamiento;
 import com.example.tallerappmovil.model.SesionCreateRequest;
-import com.example.tallerappmovil.model.SesionEntrenamiento;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;

@@ -2231,6 +2231,21 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.43 — Refactor: eliminar background explícito de todos los layouts + limpiar import no usado
+
+**Fecha:** 2026-06-29
+**Motivo:** Los 40 layouts de Activity tenían `android:background="@color/colorBackground"` hardcodeado en el elemento raíz, duplicando innecesariamente lo que el tema ya establece. Esto también impedía que cambios de tema se reflejaran automáticamente. Se elimina el atributo en todas las pantallas y se deja al tema `AppTheme` controlar el fondo.
+
+**Archivos modificados:**
+
+- **40 layouts XML** (`activity_agenda.xml`, `activity_asistencia.xml`, `activity_atleta_dashboard.xml`, `activity_atleta_perfil.xml`, `activity_atletas.xml`, `activity_cambiar_contrasena.xml`, `activity_competencia_detalle.xml`, `activity_crear_competencia.xml`, `activity_crear_editar_disciplina.xml`, `activity_crear_grupo.xml`, `activity_crear_sesion.xml`, `activity_dashboard.xml`, `activity_datos_fisicos.xml`, `activity_disciplinas.xml`, `activity_editar_atleta.xml`, `activity_editar_perfil.xml`, `activity_entrenador_dashboard.xml`, `activity_estadisticas.xml`, `activity_eventos.xml`, `activity_evolucion_grupo.xml`, `activity_evolucion_marcas.xml`, `activity_forgot_password.xml`, `activity_grupo_detalle.xml`, `activity_grupos.xml`, `activity_historial_asistencia.xml`, `activity_login.xml`, `activity_marcas.xml`, `activity_notif_preferencias.xml`, `activity_notificaciones.xml`, `activity_perfil.xml`, `activity_ranking.xml`, `activity_register.xml`, `activity_registrar_datos_fisicos.xml`, `activity_registrar_marca.xml`, `activity_reporte_asistencia.xml`, `activity_reset_password.xml`, `activity_resultados_competencia.xml`, `activity_seleccionar_atletas.xml`, `activity_sesion_detalle.xml`, `activity_verificar_correo.xml`): eliminado `android:background="@color/colorBackground"` del elemento raíz. En `activity_historial_asistencia.xml` también se eliminó en un `LinearLayout` interno.
+
+- **`CrearSesionActivity.java`:** eliminado import no usado `com.example.tallerappmovil.model.SesionEntrenamiento` (quedó huérfano tras la refactorización a `Call<Void>` en Sesión 9.40).
+
+**Resultado:** El fondo de todas las pantallas es gestionado por el tema global. Reducción de redundancia en los layouts: 41 atributos eliminados en 40 archivos. Sin impacto visual (el color sigue siendo `colorBackground` del tema).
+
+---
+
 ### Sesión 9.42 — Fix: card de sesión invisible por color + limpieza de diagnósticos
 
 **Fecha:** 2026-06-29
