@@ -126,7 +126,6 @@ public class AgendaActivity extends AppCompatActivity {
         setupChips();
         setupBusqueda();
         setupBottomNav();
-        cargarSesiones();
     }
 
     private void moverALunes(Calendar cal) {
@@ -177,10 +176,13 @@ public class AgendaActivity extends AppCompatActivity {
         String query = etBuscar.getText() != null ? etBuscar.getText().toString().trim() : "";
         Long grupoFiltro = soloMiGrupo ? miGrupoId : null;
         int visible = adapter.filtrar(query, estadoFiltro, grupoFiltro);
+        Toast.makeText(this, "Filtro: " + visible + " visibles / total=" + adapter.getTotalCount()
+                + " / estado=" + estadoFiltro, Toast.LENGTH_LONG).show();
+        recyclerSesiones.setVisibility(View.VISIBLE);
         actualizarContador(visible);
         tvVacio.setVisibility(visible == 0 && adapter.getTotalCount() > 0
                 ? View.VISIBLE : View.GONE);
-        recyclerSesiones.setVisibility(visible > 0 ? View.VISIBLE : View.GONE);
+        if (visible == 0) recyclerSesiones.setVisibility(View.GONE);
     }
 
     private void actualizarContador(int visible) {
