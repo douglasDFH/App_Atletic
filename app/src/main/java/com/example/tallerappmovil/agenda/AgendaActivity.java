@@ -220,12 +220,16 @@ public class AgendaActivity extends AppCompatActivity {
                                            Response<List<SesionEntrenamiento>> response) {
                         progressBar.setVisibility(View.GONE);
                         if (response.isSuccessful() && response.body() != null) {
-                            adapter.setSesiones(response.body());
+                            List<SesionEntrenamiento> lista = response.body();
+                            Toast.makeText(AgendaActivity.this,
+                                    "Lista OK: " + lista.size() + " sesiones (semana " + fechaApi + ")",
+                                    Toast.LENGTH_LONG).show();
+                            adapter.setSesiones(lista);
                             aplicarFiltros();
                         } else {
                             tvVacio.setVisibility(View.VISIBLE);
-                            Toast.makeText(AgendaActivity.this,
-                                    getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                            String err = "HTTP " + response.code() + " body=" + (response.body() == null ? "null" : "ok");
+                            Toast.makeText(AgendaActivity.this, err, Toast.LENGTH_LONG).show();
                         }
                     }
                     @Override
@@ -233,7 +237,8 @@ public class AgendaActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         tvVacio.setVisibility(View.VISIBLE);
                         Toast.makeText(AgendaActivity.this,
-                                getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                                "GET/" + t.getClass().getSimpleName() + ": " + t.getMessage(),
+                                Toast.LENGTH_LONG).show();
                     }
                 });
     }
