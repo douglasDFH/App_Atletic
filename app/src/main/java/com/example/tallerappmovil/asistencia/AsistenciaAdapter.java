@@ -39,6 +39,8 @@ public class AsistenciaAdapter extends RecyclerView.Adapter<AsistenciaAdapter.Vi
 
     public Map<Long, String> getEstados() { return estados; }
 
+    public List<AsistenciaAtleta> getAtletas() { return atletas; }
+
     public boolean todosSeleccionados() {
         if (atletas.isEmpty()) return false;
         for (AsistenciaAtleta a : atletas) {

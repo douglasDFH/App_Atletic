@@ -1,6 +1,8 @@
 package com.example.tallerappmovil.asistencia;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -17,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.model.AsistenciaHistorial;
+import com.example.tallerappmovil.utils.PdfReportGenerator;
 
 import java.util.List;
 
@@ -33,6 +36,8 @@ public class HistorialAsistenciaActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private TextView tvVacio;
     private TextView tvCountPresente, tvCountAusente, tvCountJustificado, tvPorcentaje;
+    private String atletaNombreLocal;
+    private int cntPresentes, cntAusentes, cntJustificados;
 
     private static final String[] FILTROS_LABELS =
             {"Todas", "Presente", "Ausente", "Justificado"};
@@ -48,11 +53,11 @@ public class HistorialAsistenciaActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Long atletaId     = getIntent().getLongExtra(EXTRA_ATLETA_ID, -1L);
-        String atletaNombre = getIntent().getStringExtra(EXTRA_ATLETA_NOMBRE);
+        Long atletaId       = getIntent().getLongExtra(EXTRA_ATLETA_ID, -1L);
+        atletaNombreLocal   = getIntent().getStringExtra(EXTRA_ATLETA_NOMBRE);
 
-        if (atletaNombre != null && getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(atletaNombre);
+        if (atletaNombreLocal != null && getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(atletaNombreLocal);
         }
 
         progressBar         = findViewById(R.id.progressBar);
@@ -74,6 +79,28 @@ public class HistorialAsistenciaActivity extends AppCompatActivity {
         } else {
             cargarMiHistorial();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_export, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_export_pdf) {
+            java.util.List<AsistenciaHistorial> todos = adapter.getAllItems();
+            if (todos == null || todos.isEmpty()) {
+                Toast.makeText(this, "No hay datos para exportar", Toast.LENGTH_SHORT).show();
+            } else {
+                PdfReportGenerator.exportarHistorialAtleta(this, todos,
+                        atletaNombreLocal != null ? atletaNombreLocal : "Atleta",
+                        cntPresentes, cntAusentes, cntJustificados);
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setupSpinnerFiltro() {
@@ -159,6 +186,10 @@ public class HistorialAsistenciaActivity extends AppCompatActivity {
             else if ("AUSENTE".equals(h.getEstado()))     ausente++;
             else if ("JUSTIFICADO".equals(h.getEstado())) justificado++;
         }
+
+        cntPresentes   = presente;
+        cntAusentes    = ausente;
+        cntJustificados = justificado;
 
         tvCountPresente.setText(String.valueOf(presente));
         tvCountAusente.setText(String.valueOf(ausente));

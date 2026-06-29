@@ -1,6 +1,8 @@
 package com.example.tallerappmovil.asistencia;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -15,6 +17,7 @@ import com.example.tallerappmovil.R;
 import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.model.AsistenciaAtleta;
 import com.example.tallerappmovil.model.AsistenciaRequest;
+import com.example.tallerappmovil.utils.PdfReportGenerator;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
@@ -40,6 +43,7 @@ public class AsistenciaActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private MaterialButton btnGuardar;
     private Long sesionId;
+    private String grupoExtra, horaExtra, lugarExtra;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +54,13 @@ public class AsistenciaActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        sesionId = getIntent().getLongExtra(EXTRA_SESION_ID, -1);
-        String grupo = getIntent().getStringExtra(EXTRA_GRUPO);
-        String hora  = getIntent().getStringExtra(EXTRA_HORA);
-        String lugar = getIntent().getStringExtra(EXTRA_LUGAR);
+        sesionId   = getIntent().getLongExtra(EXTRA_SESION_ID, -1);
+        grupoExtra = getIntent().getStringExtra(EXTRA_GRUPO);
+        horaExtra  = getIntent().getStringExtra(EXTRA_HORA);
+        lugarExtra = getIntent().getStringExtra(EXTRA_LUGAR);
+        String grupo = grupoExtra;
+        String hora  = horaExtra;
+        String lugar = lugarExtra;
 
         ((TextView) findViewById(R.id.tvSesionInfo))
                 .setText(grupo != null ? grupo : "Sesión");
@@ -77,6 +84,30 @@ public class AsistenciaActivity extends AppCompatActivity {
         btnGuardar.setOnClickListener(v -> guardar());
 
         cargarAtletas();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_export, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_export_pdf) {
+            List<AsistenciaAtleta> lista = adapter.getAtletas();
+            if (lista == null || lista.isEmpty()) {
+                Toast.makeText(this, "No hay datos para exportar", Toast.LENGTH_SHORT).show();
+            } else {
+                PdfReportGenerator.exportarAsistenciaSesion(this, lista,
+                        adapter.getEstados(),
+                        grupoExtra != null ? grupoExtra : "Sesión",
+                        formatHora(horaExtra),
+                        lugarExtra != null ? lugarExtra : "");
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void cargarAtletas() {

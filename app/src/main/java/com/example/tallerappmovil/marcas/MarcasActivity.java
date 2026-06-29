@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.example.tallerappmovil.utils.PdfReportGenerator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -120,6 +122,16 @@ public class MarcasActivity extends AppCompatActivity {
             if (atletaSeleccionadoId != null)
                 intent.putExtra(EvolucionMarcasActivity.EXTRA_ATLETA_ID, atletaSeleccionadoId);
             startActivity(intent);
+            return true;
+        }
+        if (item.getItemId() == R.id.action_export_pdf) {
+            List<MarcaPersonal> lista = adapter.getMarcas();
+            if (lista == null || lista.isEmpty()) {
+                Toast.makeText(this, "No hay marcas para exportar", Toast.LENGTH_SHORT).show();
+            } else {
+                String titulo = disciplinaSeleccionada != null ? disciplinaSeleccionada : "Todas las disciplinas";
+                PdfReportGenerator.exportarMarcas(this, lista, titulo);
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);

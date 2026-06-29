@@ -37,6 +37,8 @@ public class MarcasAdapter extends RecyclerView.Adapter<MarcasAdapter.ViewHolder
         notifyDataSetChanged();
     }
 
+    public List<MarcaPersonal> getMarcas() { return marcas; }
+
     public void setMostrarAtleta(boolean mostrar) { this.mostrarAtleta = mostrar; }
 
     public void setMostrarEliminar(boolean mostrar, OnEliminarListener listener) {

@@ -46,7 +46,7 @@
 | 34 | Sprints de desarrollo Scrum | 5.2 |
 | 35 | Pruebas unitarias (PU-01 a PU-21) | 5.4 |
 | 36 | Pruebas de integración (PI-01 a PI-16) | 5.4 |
-| 37 | Pruebas de aceptación (PA-01 a PA-16) | 5.4 |
+| 37 | Pruebas de aceptación (PA-01 a PA-20) | 5.4 |
 | 38 | Cobertura de pruebas por módulo | 5.4 |
 | 39 | Cobertura final de requisitos | 6.1 |
 
@@ -1380,6 +1380,7 @@ El proyecto se ejecutó en **8 sprints de 2 semanas** entre enero y junio de 202
 | S12 | Jun · Sem 4 | Corrección endpoint Agenda (grupos-agenda), filtro Activos/Inactivos en AtletasActivity con ChipGroup | Bugs críticos resueltos; lista de atletas filtrable |
 | S13 | Jun · Sem 4 | Notificaciones bidireccionales (atleta → entrenador en inscripción); persistencia de fotos con volumen Docker; rol PADRE diferenciado (banner, caché hijo en SessionManager) | PADRE ve datos del hijo; fotos persisten entre redespliegues |
 | S14 | Jun · Sem 4 | Fix email enumeration en forgot-password; mejora de correos (asunto, cuerpo, primer nombre); botón reenvío + pegar portapapeles en VerificarCorreoActivity; fix 500 en GET /sesiones (GlobalExceptionHandler + semana opcional) | Seguridad y UX de autenticación mejoradas; Agenda robusta |
+| S15 | Jun · Sem 4 | Exportación de reportes a PDF (PdfReportGenerator.java): asistencia por sesión, historial de atleta, marcas y estadísticas del club; FileProvider + menú en 4 activities | Los 4 módulos principales pueden generar y compartir reportes PDF desde el dispositivo |
 
 **Decisiones técnicas relevantes tomadas durante el desarrollo:**
 
@@ -1609,6 +1610,10 @@ Las pruebas fueron ejecutadas manualmente sobre dispositivo físico (Samsung Gal
 | PA-14 | HU-14 | Entrenador desactiva disciplina — deja de aparecer en selectores sin perder datos históricos | Aceptado |
 | PA-15 | HU-15 | Entrenador registra medición de atleta — IMC se actualiza en tiempo real al escribir peso y altura | Aceptado |
 | PA-16 | HU-15 | Atleta consulta su historial de condición física desde su perfil | Aceptado |
+| PA-17 | HU-06 | Entrenador exporta asistencia de sesión a PDF — archivo generado y abierto en visor | Aceptado |
+| PA-18 | HU-07 | Atleta exporta su historial de asistencia a PDF con resumen de porcentaje | Aceptado |
+| PA-19 | HU-09 | Atleta exporta sus marcas personales a PDF con columna de récord personal | Aceptado |
+| PA-20 | HU-10 | Entrenador exporta estadísticas del club a PDF con ranking de asistencia | Aceptado |
 
 #### Cobertura de Pruebas por Módulo
 
@@ -2222,6 +2227,31 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 - `SesionController.java`: `semana` pasa a ser `required = false`. Si no se manda, se usa `LocalDate.now()` como default, devolviendo las sesiones de la semana actual en lugar de error.
 
 **Resultado:** `GET /api/v1/sesiones` sin `?semana=` devuelve las sesiones de la semana actual (200). Cualquier parámetro obligatorio faltante en cualquier endpoint del sistema ahora devuelve 400 con mensaje claro en lugar de 500.
+
+---
+
+### Sesión 9.37 — Exportación de reportes a PDF (4 módulos)
+
+**Fecha:** 2026-06-28
+**Módulos impactados:** Asistencia, Historial de Asistencia, Marcas, Estadísticas.
+
+**Componentes creados:**
+- `utils/PdfReportGenerator.java`: clase utilitaria con 4 métodos estáticos, uno por tipo de reporte. Usa `android.graphics.pdf.PdfDocument` + `Canvas` (API nativa Android, sin dependencias externas). Cada método genera un archivo en `getExternalFilesDir(DIRECTORY_DOCUMENTS)`, obtiene un `Uri` vía `FileProvider` y dispara `Intent.ACTION_VIEW` para abrir el PDF con cualquier visor instalado.
+- `res/menu/menu_export.xml`: ítem de menú "Exportar PDF" reutilizado en 3 activities.
+- `res/xml/file_paths.xml`: se añadió `<external-files-path name="documents" path="Documents/" />` al FileProvider existente.
+
+**Adaptadores actualizados** (getter faltante añadido):
+- `AsistenciaAdapter.java` → `getAtletas()`
+- `HistorialAsistenciaAdapter.java` → `getAllItems()`
+- `MarcasAdapter.java` → `getMarcas()`
+
+**Activities actualizadas:**
+- `AsistenciaActivity`: menú "Exportar PDF" → reporte con lista de atletas, estado marcado, grupo, hora, lugar. Incluye resumen de presentes/ausentes/justificados.
+- `HistorialAsistenciaActivity`: menú "Exportar PDF" → historial completo del atleta (todas las sesiones), con conteos y porcentaje de asistencia.
+- `MarcasActivity`: opción añadida al menú existente (`menu_marcas.xml`) → exporta las marcas visibles según el filtro activo de disciplina.
+- `EstadisticasActivity`: menú "Exportar PDF" → reporte ejecutivo con totales del mes, promedio de asistencia y ranking completo de atletas.
+
+**Resultado:** Desde cada módulo se puede generar y compartir un PDF con una sola tap; el visor de PDF del dispositivo lo abre o puede compartirse vía WhatsApp/Drive. No se requieren permisos de almacenamiento (usa directorio privado de la app).
 
 ---
 

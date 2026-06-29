@@ -39,6 +39,8 @@ public class HistorialAsistenciaAdapter
         aplicarFiltro(filtroEstado);
     }
 
+    public List<AsistenciaHistorial> getAllItems() { return todosItems; }
+
     public void aplicarFiltro(String estado) {
         this.filtroEstado = estado;
         filteredItems.clear();

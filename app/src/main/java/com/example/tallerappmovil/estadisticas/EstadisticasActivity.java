@@ -3,10 +3,12 @@ package com.example.tallerappmovil.estadisticas;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -18,6 +20,7 @@ import com.example.tallerappmovil.api.ApiClient;
 import com.example.tallerappmovil.model.Competencia;
 import com.example.tallerappmovil.model.AtletaInfo;
 import com.example.tallerappmovil.model.ReporteAtleta;
+import com.example.tallerappmovil.utils.PdfReportGenerator;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,6 +53,13 @@ public class EstadisticasActivity extends AppCompatActivity {
     private RankingAsistenciaAdapter rankingAdapter;
 
     private int pendingCalls = 0;
+    private String mesDisplay = "";
+    private int exportTotalAtletas = 0;
+    private int exportProxCompetencias = 0;
+    private int exportPromedio = 0;
+    private int exportTotalPresentes = 0;
+    private int exportTotalAusentes = 0;
+    private List<ReporteAtleta> exportRanking = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +89,7 @@ public class EstadisticasActivity extends AppCompatActivity {
         recyclerRanking.setAdapter(rankingAdapter);
 
         Calendar cal = Calendar.getInstance();
-        String mesDisplay = new SimpleDateFormat("MMMM yyyy", new Locale("es", "ES"))
+        mesDisplay = new SimpleDateFormat("MMMM yyyy", new Locale("es", "ES"))
                 .format(cal.getTime());
         mesDisplay = Character.toUpperCase(mesDisplay.charAt(0)) + mesDisplay.substring(1);
         tvMesActual.setText(mesDisplay);
@@ -101,7 +111,8 @@ public class EstadisticasActivity extends AppCompatActivity {
                     public void onResponse(Call<List<AtletaInfo>> call,
                                            Response<List<AtletaInfo>> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            tvTotalAtletas.setText(String.valueOf(response.body().size()));
+                            exportTotalAtletas = response.body().size();
+                            tvTotalAtletas.setText(String.valueOf(exportTotalAtletas));
                         } else {
                             tvTotalAtletas.setText("--");
                         }
@@ -122,7 +133,8 @@ public class EstadisticasActivity extends AppCompatActivity {
                                            Response<List<Competencia>> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             List<Competencia> proximas = response.body();
-                            tvProxCompetencias.setText(String.valueOf(proximas.size()));
+                            exportProxCompetencias = proximas.size();
+                            tvProxCompetencias.setText(String.valueOf(exportProxCompetencias));
                             mostrarProximasCompetencias(proximas);
                         } else {
                             tvProxCompetencias.setText("0");
@@ -176,6 +188,10 @@ public class EstadisticasActivity extends AppCompatActivity {
                 ? (totalPresentes * 100f) / totalSesiones : 0f;
         int pctInt = Math.round(promedio);
 
+        exportPromedio       = pctInt;
+        exportTotalPresentes = totalPresentes;
+        exportTotalAusentes  = totalAusentes;
+
         tvPromedioAsistencia.setText(pctInt + "%");
 
         // Color según el promedio
@@ -203,6 +219,7 @@ public class EstadisticasActivity extends AppCompatActivity {
         // Mostrar top 10 en el ranking
         List<ReporteAtleta> top = ordenados.size() > 10
                 ? ordenados.subList(0, 10) : ordenados;
+        exportRanking = ordenados;
         rankingAdapter.setLista(top);
     }
 
@@ -269,8 +286,29 @@ public class EstadisticasActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_export, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) { finish(); return true; }
+        if (item.getItemId() == R.id.action_export_pdf) {
+            if (exportRanking == null) {
+                Toast.makeText(this, "Espera a que carguen los datos", Toast.LENGTH_SHORT).show();
+            } else {
+                PdfReportGenerator.exportarEstadisticas(this,
+                        mesDisplay,
+                        exportTotalAtletas,
+                        exportProxCompetencias,
+                        exportPromedio,
+                        exportTotalPresentes,
+                        exportTotalAusentes,
+                        exportRanking);
+            }
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 }

@@ -12,4 +12,9 @@
         android:id="@+id/action_evolucion"
         android:title="@string/lbl_evolucion_marcas"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_export_pdf"
+        android:title="Exportar PDF"
+        app:showAsAction="never" />
 </menu>
