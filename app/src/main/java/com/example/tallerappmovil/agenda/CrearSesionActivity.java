@@ -178,8 +178,7 @@ public class CrearSesionActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<List<GrupoEntrenamiento>> call, Throwable t) {
                 Toast.makeText(CrearSesionActivity.this,
-                        "Grupos/" + t.getClass().getSimpleName() + ": " + t.getMessage(),
-                        Toast.LENGTH_LONG).show();
+                        getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -263,8 +262,7 @@ public class CrearSesionActivity extends AppCompatActivity {
             public void onFailure(Call<Void> call, Throwable t) {
                 setLoading(false);
                 Toast.makeText(CrearSesionActivity.this,
-                        "Guardar/" + t.getClass().getSimpleName() + ": " + t.getMessage(),
-                        Toast.LENGTH_LONG).show();
+                        getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
             }
         };
 
@@ -319,8 +317,7 @@ public class CrearSesionActivity extends AppCompatActivity {
                     public void onFailure(Call<Void> call, Throwable t) {
                         setLoading(false);
                         Toast.makeText(CrearSesionActivity.this,
-                                "Cancelar/" + t.getClass().getSimpleName() + ": " + t.getMessage(),
-                                Toast.LENGTH_LONG).show();
+                                getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

@@ -176,13 +176,10 @@ public class AgendaActivity extends AppCompatActivity {
         String query = etBuscar.getText() != null ? etBuscar.getText().toString().trim() : "";
         Long grupoFiltro = soloMiGrupo ? miGrupoId : null;
         int visible = adapter.filtrar(query, estadoFiltro, grupoFiltro);
-        Toast.makeText(this, "Filtro: " + visible + " visibles / total=" + adapter.getTotalCount()
-                + " / estado=" + estadoFiltro, Toast.LENGTH_LONG).show();
-        recyclerSesiones.setVisibility(View.VISIBLE);
+        recyclerSesiones.setVisibility(visible > 0 ? View.VISIBLE : View.GONE);
         actualizarContador(visible);
         tvVacio.setVisibility(visible == 0 && adapter.getTotalCount() > 0
                 ? View.VISIBLE : View.GONE);
-        if (visible == 0) recyclerSesiones.setVisibility(View.GONE);
     }
 
     private void actualizarContador(int visible) {
@@ -222,16 +219,12 @@ public class AgendaActivity extends AppCompatActivity {
                                            Response<List<SesionEntrenamiento>> response) {
                         progressBar.setVisibility(View.GONE);
                         if (response.isSuccessful() && response.body() != null) {
-                            List<SesionEntrenamiento> lista = response.body();
-                            Toast.makeText(AgendaActivity.this,
-                                    "Lista OK: " + lista.size() + " sesiones (semana " + fechaApi + ")",
-                                    Toast.LENGTH_LONG).show();
-                            adapter.setSesiones(lista);
+                            adapter.setSesiones(response.body());
                             aplicarFiltros();
                         } else {
                             tvVacio.setVisibility(View.VISIBLE);
-                            String err = "HTTP " + response.code() + " body=" + (response.body() == null ? "null" : "ok");
-                            Toast.makeText(AgendaActivity.this, err, Toast.LENGTH_LONG).show();
+                            Toast.makeText(AgendaActivity.this,
+                                    getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
                         }
                     }
                     @Override
@@ -239,8 +232,7 @@ public class AgendaActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         tvVacio.setVisibility(View.VISIBLE);
                         Toast.makeText(AgendaActivity.this,
-                                "GET/" + t.getClass().getSimpleName() + ": " + t.getMessage(),
-                                Toast.LENGTH_LONG).show();
+                                getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

@@ -2231,6 +2231,40 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.42 — Fix: card de sesión invisible por color + limpieza de diagnósticos
+
+**Fecha:** 2026-06-29
+**Problema:** Tras confirmar que la API retornaba la sesión correctamente (`Lista OK: 1 sesiones`) y el filtro la procesaba (`Filtro: 1 visibles / total=1`), la sesión seguía sin verse en pantalla.
+
+**Diagnóstico progresivo:**
+1. Toast en `cargarSesiones().onResponse` → confirmó que la lista llegaba con 1 sesión.
+2. Toast en `aplicarFiltros()` → confirmó que el filtro encontraba 1 visible.
+3. Toast en `SesionAdapter.onBindViewHolder` → **confirmó que el adapter SÍ vinculaba el item** (`BIND pos=0 lugar=... estado=PROGRAMADA`).
+4. `h.itemView.setBackgroundColor(Color.RED)` en onBindViewHolder → **el bloque rojo apareció en pantalla**, descartando cualquier problema de layout o medición.
+
+**Causa raíz — contraste insuficiente:** El color de fondo del card (`colorSurface = #162232`) era prácticamente idéntico al fondo de la activity (`colorBackground = #0D1B2A`). Diferencia de luminancia < 1.3:1, imperceptible en pantalla. El borde (`colorBorder = #2A3D55`) tampoco tenía contraste suficiente para delimitar el card.
+
+**Fix — `bg_card_sesion.xml`:**
+```xml
+<!-- ANTES -->
+<solid android:color="@color/colorSurface" />   <!-- #162232 ≈ fondo -->
+<stroke android:width="1dp" android:color="@color/colorBorder" />  <!-- #2A3D55 -->
+
+<!-- DESPUÉS -->
+<solid android:color="@color/colorSurfaceVariant" />  <!-- #1E2E42, más claro -->
+<stroke android:width="1dp" android:color="@color/colorPrimary" /> <!-- #00BFA5 teal -->
+```
+El borde teal y el fondo `colorSurfaceVariant` dan contraste claro contra `colorBackground`.
+
+**Limpieza de código diagnóstico:**
+- `AgendaActivity.java`: eliminados toasts de diagnóstico de `cargarSesiones()` y `aplicarFiltros()`. Error en `onFailure`/`onResponse` error → `getString(R.string.err_conexion)`.
+- `SesionAdapter.java`: eliminado `setBackgroundColor(RED)`.
+- `CrearSesionActivity.java`: mensajes `onFailure` de diagnóstico (`"Grupos/..."`, `"Guardar/..."`, `"Cancelar/..."`) reemplazados por `getString(R.string.err_conexion)`.
+
+**Resultado:** Las sesiones creadas son visibles en el módulo Agenda con el card teal bien delimitado contra el fondo navy oscuro.
+
+---
+
 ### Sesión 9.41 — Fix: sesión no aparece en Agenda y edición no se refleja
 
 **Fecha:** 2026-06-29
