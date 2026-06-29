@@ -167,6 +167,11 @@ public class CrearSesionActivity extends AppCompatActivity {
                     }
                     spinnerGrupo.setOnItemClickListener((parent, view, position, id) ->
                             grupoIdSeleccionado = grupos.get(position).getId());
+                } else {
+                    String msg = extractErrorMessage(response);
+                    Toast.makeText(CrearSesionActivity.this,
+                            msg != null ? msg : "Error " + response.code() + " al cargar grupos",
+                            Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -248,7 +253,7 @@ public class CrearSesionActivity extends AppCompatActivity {
                 } else {
                     String msg = extractErrorMessage(response);
                     Toast.makeText(CrearSesionActivity.this,
-                            msg != null ? msg : getString(R.string.err_conexion),
+                            msg != null ? msg : "Error " + response.code() + " al guardar sesión",
                             Toast.LENGTH_LONG).show();
                 }
             }

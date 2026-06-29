@@ -4,6 +4,7 @@ import com.club.atletismo.auth.CuentaBloqueadaException;
 import com.club.atletismo.auth.CorreoNoVerificadoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
@@ -35,6 +36,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleCorreoNoVerificado(CorreoNoVerificadoException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error("No tienes permiso para realizar esta acción"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

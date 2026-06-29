@@ -1381,6 +1381,7 @@ El proyecto se ejecutó en **8 sprints de 2 semanas** entre enero y junio de 202
 | S13 | Jun · Sem 4 | Notificaciones bidireccionales (atleta → entrenador en inscripción); persistencia de fotos con volumen Docker; rol PADRE diferenciado (banner, caché hijo en SessionManager) | PADRE ve datos del hijo; fotos persisten entre redespliegues |
 | S14 | Jun · Sem 4 | Fix email enumeration en forgot-password; mejora de correos (asunto, cuerpo, primer nombre); botón reenvío + pegar portapapeles en VerificarCorreoActivity; fix 500 en GET /sesiones (GlobalExceptionHandler + semana opcional) | Seguridad y UX de autenticación mejoradas; Agenda robusta |
 | S15 | Jun · Sem 4 | Exportación de reportes a PDF (PdfReportGenerator.java): asistencia por sesión, historial de atleta, marcas y estadísticas del club; FileProvider + menú en 4 activities | Los 4 módulos principales pueden generar y compartir reportes PDF desde el dispositivo |
+| S16 | Jun · Sem 4 | Fix "Error de conexión" al crear sesión: JwtAuthFilter sin try-catch + GlobalExceptionHandler sin AccessDeniedException; diagnóstico mejorado en CrearSesionActivity | Sesiones se crean correctamente; errores 403 y token inválido muestran mensajes claros |
 
 **Decisiones técnicas relevantes tomadas durante el desarrollo:**
 
@@ -2227,6 +2228,46 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 - `SesionController.java`: `semana` pasa a ser `required = false`. Si no se manda, se usa `LocalDate.now()` como default, devolviendo las sesiones de la semana actual en lugar de error.
 
 **Resultado:** `GET /api/v1/sesiones` sin `?semana=` devuelve las sesiones de la semana actual (200). Cualquier parámetro obligatorio faltante en cualquier endpoint del sistema ahora devuelve 400 con mensaje claro en lugar de 500.
+
+---
+
+### Sesión 9.38 — Fix: "Error de conexión" al crear sesión (2 causas backend)
+
+**Fecha:** 2026-06-28
+**Problema:** Al intentar crear una sesión en Agenda, el usuario veía "Error de conexión. Verifique su internet." a pesar de tener conectividad. La causa raíz son dos bugs en el backend que provocan respuestas HTTP sin campo `"message"`, haciendo que `extractErrorMessage()` devuelva null y Android caiga al string genérico `err_conexion`.
+
+**Causa 1 — `JwtAuthFilter.java` línea sin try-catch:**
+`jwtService.extractUsername(token)` lanza `ExpiredJwtException` / `JwtException` si el token está expirado o tiene firma inválida. Al no estar envuelta en try-catch, la excepción escapa del filtro, se salta el `chain.doFilter`, y Spring Boot devuelve 500 con cuerpo `{"status":500,"error":"Internal Server Error","path":"..."}` (sin campo `"message"`). El interceptor OkHttp solo redirige al login en 401, no en 500; por eso el usuario ve "err_conexion" sin ser redirigido.
+
+**Fix 1:** `JwtAuthFilter.java` — envolver `extractUsername` en try-catch:
+```java
+String username;
+try {
+    username = jwtService.extractUsername(token);
+} catch (Exception e) {
+    chain.doFilter(request, response);
+    return;
+}
+```
+Token inválido → continúa sin autenticación → Spring Security devuelve 401 → `handleUnauthorized()` redirige al login con "Tu sesión expiró".
+
+**Causa 2 — `GlobalExceptionHandler` no maneja `AccessDeniedException`:**
+Cuando `@PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")` falla, Spring Security lanza `AccessDeniedException`. Al no existir handler en `@RestControllerAdvice`, el `ExceptionTranslationFilter` de Spring Security maneja el 403 con su formato por defecto: `{"timestamp":"...","status":403,"error":"Forbidden","path":"..."}` — sin campo `"message"` — causando el mismo síntoma.
+
+**Fix 2:** `GlobalExceptionHandler.java` — añadir handler:
+```java
+@ExceptionHandler(AccessDeniedException.class)
+public ResponseEntity<ApiResponse<Void>> handleAccessDenied() {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(ApiResponse.error("No tienes permiso para realizar esta acción"));
+}
+```
+
+**Cambio Android diagnóstico:** `CrearSesionActivity.java`:
+- `cargarGrupos().onResponse` else: ahora muestra "Error {código} al cargar grupos" con el código HTTP real.
+- `guardar().onResponse` else: cuando `extractErrorMessage` devuelve null, muestra "Error {código} al guardar sesión" en vez de "err_conexion" genérico.
+
+**Resultado:** Token expirado → 401 → redirect automático a login (no "err_conexion"). Sin permiso → 403 → "No tienes permiso para realizar esta acción" (en vez de "err_conexion"). Cualquier otro error HTTP muestra el código numérico, facilitando diagnóstico.
 
 ---
 
