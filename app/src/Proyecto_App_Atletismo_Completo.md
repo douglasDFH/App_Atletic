@@ -2231,6 +2231,33 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.40 — Fix definitivo: MalformedJsonException al crear/editar sesión
+
+**Fecha:** 2026-06-29
+**Problema identificado:** Tras instalar la APK de Sesión 9.39, el toast reveló `Guardar/MalformedJsonException: Use JsonReader.setLenient(true)`. Esto significa que el backend SÍ respondió con 2xx y el cuerpo JSON llegó, pero Gson (modo estricto) rechazó el cuerpo — posiblemente por contenido extra inyectado por el reverse proxy Coolify/Traefik (BOM, HTML de error, o texto adicional después del JSON).
+
+**Causa raíz:** `AgendaApiService` declaraba `Call<SesionEntrenamiento>` para `crear` y `editar`. Retrofit entregó la respuesta a Gson para parsear, y Gson lanzó `MalformedJsonException` porque el cuerpo no era JSON estricto puro, enviando el control a `onFailure` en lugar de `onResponse`.
+
+**Fix — `AgendaApiService.java`:**
+```java
+// ANTES
+Call<SesionEntrenamiento> crear(@Body SesionCreateRequest request);
+Call<SesionEntrenamiento> editar(...);
+Call<SesionEntrenamiento> cancelar(...);
+
+// DESPUÉS
+Call<Void> crear(@Body SesionCreateRequest request);
+Call<Void> editar(...);
+Call<Void> cancelar(...);
+```
+Con `Call<Void>`, Retrofit descarta el cuerpo de respuesta sin intentar parsearlo. El `onResponse` sigue recibiendo el código HTTP correcto, `response.isSuccessful()` devuelve `true` en 2xx, y `response.errorBody()` sigue disponible para errores 4xx/5xx. La sesión SÍ se crea en la BD; el cuerpo de respuesta nunca era necesario en la UI (solo se llama `finish()`).
+
+**`CrearSesionActivity.java`:** Callbacks actualizados a `Callback<Void>`.
+
+**Resultado:** Crear y editar sesión funcionan correctamente. No se usa la respuesta del servidor más allá del código HTTP.
+
+---
+
 ### Sesión 9.39 — Diagnóstico "Error de conexión" al crear sesión: timeouts y excepción real
 
 **Fecha:** 2026-06-29

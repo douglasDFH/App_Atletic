@@ -26,13 +26,13 @@ public interface AgendaApiService {
                                                    @Query("grupoId") Long grupoId);
 
     @POST("sesiones")
-    Call<SesionEntrenamiento> crear(@Body SesionCreateRequest request);
+    Call<Void> crear(@Body SesionCreateRequest request);
 
     @PUT("sesiones/{id}")
-    Call<SesionEntrenamiento> editar(@Path("id") Long id, @Body SesionCreateRequest request);
+    Call<Void> editar(@Path("id") Long id, @Body SesionCreateRequest request);
 
     @PUT("sesiones/{id}/cancelar")
-    Call<SesionEntrenamiento> cancelar(@Path("id") Long id, @Body Map<String, String> body);
+    Call<Void> cancelar(@Path("id") Long id, @Body Map<String, String> body);
 
     @DELETE("sesiones/{id}")
     Call<Void> eliminar(@Path("id") Long id);

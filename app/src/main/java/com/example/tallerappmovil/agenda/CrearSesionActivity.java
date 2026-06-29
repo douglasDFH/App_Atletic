@@ -239,10 +239,9 @@ public class CrearSesionActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        Callback<SesionEntrenamiento> callback = new Callback<SesionEntrenamiento>() {
+        Callback<Void> callback = new Callback<Void>() {
             @Override
-            public void onResponse(Call<SesionEntrenamiento> call,
-                                   Response<SesionEntrenamiento> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
                 setLoading(false);
                 if (response.isSuccessful()) {
                     Toast.makeText(CrearSesionActivity.this,
@@ -260,7 +259,7 @@ public class CrearSesionActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<SesionEntrenamiento> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
                 setLoading(false);
                 Toast.makeText(CrearSesionActivity.this,
                         "Guardar/" + t.getClass().getSimpleName() + ": " + t.getMessage(),
@@ -306,10 +305,9 @@ public class CrearSesionActivity extends AppCompatActivity {
         Map<String, String> body = new HashMap<>();
         body.put("motivo", motivo);
         ApiClient.getAgendaService().cancelar(sesionId, body)
-                .enqueue(new Callback<SesionEntrenamiento>() {
+                .enqueue(new Callback<Void>() {
                     @Override
-                    public void onResponse(Call<SesionEntrenamiento> call,
-                                           Response<SesionEntrenamiento> response) {
+                    public void onResponse(Call<Void> call, Response<Void> response) {
                         setLoading(false);
                         Toast.makeText(CrearSesionActivity.this,
                                 getString(R.string.msg_sesion_cancelada), Toast.LENGTH_SHORT).show();
@@ -317,10 +315,11 @@ public class CrearSesionActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Call<SesionEntrenamiento> call, Throwable t) {
+                    public void onFailure(Call<Void> call, Throwable t) {
                         setLoading(false);
                         Toast.makeText(CrearSesionActivity.this,
-                                getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                                "Cancelar/" + t.getClass().getSimpleName() + ": " + t.getMessage(),
+                                Toast.LENGTH_LONG).show();
                     }
                 });
     }
