@@ -2231,6 +2231,33 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.39 — Diagnóstico "Error de conexión" al crear sesión: timeouts y excepción real
+
+**Fecha:** 2026-06-29
+**Problema persistente:** Después de los fixes de Sesión 9.38 (JwtAuthFilter + GlobalExceptionHandler), el usuario instaló la nueva APK y el error "Error de conexión. Verifique su internet." seguía apareciendo. Dado que venía de `onFailure` (no de `onResponse`), las causas posibles son: (a) `SocketTimeoutException` por backend lento (por defecto OkHttp = 10s), (b) `IOException` de red real, (c) `JsonSyntaxException` si el JSON 2xx no matchea el modelo.
+
+**Hipótesis principal — timeout:** `SesionService.crear()` es `@Transactional` y llama a `notificarGrupo()` sincrónicamente para cada atleta del grupo (guarda `Notificacion` en BD × N atletas). Con el timeout por defecto de 10 s y varios atletas, la petición puede superar ese límite → `SocketTimeoutException` → `onFailure`.
+
+**Fix 1 — Timeouts explícitos en `ApiClient.java`:**
+```java
+OkHttpClient client = new OkHttpClient.Builder()
+    .connectTimeout(30, TimeUnit.SECONDS)
+    .readTimeout(30, TimeUnit.SECONDS)
+    .writeTimeout(30, TimeUnit.SECONDS)
+    ...
+```
+
+**Fix 2 — `CrearSesionActivity.java` — excepción real en `onFailure`:**
+En lugar del string genérico `err_conexion`, ambos callbacks ahora muestran la clase y mensaje de la excepción real:
+- `cargarGrupos().onFailure` → `"Grupos/SocketTimeoutException: timeout"` (o la excepción real)
+- `guardar().onFailure` → `"Guardar/SocketTimeoutException: timeout"` (o la excepción real)
+
+Esto permite diagnosticar la causa exacta al instalar la próxima APK.
+
+**Nota:** Los fixes de backend de Sesión 9.38 requieren redeploy en Coolify para tener efecto. Solo se instaló la APK, no se redeployó el backend.
+
+---
+
 ### Sesión 9.38 — Fix: "Error de conexión" al crear sesión (2 causas backend)
 
 **Fecha:** 2026-06-28

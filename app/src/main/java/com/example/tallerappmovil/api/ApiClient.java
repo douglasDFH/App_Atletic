@@ -6,6 +6,8 @@ import com.example.tallerappmovil.AtletismoApp;
 import com.example.tallerappmovil.auth.LoginActivity;
 import com.example.tallerappmovil.session.SessionManager;
 
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -48,6 +50,9 @@ public class ApiClient {
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(30, TimeUnit.SECONDS)
                     .addInterceptor(logging)
                     .addInterceptor(chain -> {
                         Request original = chain.request();
