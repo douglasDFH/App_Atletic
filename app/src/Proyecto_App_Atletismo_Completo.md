@@ -2231,6 +2231,27 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.44 — Cambio de ícono de la app (logo.png)
+
+**Fecha:** 2026-06-30
+**Motivo:** Reemplazar el ícono por defecto de Android Studio por el logo real del club de atletismo.
+
+**Archivos creados/modificados:**
+
+- **`drawable/ic_launcher_logo.png`** (432×432 px): logo centrado en zona segura (288×245 px de 288px safe zone) sobre fondo transparente. Usado como foreground del ícono adaptativo (API ≥ 26).
+- **`drawable/ic_launcher_background.xml`**: color cambiado de `#6200EE` (púrpura por defecto) a `#0D1B2A` (dark navy de la app).
+- **`mipmap-anydpi-v26/ic_launcher.xml`** y **`ic_launcher_round.xml`**: foreground actualizado a `@drawable/ic_launcher_logo`.
+- **Mipmap PNGs** generados en 5 densidades (logo centrado sobre fondo `#0D1B2A`):
+  - `mipmap-mdpi/ic_launcher.png` — 48×48 px
+  - `mipmap-hdpi/ic_launcher.png` — 72×72 px
+  - `mipmap-xhdpi/ic_launcher.png` — 96×96 px
+  - `mipmap-xxhdpi/ic_launcher.png` — 144×144 px
+  - `mipmap-xxxhdpi/ic_launcher.png` — 192×192 px
+
+**Resultado:** Al instalar la APK, el ícono del launcher muestra el logo del club sobre fondo navy en todos los dispositivos (API 21+). En API ≥ 26 usa ícono adaptativo que respeta la forma del launcher del sistema (circular, cuadrado redondeado, etc.).
+
+---
+
 ### Sesión 9.43 — Refactor: eliminar background explícito de todos los layouts + limpiar import no usado
 
 **Fecha:** 2026-06-29
