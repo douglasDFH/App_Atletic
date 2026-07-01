@@ -2231,6 +2231,20 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.53 — Fix root cause REAL: sesión responde 201 pero NO persiste (notificación revierte la transacción)
+
+**Fecha:** 2026-07-01
+**Diagnóstico (medido, no teórico):** Se instrumentó la app para que, tras crear una sesión, re-consultara al servidor la semana de esa sesión y mostrara el resultado crudo. Resultado: `VERIFICA sem 2026-07-01: 0 ses.` — inmediatamente después de recibir 201 "creada", el servidor devolvía **cero** sesiones para esa semana. La sesión NO se persistía pese al 201.
+
+**Causa raíz:** En `SesionService.crear` (`@Transactional`), tras `save(sesión)` se llama a `notificarGrupo` → `NotificacionService.crear` (también `@Transactional`, `PROPAGATION_REQUIRED` → misma transacción física) → `fcmService.sendToToken`. Si el envío FCM o el guardado de notificación falla, la transacción compartida queda marcada **rollback-only**, y al hacer commit se revierte **TODO, incluida la sesión ya insertada**. El cliente igual podía recibir 2xx en ciertos flujos, dejando el síntoma "creada pero no aparece".
+
+**Fix:**
+- `NotificacionService.crear`: cambiado a `@Transactional(propagation = REQUIRES_NEW)` — cada notificación corre en su propia transacción aislada; su fallo ya no contamina ni revierte la transacción de la sesión. Además el envío FCM se envolvió en try/catch con `log.warn`.
+- `SesionService.crear`: usa `saveAndFlush` para forzar el INSERT y confirmar el id; `notificarGrupo` envuelto en try/catch (las notificaciones son secundarias y nunca deben revertir la sesión); logging explícito (`log.info` id persistido, `log.error` si falla la notificación) para verificar en logs de Coolify.
+- Diagnósticos temporales en la app (toast VERIFICA / GUARDADA / lista de fechas por semana) usados para aislar backend vs. app; se retirarán una vez confirmado el fix.
+
+---
+
 ### Sesión 9.52 — Fix root cause: tarjetas invisibles por estado de chips restaurado + item_sesion robusto
 
 **Fecha:** 2026-07-01

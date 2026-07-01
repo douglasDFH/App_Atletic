@@ -9,6 +9,7 @@ import com.club.atletismo.usuario.Rol;
 import com.club.atletismo.usuario.Usuario;
 import com.club.atletismo.usuario.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class SesionService {
 
@@ -47,6 +49,8 @@ public class SesionService {
                 .orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado"));
         LocalDateTime horaInicio = LocalDateTime.parse(req.getHoraInicio(), DT);
         LocalDateTime horaFin    = LocalDateTime.parse(req.getHoraFin(), DT);
+        log.info("crear() grupo={} horaInicio={} horaFin={} lugar={}",
+                req.getGrupoId(), horaInicio, horaFin, req.getLugar());
         if (sesionRepository.countConflictos(req.getGrupoId(), horaInicio, horaFin, -1L) > 0) {
             throw new IllegalArgumentException(
                     "Ya existe una sesión programada para este grupo en ese horario");
@@ -59,12 +63,22 @@ public class SesionService {
                 .descripcion(req.getDescripcion())
                 .estado(EstadoSesion.PROGRAMADA)
                 .build();
-        SesionResponse resp = toResponse(sesionRepository.save(s));
-        notificarGrupo(g.getId(), "SESION",
-                "Nueva sesión programada",
-                "Sesión el " + s.getHoraInicio().format(DATE) + " a las " +
-                s.getHoraInicio().format(DateTimeFormatter.ofPattern("HH:mm")) +
-                " en " + s.getLugar());
+        // saveAndFlush fuerza el INSERT dentro de la transacción y confirma el id.
+        SesionEntrenamiento guardada = sesionRepository.saveAndFlush(s);
+        log.info("crear() sesión persistida id={} horaInicio={}",
+                guardada.getId(), guardada.getHoraInicio());
+        SesionResponse resp = toResponse(guardada);
+        // Las notificaciones son secundarias: NUNCA deben revertir la sesión ya guardada.
+        try {
+            notificarGrupo(g.getId(), "SESION",
+                    "Nueva sesión programada",
+                    "Sesión el " + s.getHoraInicio().format(DATE) + " a las " +
+                    s.getHoraInicio().format(DateTimeFormatter.ofPattern("HH:mm")) +
+                    " en " + s.getLugar());
+        } catch (Exception e) {
+            log.error("crear() falló la notificación (sesión id={} SÍ guardada): {}",
+                    guardada.getId(), e.toString(), e);
+        }
         return resp;
     }
 

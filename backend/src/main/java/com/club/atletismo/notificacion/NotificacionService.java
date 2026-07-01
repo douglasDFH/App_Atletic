@@ -5,7 +5,9 @@ import com.club.atletismo.usuario.Usuario;
 import com.club.atletismo.usuario.UsuarioRepository;
 import com.club.atletismo.usuario.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class NotificacionService {
 
@@ -48,7 +51,10 @@ public class NotificacionService {
         usuarioRepository.findAll().forEach(u -> crear(u, tipo, titulo, mensaje));
     }
 
-    @Transactional
+    // REQUIRES_NEW: cada notificación corre en su PROPIA transacción. Así, si el
+    // guardado de la notificación o el envío FCM falla, NO contamina ni revierte la
+    // transacción de quien la invoca (p. ej. la creación de una sesión).
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void crear(Usuario usuario, String tipo, String titulo, String mensaje) {
         Notificacion n = Notificacion.builder()
                 .usuario(usuario)
@@ -58,9 +64,14 @@ public class NotificacionService {
                 .build();
         notificacionRepository.save(n);
         // Solo envía push FCM si el usuario tiene habilitado ese tipo de notificación.
-        // null = no configurado → activo por defecto.
+        // null = no configurado → activo por defecto. Un fallo de FCM no debe tumbar
+        // la notificación ya guardada.
         if (debeRecibirPush(usuario, tipo)) {
-            fcmService.sendToToken(usuario.getFcmToken(), titulo, mensaje);
+            try {
+                fcmService.sendToToken(usuario.getFcmToken(), titulo, mensaje);
+            } catch (Exception e) {
+                log.warn("Envío FCM falló para usuario {}: {}", usuario.getId(), e.toString());
+            }
         }
     }
 
