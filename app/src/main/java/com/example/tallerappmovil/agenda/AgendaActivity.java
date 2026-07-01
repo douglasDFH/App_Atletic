@@ -232,10 +232,20 @@ public class AgendaActivity extends AppCompatActivity {
                                            Response<List<SesionEntrenamiento>> response) {
                         progressBar.setVisibility(View.GONE);
                         if (response.isSuccessful() && response.body() != null) {
-                            int count = response.body().size();
+                            List<SesionEntrenamiento> body = response.body();
+                            int count = body.size();
                             Log.d("AgendaActivity", "cargarSesiones semana=" + fechaApi
                                     + " → " + count + " sesiones");
-                            adapter.setSesiones(response.body());
+                            // Diagnóstico visible: qué fechas devolvió el servidor para esta semana
+                            StringBuilder diag = new StringBuilder("Semana " + fechaApi
+                                    + ": " + count + " sesión(es)");
+                            for (SesionEntrenamiento se : body) {
+                                diag.append("\n• ").append(se.getHoraInicio())
+                                    .append(" [").append(se.getEstado()).append("]");
+                            }
+                            Toast.makeText(AgendaActivity.this, diag.toString(),
+                                    Toast.LENGTH_LONG).show();
+                            adapter.setSesiones(body);
                             aplicarFiltros();
                         } else {
                             Log.e("AgendaActivity", "cargarSesiones HTTP " + response.code()
