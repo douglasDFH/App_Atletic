@@ -90,8 +90,11 @@ public class SesionAdapter extends RecyclerView.Adapter<SesionAdapter.ViewHolder
         SesionEntrenamiento s = sesiones.get(position);
 
         try {
-            Date inicio = ISO_FORMAT.parse(s.getHoraInicio());
-            Date fin    = ISO_FORMAT.parse(s.getHoraFin());
+            String rawInicio = s.getHoraInicio();
+            String rawFin    = s.getHoraFin();
+            if (rawInicio == null || rawFin == null) throw new ParseException("null field", 0);
+            Date inicio = ISO_FORMAT.parse(rawInicio);
+            Date fin    = ISO_FORMAT.parse(rawFin);
             if (inicio != null && fin != null) {
                 h.tvDiaSemana.setText(DIA_SEMANA.format(inicio).toUpperCase(Locale.getDefault()));
                 h.tvDiaNumero.setText(DIA_NUM.format(inicio));
@@ -99,7 +102,7 @@ public class SesionAdapter extends RecyclerView.Adapter<SesionAdapter.ViewHolder
                 h.tvHorario.setText(HORA.format(inicio) + " - " + HORA.format(fin));
             }
         } catch (ParseException e) {
-            h.tvHorario.setText(s.getHoraInicio());
+            h.tvHorario.setText(s.getHoraInicio() != null ? s.getHoraInicio() : "");
         }
 
         h.tvLugar.setText("📍 " + s.getLugar());

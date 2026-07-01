@@ -2231,6 +2231,32 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.45 — Fix: NullPointerException en SesionAdapter cuando horaFin es null
+
+**Fecha:** 2026-07-01
+**Bug:** `SesionAdapter.onBindViewHolder()` llamaba `ISO_FORMAT.parse(s.getHoraFin())` sin comprobar null. `SimpleDateFormat.parse(null)` lanza `NullPointerException`, que el bloque `catch (ParseException e)` **no atrapa**. Si el backend retorna una sesión con `horaFin` nulo (dato inconsistente), esto crasheaba `AgendaActivity` por completo, impidiendo llegar al FAB de crear sesión o a cualquier tarjeta para editar.
+
+**Fix — `SesionAdapter.java`:**
+```java
+// ANTES — NullPointerException no capturado
+Date inicio = ISO_FORMAT.parse(s.getHoraInicio());
+Date fin    = ISO_FORMAT.parse(s.getHoraFin());
+
+// DESPUÉS — null comprobado antes de parsear
+String rawInicio = s.getHoraInicio();
+String rawFin    = s.getHoraFin();
+if (rawInicio == null || rawFin == null) throw new ParseException("null field", 0);
+Date inicio = ISO_FORMAT.parse(rawInicio);
+Date fin    = ISO_FORMAT.parse(rawFin);
+```
+El fallback del `catch` también se protegió: `h.tvHorario.setText(s.getHoraInicio() != null ? s.getHoraInicio() : "")`.
+
+**Diagnóstico general de la sesión:** Se auditó el módulo Agenda completo (`CrearSesionActivity`, `AgendaActivity`, `SesionDetalleActivity`, `SesionAdapter`, `AgendaApiService`, `ApiClient`, layouts, strings, Manifest). Los commits anteriores (ícono + eliminación de backgrounds) **no introdujeron ningún bug funcional** — son puramente recursos/cosmético. El error recurrente de "Error de conexión" al crear sesión sigue siendo de origen backend (servidor Coolify debe estar en ejecución y con el último deploy).
+
+**Resultado:** El adapter ya no crashea si el backend retorna `horaFin` null. `AgendaActivity` permanece estable y el flujo crear/editar sesión queda accesible.
+
+---
+
 ### Sesión 9.44 — Cambio de ícono de la app (logo.png)
 
 **Fecha:** 2026-06-30
