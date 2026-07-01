@@ -2231,6 +2231,22 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.48 — Fix: tvVacio nunca aparecía + toast diagnóstico cargarSesiones + warning spinnerGrupo
+
+**Fecha:** 2026-07-01
+**Bugs:**
+1. `tvVacio` ("Sin entrenamientos esta semana") nunca se mostraba cuando el backend devolvía lista vacía. La condición anterior era `visible == 0 && getTotalCount() > 0` — pero con 0 sesiones devueltas, `getTotalCount() = 0` también, haciendo la condición siempre `false` → área completamente en blanco sin indicación al usuario.
+2. `AgendaActivity.cargarSesiones().onResponse` no mostraba al usuario cuántas sesiones devolvía el backend, imposibilitando diagnóstico sin Android Studio.
+3. `spinnerGrupo` (`AutoCompleteTextView`) sin `android:contentDescription` generaba warning de accesibilidad: "No speakable text present".
+
+**Fixes:**
+- `AgendaActivity.java`: `aplicarFiltros()` → condición de `tvVacio` simplificada a `visible == 0` (visible sin datos Y visible con filtro aplicado). Toast en `onResponse` muestra "Semana YYYY-MM-DD: X sesión(es)" → el usuario confirma sin Logcat si el servidor retorna sesiones.
+- `activity_crear_sesion.xml`: `spinnerGrupo` con `android:contentDescription="@string/hint_grupo"` para eliminar el warning.
+
+**Resultado:** El usuario ahora ve "Sin entrenamientos esta semana" cuando la semana está vacía, y puede confirmar el count de sesiones cargadas mediante el toast.
+
+---
+
 ### Sesión 9.47 — Fix: sesiones creadas/editadas no aparecen en Agenda
 
 **Fecha:** 2026-07-01

@@ -184,8 +184,8 @@ public class AgendaActivity extends AppCompatActivity {
         int visible = adapter.filtrar(query, estadoFiltro, grupoFiltro);
         recyclerSesiones.setVisibility(visible > 0 ? View.VISIBLE : View.GONE);
         actualizarContador(visible);
-        tvVacio.setVisibility(visible == 0 && adapter.getTotalCount() > 0
-                ? View.VISIBLE : View.GONE);
+        // Mostrar tvVacio si no hay nada visible (ya sea sin datos o por filtro)
+        tvVacio.setVisibility(visible == 0 ? View.VISIBLE : View.GONE);
     }
 
     private void actualizarContador(int visible) {
@@ -228,6 +228,9 @@ public class AgendaActivity extends AppCompatActivity {
                             int count = response.body().size();
                             Log.d("AgendaActivity", "cargarSesiones semana=" + fechaApi
                                     + " → " + count + " sesiones");
+                            Toast.makeText(AgendaActivity.this,
+                                    "Semana " + fechaApi + ": " + count + " sesión(es)",
+                                    Toast.LENGTH_SHORT).show();
                             adapter.setSesiones(response.body());
                             aplicarFiltros();
                         } else {
@@ -245,7 +248,7 @@ public class AgendaActivity extends AppCompatActivity {
                         Log.e("AgendaActivity", "cargarSesiones onFailure semana=" + fechaApi
                                 + " → " + t.getClass().getSimpleName(), t);
                         Toast.makeText(AgendaActivity.this,
-                                getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                                "Error carga: " + t.getClass().getSimpleName(), Toast.LENGTH_LONG).show();
                     }
                 });
     }
