@@ -260,8 +260,11 @@ public class AgendaActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        BottomNavigationView nav = findViewById(R.id.bottomNav);
-        nav.setSelectedItemId(R.id.nav_agenda);
+        // Resetear filtros para que sesiones siempre sean visibles al volver a Agenda
+        estadoFiltro = null;
+        soloMiGrupo  = false;
+        if (etBuscar != null) etBuscar.setText("");
+        chipGroupEstado.check(R.id.chipTodos);
         cargarSesiones();
     }
 

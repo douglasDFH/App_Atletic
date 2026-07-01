@@ -2231,6 +2231,23 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.52 — Fix root cause: tarjetas invisibles por estado de chips restaurado + item_sesion robusto
+
+**Fecha:** 2026-07-01
+**Bug raíz confirmado:** Android guarda y restaura automáticamente el estado de vistas con ID entre sesiones (`onSaveInstanceState`). Si el usuario tenía chipActivas o chipFinalizadas seleccionado al cerrar la app, al volver se restauraba ese chip → `estadoFiltro = "ACTIVA"/"FINALIZADA"` → `filtrar()` retornaba 0 sesiones ACTIVA/FINALIZADA en la semana (cuando las sesiones existentes son PROGRAMADA) → RecyclerView se ponía GONE → tarjetas completamente invisibles pese a que el adapter tenía datos.
+
+**Fix:**
+- `AgendaActivity.java` — `onResume()`: reinicia siempre a estado neutro antes de cargar:
+  ```
+  estadoFiltro = null; soloMiGrupo = false;
+  etBuscar.setText(""); chipGroupEstado.check(R.id.chipTodos);
+  cargarSesiones();
+  ```
+  Así, sin importar qué chip estaba activo, la primera carga siempre muestra todas las sesiones de la semana.
+- `item_sesion.xml`: reescrito con `LinearLayout` puro (eliminado MaterialCardView y ConstraintLayout que causaban problemas de medición de altura). Root con `minHeight="72dp"` + `elevation="3dp"`. `panelDia` con `layout_height="match_parent"` y `minHeight="72dp"` garantiza que el panel teal siempre tenga altura mínima visible. Sin dependencias circulares de layout.
+
+---
+
 ### Sesión 9.51 — Fix: sesión nueva se crea en semana incorrecta + limpieza diagnósticos
 
 **Fecha:** 2026-07-01
