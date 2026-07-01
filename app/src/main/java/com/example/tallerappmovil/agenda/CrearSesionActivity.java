@@ -256,11 +256,10 @@ public class CrearSesionActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 setLoading(false);
                 if (response.isSuccessful()) {
+                    // Diagnóstico: mostrar la fecha/hora EXACTA que se guardó
                     Toast.makeText(CrearSesionActivity.this,
-                            sesionId == null
-                                    ? getString(R.string.msg_sesion_creada)
-                                    : getString(R.string.msg_sesion_actualizada),
-                            Toast.LENGTH_SHORT).show();
+                            (sesionId == null ? "GUARDADA: " : "EDITADA: ") + isoInicio,
+                            Toast.LENGTH_LONG).show();
                     setResult(RESULT_OK);
                     finish();
                 } else {
