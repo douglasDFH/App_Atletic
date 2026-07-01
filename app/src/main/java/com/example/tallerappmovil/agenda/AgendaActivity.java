@@ -184,8 +184,12 @@ public class AgendaActivity extends AppCompatActivity {
         int visible = adapter.filtrar(query, estadoFiltro, grupoFiltro);
         recyclerSesiones.setVisibility(visible > 0 ? View.VISIBLE : View.GONE);
         actualizarContador(visible);
-        // Mostrar tvVacio si no hay nada visible (ya sea sin datos o por filtro)
         tvVacio.setVisibility(visible == 0 ? View.VISIBLE : View.GONE);
+        Log.d("AgendaFiltros", "visible=" + visible + " total=" + adapter.getTotalCount()
+                + " estado=" + estadoFiltro + " soloMiGrupo=" + soloMiGrupo
+                + " rv=" + recyclerSesiones.getVisibility());
+        Toast.makeText(this, "Items: " + visible + "/" + adapter.getTotalCount(),
+                Toast.LENGTH_SHORT).show();
     }
 
     private void actualizarContador(int visible) {

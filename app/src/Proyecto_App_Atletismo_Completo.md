@@ -2231,6 +2231,17 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.49 — Fix: tarjetas sesion no visibles + toast diagnóstico aplicarFiltros
+
+**Fecha:** 2026-07-01
+**Bug:** Backend devuelve sesiones (confirmado por toast "Semana: N sesión(es)") pero las tarjetas no aparecen en pantalla. Causa: `item_sesion.xml` usaba `LinearLayout` root con `panelDia.layout_height="match_parent"` dentro de padre `wrap_content`. En Android, `match_parent` en hijo horizontal de padre `wrap_content` puede dar altura 0, haciendo la tarjeta invisible o deformada.
+
+**Fixes:**
+- `item_sesion.xml`: raíz cambiada de `LinearLayout + bg_card_sesion drawable` a `MaterialCardView` con `cardBackgroundColor`, `cardElevation=4dp`, `strokeColor/Width` y `rippleColor`. Interior usa `ConstraintLayout` + `panelDia layout_height="0dp"` con constraints top/bottom → garantiza que el panel teal llene el alto completo de la tarjeta sin depender de `match_parent` en padre `wrap_content`.
+- `AgendaActivity.java`: toast diagnóstico en `aplicarFiltros()` muestra "Items: visible/total" para distinguir bug de filtro (0/N) vs bug de render (N/N sin cards).
+
+---
+
 ### Sesión 9.48 — Fix: tvVacio nunca aparecía + toast diagnóstico cargarSesiones + warning spinnerGrupo
 
 **Fecha:** 2026-07-01
