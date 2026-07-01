@@ -35,12 +35,14 @@ import retrofit2.Response;
 
 public class CrearSesionActivity extends AppCompatActivity {
 
-    public static final String EXTRA_SESION_ID    = "sesionId";
-    public static final String EXTRA_HORA_INICIO  = "horaInicio";
-    public static final String EXTRA_HORA_FIN     = "horaFin";
-    public static final String EXTRA_LUGAR        = "lugar";
-    public static final String EXTRA_GRUPO_ID     = "grupoId";
-    public static final String EXTRA_DESCRIPCION  = "descripcion";
+    public static final String EXTRA_SESION_ID      = "sesionId";
+    public static final String EXTRA_HORA_INICIO    = "horaInicio";
+    public static final String EXTRA_HORA_FIN       = "horaFin";
+    public static final String EXTRA_LUGAR          = "lugar";
+    public static final String EXTRA_GRUPO_ID       = "grupoId";
+    public static final String EXTRA_DESCRIPCION    = "descripcion";
+    // Fecha "yyyy-MM-dd" del lunes de la semana visible en AgendaActivity
+    public static final String EXTRA_SEMANA_DEFAULT = "semanaDefault";
 
     private TextInputLayout tilFecha, tilHoraInicio, tilHoraFin, tilLugar, tilGrupo;
     private TextInputEditText etFecha, etHoraInicio, etHoraFin, etLugar, etDescripcion;
@@ -97,11 +99,19 @@ public class CrearSesionActivity extends AppCompatActivity {
                     getIntent().getLongExtra(EXTRA_GRUPO_ID, -1),
                     getIntent().getStringExtra(EXTRA_DESCRIPCION));
         } else {
-            // Fecha por defecto: hoy
-            Calendar hoy = Calendar.getInstance();
-            anio = hoy.get(Calendar.YEAR);
-            mes  = hoy.get(Calendar.MONTH);
-            dia  = hoy.get(Calendar.DAY_OF_MONTH);
+            // Fecha por defecto: lunes de la semana visible en Agenda (o hoy si no se pasó)
+            String semanaDefault = getIntent().getStringExtra(EXTRA_SEMANA_DEFAULT);
+            if (semanaDefault != null && semanaDefault.length() == 10) {
+                String[] parts = semanaDefault.split("-");
+                anio = Integer.parseInt(parts[0]);
+                mes  = Integer.parseInt(parts[1]) - 1; // Calendar usa 0-indexed
+                dia  = Integer.parseInt(parts[2]);
+            } else {
+                Calendar hoy = Calendar.getInstance();
+                anio = hoy.get(Calendar.YEAR);
+                mes  = hoy.get(Calendar.MONTH);
+                dia  = hoy.get(Calendar.DAY_OF_MONTH);
+            }
             actualizarCampoFecha();
         }
 

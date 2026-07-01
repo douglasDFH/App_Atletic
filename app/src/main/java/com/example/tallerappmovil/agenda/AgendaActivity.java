@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -83,8 +84,13 @@ public class AgendaActivity extends AppCompatActivity {
 
         FloatingActionButton fab = findViewById(R.id.fabCrear);
         fab.setVisibility(puedeEditar ? View.VISIBLE : View.GONE);
-        fab.setOnClickListener(v ->
-                startActivity(new Intent(this, CrearSesionActivity.class)));
+        fab.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CrearSesionActivity.class);
+            // Pasar la semana visible para que la sesión nueva quede en esa semana
+            intent.putExtra(CrearSesionActivity.EXTRA_SEMANA_DEFAULT,
+                    API_FORMAT.format(semanaActual.getTime()));
+            startActivity(intent);
+        });
 
         recyclerSesiones.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SesionAdapter(puedeEditar, sesion -> {
@@ -219,9 +225,14 @@ public class AgendaActivity extends AppCompatActivity {
                                            Response<List<SesionEntrenamiento>> response) {
                         progressBar.setVisibility(View.GONE);
                         if (response.isSuccessful() && response.body() != null) {
+                            int count = response.body().size();
+                            Log.d("AgendaActivity", "cargarSesiones semana=" + fechaApi
+                                    + " → " + count + " sesiones");
                             adapter.setSesiones(response.body());
                             aplicarFiltros();
                         } else {
+                            Log.e("AgendaActivity", "cargarSesiones HTTP " + response.code()
+                                    + " semana=" + fechaApi);
                             tvVacio.setVisibility(View.VISIBLE);
                             Toast.makeText(AgendaActivity.this,
                                     getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
@@ -231,6 +242,8 @@ public class AgendaActivity extends AppCompatActivity {
                     public void onFailure(Call<List<SesionEntrenamiento>> call, Throwable t) {
                         progressBar.setVisibility(View.GONE);
                         tvVacio.setVisibility(View.VISIBLE);
+                        Log.e("AgendaActivity", "cargarSesiones onFailure semana=" + fechaApi
+                                + " → " + t.getClass().getSimpleName(), t);
                         Toast.makeText(AgendaActivity.this,
                                 getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
                     }

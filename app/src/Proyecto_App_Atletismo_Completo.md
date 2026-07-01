@@ -2231,6 +2231,25 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.47 — Fix: sesiones creadas/editadas no aparecen en Agenda
+
+**Fecha:** 2026-07-01
+**Bug:** Al crear o editar una sesión en `CrearSesionActivity`, al volver a `AgendaActivity` la sesión nueva no aparecía en la lista.
+
+**Causa raíz — fecha desincronizada:** `CrearSesionActivity` usaba **hoy** como fecha por defecto (independiente de qué semana estuviese viendo el usuario en `AgendaActivity`). Si el usuario navegó a otra semana (siguiente/anterior) y luego creó una sesión, la sesión quedaba con fecha de la semana real actual mientras `AgendaActivity` mostraba la otra semana — por lo que `GET /api/v1/sesiones?semana=...` no la retornaba para esa vista. Para la edición: el problema era similar si el usuario modificaba la fecha del campo.
+
+**Fix — `AgendaActivity.java`:**
+- FAB ahora pasa `EXTRA_SEMANA_DEFAULT` con el lunes de `semanaActual` (la semana actualmente visible) a `CrearSesionActivity`.
+- Agregado `Log.d("AgendaActivity", ...)` en `onResponse` de `cargarSesiones()` mostrando la fecha enviada y el count de sesiones devueltas.
+
+**Fix — `CrearSesionActivity.java`:**
+- Agregada constante `EXTRA_SEMANA_DEFAULT`.
+- En modo creación, si el extra está presente se usa esa fecha como defecto del campo de fecha en lugar de "hoy". El usuario puede cambiarla con el DatePicker.
+
+**Resultado:** Sesiones creadas desde la vista de cualquier semana aparecen en esa misma semana al volver a `AgendaActivity`. Las sesiones editadas siguen apareciendo porque su fecha ya estaba dentro del rango visible.
+
+---
+
 ### Sesión 9.46 — Diag: tipo de excepción visible en toast + timeout 60 s en ApiClient
 
 **Fecha:** 2026-07-01
