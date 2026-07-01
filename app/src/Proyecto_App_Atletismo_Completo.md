@@ -2231,6 +2231,24 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.46 — Diag: tipo de excepción visible en toast + timeout 60 s en ApiClient
+
+**Fecha:** 2026-07-01
+**Problema persistente:** El error "Error de conexión" en `onFailure` de `CrearSesionActivity` (cargarGrupos / guardar) no revelaba el tipo de excepción, impidiendo diagnosticar si era `SocketTimeoutException`, `ConnectException` u otro. Revisión exhaustiva de TODO el código (backend + Android + seguridad) no encontró ningún bug de lógica: DTOs coinciden, `@EnableAsync` activo, `Call<Void>` correcto, `GlobalExceptionHandler` cubre todos los casos, `JwtAuthFilter` con try-catch.
+
+**Cambios — `CrearSesionActivity.java`:**
+- Agregado `android.util.Log.e("CrearSesion", ...)` en los tres callbacks `onFailure` (cargarGrupos, guardar, cancelar) con stack trace completo visible en Logcat.
+- Toast de `onFailure` ahora muestra el nombre simple de la excepción: `"Error grupos: SocketTimeoutException"`, `"Error guardar: ConnectException"`, etc.
+
+**Cambio — `ApiClient.java`:**
+- Timeouts aumentados de 30 s a 60 s (`connectTimeout`, `readTimeout`, `writeTimeout`) para absorber respuestas lentas del backend Coolify.
+
+**Diagnóstico para identificar la causa raíz:** Instalar la APK → abrir CrearSesionActivity → leer el toast o filtrar Logcat por tag `CrearSesion` → el nombre de la excepción indica la causa exacta.
+
+**Resultado:** El tipo de error es ahora visible en pantalla sin necesidad de Android Studio; el timeout extendido reduce la probabilidad de fallos por latencia del servidor.
+
+---
+
 ### Sesión 9.45 — Fix: NullPointerException en SesionAdapter cuando horaFin es null
 
 **Fecha:** 2026-07-01

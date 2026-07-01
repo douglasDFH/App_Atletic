@@ -3,6 +3,7 @@ package com.example.tallerappmovil.agenda;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -176,8 +177,11 @@ public class CrearSesionActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<GrupoEntrenamiento>> call, Throwable t) {
+                Log.e("CrearSesion", "cargarGrupos falló: " + t.getClass().getSimpleName()
+                        + " - " + t.getMessage(), t);
                 Toast.makeText(CrearSesionActivity.this,
-                        getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                        "Error grupos: " + t.getClass().getSimpleName(),
+                        Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -260,8 +264,11 @@ public class CrearSesionActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 setLoading(false);
+                Log.e("CrearSesion", "guardar falló: " + t.getClass().getSimpleName()
+                        + " - " + t.getMessage(), t);
                 Toast.makeText(CrearSesionActivity.this,
-                        getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
+                        "Error guardar: " + t.getClass().getSimpleName(),
+                        Toast.LENGTH_LONG).show();
             }
         };
 
@@ -315,6 +322,8 @@ public class CrearSesionActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
                         setLoading(false);
+                        Log.e("CrearSesion", "cancelar falló: " + t.getClass().getSimpleName()
+                                + " - " + t.getMessage(), t);
                         Toast.makeText(CrearSesionActivity.this,
                                 getString(R.string.err_conexion), Toast.LENGTH_SHORT).show();
                     }
