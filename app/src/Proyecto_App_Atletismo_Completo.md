@@ -2231,6 +2231,17 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.50 — Fix crítico: ConstraintLayout altura 0 → tarjetas invisibles
+
+**Fecha:** 2026-07-01
+**Bug raíz:** En `item_sesion.xml` (versión 9.49 con MaterialCardView), el panel derecho tenía `app:layout_constraintBottom_toBottomOf="parent"` con `layout_height="wrap_content"`. En un `ConstraintLayout` con `layout_height="wrap_content"`, un hijo con bottom constraint circular crea dependencia de altura: el CL no puede resolver su propio tamaño → colapsa a 0dp → `MaterialCardView` también tiene 0dp → tarjetas completamente invisibles.
+
+**Fix:**
+- `item_sesion.xml`: eliminado `app:layout_constraintBottom_toBottomOf="parent"` del panel derecho. Ahora solo tiene `constraintTop_toTopOf="parent"`. El ConstraintLayout toma la altura wrap_content del panel derecho, y `panelDia` (height=0dp, con constraintTop+constraintBottom a parent) llena ese alto correctamente sin dependencia circular.
+- `AgendaActivity.java`: toast diagnóstico en `onResume()` muestra "Actualizando semana X" para confirmar que el ciclo de vuelta desde CrearSesionActivity funciona.
+
+---
+
 ### Sesión 9.49 — Fix: tarjetas sesion no visibles + toast diagnóstico aplicarFiltros
 
 **Fecha:** 2026-07-01

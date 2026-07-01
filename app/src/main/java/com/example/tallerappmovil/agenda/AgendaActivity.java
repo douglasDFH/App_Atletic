@@ -262,6 +262,9 @@ public class AgendaActivity extends AppCompatActivity {
         super.onResume();
         BottomNavigationView nav = findViewById(R.id.bottomNav);
         nav.setSelectedItemId(R.id.nav_agenda);
+        String semDiag = API_FORMAT.format(semanaActual.getTime());
+        Log.d("AgendaActivity", "onResume → semana=" + semDiag);
+        Toast.makeText(this, "Actualizando semana " + semDiag, Toast.LENGTH_SHORT).show();
         cargarSesiones();
     }
 

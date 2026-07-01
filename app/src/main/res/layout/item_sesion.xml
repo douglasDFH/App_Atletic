@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:minHeight="80dp">
 
-        <!-- Panel izquierdo: día con acento teal -->
+        <!-- Panel izquierdo: fija su altura en constraint 0dp contra parent top/bottom -->
         <LinearLayout
             android:id="@+id/panelDia"
             android:layout_width="64dp"
@@ -57,16 +57,16 @@
                 android:textColor="@color/colorOnPrimary" />
         </LinearLayout>
 
-        <!-- Panel derecho: detalles -->
+        <!-- Panel derecho: solo top constraint → el ConstraintLayout toma SU altura wrap_content -->
         <LinearLayout
+            android:id="@+id/panelDerecho"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="12dp"
             app:layout_constraintStart_toEndOf="@id/panelDia"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
