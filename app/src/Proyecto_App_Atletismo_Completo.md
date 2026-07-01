@@ -2231,6 +2231,20 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 
 ---
 
+### Sesión 9.51 — Fix: sesión nueva se crea en semana incorrecta + limpieza diagnósticos
+
+**Fecha:** 2026-07-01
+**Bug:** El FAB de Agenda pasaba siempre el LUNES de la semana visible como fecha por defecto al formulario de CrearSesionActivity. Si hoy es miércoles 01/07, el formulario mostraba "29/06/2026" (lunes), lo que llevaba al usuario a confundirse y guardar la sesión en la semana equivocada o en una fecha inesperada. Al volver a Agenda, la sesión no aparecía porque no estaba en la semana siendo visualizada.
+
+**Fix:**
+- `AgendaActivity.java`: lógica inteligente para la fecha por defecto del FAB:
+  - Si HOY está dentro de la semana visible (caso normal) → fecha default = HOY → el usuario ve su fecha real y la sesión queda en la semana que está mirando.
+  - Si el usuario navega a una semana pasada/futura y presiona FAB → fecha default = lunes de esa semana → la sesión queda en la semana que el usuario eligió ver.
+- Eliminados toasts de diagnóstico ("Actualizando semana...", "Semana...: N sesión(es)", "Items: N/N") que ya cumplieron su propósito.
+- Aclaración: los chips de estado (Todos/Programadas/Activas/etc.) funcionan correctamente filtrando por estado dentro de la semana visible — no hay bug en esa lógica.
+
+---
+
 ### Sesión 9.50 — Fix crítico: ConstraintLayout altura 0 → tarjetas invisibles
 
 **Fecha:** 2026-07-01

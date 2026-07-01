@@ -86,9 +86,15 @@ public class AgendaActivity extends AppCompatActivity {
         fab.setVisibility(puedeEditar ? View.VISIBLE : View.GONE);
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(this, CrearSesionActivity.class);
-            // Pasar la semana visible para que la sesión nueva quede en esa semana
-            intent.putExtra(CrearSesionActivity.EXTRA_SEMANA_DEFAULT,
-                    API_FORMAT.format(semanaActual.getTime()));
+            // Si hoy está dentro de la semana visible → fecha default = HOY
+            // Si el usuario navega a otra semana → fecha default = lunes de esa semana
+            Calendar hoy = Calendar.getInstance();
+            Calendar finSemana = (Calendar) semanaActual.clone();
+            finSemana.add(Calendar.DATE, 6); // domingo de la semana visible
+            boolean hoyEnSemanaVisible = !hoy.before(semanaActual) && !hoy.after(finSemana);
+            String fechaDefault = API_FORMAT.format(
+                    hoyEnSemanaVisible ? hoy.getTime() : semanaActual.getTime());
+            intent.putExtra(CrearSesionActivity.EXTRA_SEMANA_DEFAULT, fechaDefault);
             startActivity(intent);
         });
 
@@ -186,10 +192,7 @@ public class AgendaActivity extends AppCompatActivity {
         actualizarContador(visible);
         tvVacio.setVisibility(visible == 0 ? View.VISIBLE : View.GONE);
         Log.d("AgendaFiltros", "visible=" + visible + " total=" + adapter.getTotalCount()
-                + " estado=" + estadoFiltro + " soloMiGrupo=" + soloMiGrupo
-                + " rv=" + recyclerSesiones.getVisibility());
-        Toast.makeText(this, "Items: " + visible + "/" + adapter.getTotalCount(),
-                Toast.LENGTH_SHORT).show();
+                + " estado=" + estadoFiltro + " soloMiGrupo=" + soloMiGrupo);
     }
 
     private void actualizarContador(int visible) {
@@ -232,9 +235,6 @@ public class AgendaActivity extends AppCompatActivity {
                             int count = response.body().size();
                             Log.d("AgendaActivity", "cargarSesiones semana=" + fechaApi
                                     + " → " + count + " sesiones");
-                            Toast.makeText(AgendaActivity.this,
-                                    "Semana " + fechaApi + ": " + count + " sesión(es)",
-                                    Toast.LENGTH_SHORT).show();
                             adapter.setSesiones(response.body());
                             aplicarFiltros();
                         } else {
@@ -262,9 +262,6 @@ public class AgendaActivity extends AppCompatActivity {
         super.onResume();
         BottomNavigationView nav = findViewById(R.id.bottomNav);
         nav.setSelectedItemId(R.id.nav_agenda);
-        String semDiag = API_FORMAT.format(semanaActual.getTime());
-        Log.d("AgendaActivity", "onResume → semana=" + semDiag);
-        Toast.makeText(this, "Actualizando semana " + semDiag, Toast.LENGTH_SHORT).show();
         cargarSesiones();
     }
 
