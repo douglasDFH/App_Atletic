@@ -2241,7 +2241,11 @@ Los RNF parcialmente implementados son RNF-02 (HTTPS pendiente por requerir domi
 **Fix:**
 - `NotificacionService.crear`: cambiado a `@Transactional(propagation = REQUIRES_NEW)` — cada notificación corre en su propia transacción aislada; su fallo ya no contamina ni revierte la transacción de la sesión. Además el envío FCM se envolvió en try/catch con `log.warn`.
 - `SesionService.crear`: usa `saveAndFlush` para forzar el INSERT y confirmar el id; `notificarGrupo` envuelto en try/catch (las notificaciones son secundarias y nunca deben revertir la sesión); logging explícito (`log.info` id persistido, `log.error` si falla la notificación) para verificar en logs de Coolify.
-- Diagnósticos temporales en la app (toast VERIFICA / GUARDADA / lista de fechas por semana) usados para aislar backend vs. app; se retirarán una vez confirmado el fix.
+- Diagnósticos temporales en la app (toast VERIFICA / GUARDADA / lista de fechas por semana) usados para aislar backend vs. app.
+
+**Confirmado (prueba directa a la API desplegada):** se hicieron 5 creaciones seguidas con horarios distintos (11:00–15:00) vía curl con token de entrenador; el conteo subió `1,2,3,4,5` — todas persistieron, cero intermitencia. También se verificó que crear dos sesiones al mismo horario/grupo devuelve HTTP 400 "Ya existe una sesión programada..." (validación de conflicto correcta, no es bug). Las 5 sesiones de prueba se eliminaron después. Diagnósticos temporales retirados de la app (`CrearSesionActivity` y `AgendaActivity` vuelven a los toasts normales). Se conserva el logging INFO del backend (`crear() sesión persistida id=...`) como auditoría de bajo ruido.
+
+**Nota sobre el síntoma "0 ses" intermitente que reportó el usuario:** fue por probar durante la transición del rolling-update (el contenedor viejo con el bug seguía respondiendo hasta que el nuevo quedó healthy). Con el backend nuevo estable, persiste siempre.
 
 ---
 

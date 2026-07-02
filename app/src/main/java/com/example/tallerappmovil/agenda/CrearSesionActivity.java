@@ -256,40 +256,13 @@ public class CrearSesionActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 setLoading(false);
                 if (response.isSuccessful()) {
-                    // Diagnóstico decisivo: re-consultar al servidor por la semana de la
-                    // sesión recién guardada y mostrar el resultado CRUDO. Esto prueba si
-                    // el backend realmente persiste y devuelve la sesión.
-                    final String semanaSesion = isoInicio.substring(0, 10);
-                    ApiClient.getAgendaService().listarPorSemana(semanaSesion)
-                            .enqueue(new Callback<List<com.example.tallerappmovil.model.SesionEntrenamiento>>() {
-                        @Override
-                        public void onResponse(Call<List<com.example.tallerappmovil.model.SesionEntrenamiento>> c,
-                                               Response<List<com.example.tallerappmovil.model.SesionEntrenamiento>> r) {
-                            StringBuilder sb = new StringBuilder();
-                            if (r.isSuccessful() && r.body() != null) {
-                                sb.append("VERIFICA sem ").append(semanaSesion)
-                                  .append(": ").append(r.body().size()).append(" ses.");
-                                for (com.example.tallerappmovil.model.SesionEntrenamiento se : r.body()) {
-                                    sb.append("\n• ").append(se.getHoraInicio());
-                                }
-                            } else {
-                                sb.append("VERIFICA HTTP ").append(r.code());
-                            }
-                            Toast.makeText(CrearSesionActivity.this, sb.toString(),
-                                    Toast.LENGTH_LONG).show();
-                            setResult(RESULT_OK);
-                            finish();
-                        }
-                        @Override
-                        public void onFailure(Call<List<com.example.tallerappmovil.model.SesionEntrenamiento>> c,
-                                              Throwable t) {
-                            Toast.makeText(CrearSesionActivity.this,
-                                    "VERIFICA falló: " + t.getClass().getSimpleName(),
-                                    Toast.LENGTH_LONG).show();
-                            setResult(RESULT_OK);
-                            finish();
-                        }
-                    });
+                    Toast.makeText(CrearSesionActivity.this,
+                            sesionId == null
+                                    ? getString(R.string.msg_sesion_creada)
+                                    : getString(R.string.msg_sesion_actualizada),
+                            Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK);
+                    finish();
                 } else {
                     String msg = extractErrorMessage(response);
                     Toast.makeText(CrearSesionActivity.this,
